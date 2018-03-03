@@ -8,7 +8,9 @@ from utils import movielens_to_df
 
 def main():
     # Load the movielens-100k dataset (download it if needed).
-    data = Dataset.load_builtin('ml-100k')
+    # HEY LISTEN
+    # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
+    # data = Dataset.load_builtin('ml-100k')
 
     # Use the famous SVD algorithm.
     algo = SVD()
@@ -19,8 +21,8 @@ def main():
     dfs = movielens_to_df(ratings_path, users_path, movies_path)
     ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     print(ratings_df.columns.values)
-    return
 
+    data = Dataset.load_from_df(ratings_df)
     # Run 5-fold cross-validation and print results.
     cross_validate(algo, data, measures=['RMSE', 'MAE'], cv=5, verbose=True)
 
