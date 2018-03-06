@@ -56,28 +56,29 @@ def main():
 
     uid_to_error = {}
     count = 0
+
+    group_size  = 10
+    group = None
     for i_u, user in users_df.iterrows():
-        count += 1
-        if count > 15:
-            break
         
         subset_ratings_df = ratings_df[ratings_df.user_id != user.user_id]
         subset_data = Dataset.load_from_df(
             subset_ratings_df[['user_id', 'movie_id', 'rating']],
             reader=Reader()
         )
-        print('len(subset_ratings_df.index)', len(subset_ratings_df.index))
 
         # TODO: make sure you understand exactly how the cross-folds work when manually deleting rows from ratings_df
-        subset_results = cross_validate(algo, subset_data, measures=['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10'], cv=5, verbose=True)
+        subset_results = cross_validate(algo, subset_data, measures=['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10'], cv=5, verbose=False)
         uid_to_error[user.user_id] = {
             'mae increase': np.mean(subset_results['test_mae']) - best_err['mae'],
             'rmse increase': np.mean(subset_results['test_rmse']) - best_err['rmse'],
             'precision10t4 decrease': best_err['precision10t4'] - np.mean(subset_results['test_precision10t4']),
             'recall10t4 decrease': best_err['recall10t4'] - np.mean(subset_results['test_recall10t4']),
-            'ndcg10 decreases': best_err['ndcg10'] - np.mean(subset_results['test_ndcg10']),
+            'ndcg10 decrease': best_err['ndcg10'] - np.mean(subset_results['test_ndcg10']),
+            'num_ratings': len(subset_ratings_df.index),
+            'num_users': len(users_df.index) - 1,
+
         }
-        print(uid_to_error)
         
     err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
     print(err_df)
