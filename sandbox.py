@@ -4,6 +4,7 @@ sandbox.py includes a simple experimentation with Surprise and the ML-100k datas
 from collections import defaultdict
 import platform
 import sys
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -25,7 +26,7 @@ from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
 
-def main():
+def main(args):
     # Load the movielens-100k dataset (download it if needed).
     # HEY LISTEN
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
@@ -57,10 +58,12 @@ def main():
     uid_to_error = {}
     count = 0
 
-    group_size  = 10
-    group = None
+    if args.group_size:
+        group = None
     for i_u, user in users_df.iterrows():
-        
+        if args.num_users:
+            if i_u >= args.num_users - 1:
+                break
         subset_ratings_df = ratings_df[ratings_df.user_id != user.user_id]
         subset_data = Dataset.load_from_df(
             subset_ratings_df[['user_id', 'movie_id', 'rating']],
@@ -77,7 +80,8 @@ def main():
             'ndcg10 decrease': best_err['ndcg10'] - np.mean(subset_results['test_ndcg10']),
             'num_ratings': len(subset_ratings_df.index),
             'num_users': len(users_df.index) - 1,
-
+            'fit_time': np.mean(subset_results['fit_time']),
+            'test_time': np.mean(subset_results['test_time']),
         }
         
     err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
@@ -91,4 +95,8 @@ def main():
     
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num_users', type=int, default=None)
+    parser.add_argument('--group_size', default=None)
+    args = parser.parse_args()
+    main(args)
