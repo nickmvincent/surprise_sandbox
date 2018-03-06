@@ -1,0 +1,46 @@
+weights: (0.25, 0.75)
+Great Day in Harlem, A (1994), 5.0
+They Made Me a Criminal (1939), 5.0
+Prefontaine (1997), 5.0
+Marlene Dietrich: Shadow and Light (1996) , 5.0
+Star Kid (1997), 5.0
+Santa with Muscles (1996), 5.0
+Aiqing wansui (1994), 5.0
+Someone Else's America (1995), 5.0
+Entertaining Angels: The Dorothy Day Story (1996), 5.0
+Saint of Fort Washington, The (1993), 4.999999999999999
+Pather Panchali (1955), 4.675348789721113
+Citizen Kane (1941), 4.667585215870556
+Casablanca (1942), 4.625355638679927
+Maya Lin: A Strong Clear Vision (1994), 4.609956445025748
+Secrets & Lies (1996), 4.5812420273928485
+Anna (1996), 4.564023703136676
+Everest (1998), 4.5407729014092135
+Star Wars (1977), 4.5376491772750995
+Usual Suspects, The (1995), 4.5218723842542605
+Wrong Trousers, The (1993), 4.5105091248464735
+
+
+weights: (0.75, 0.25)
+Great Day in Harlem, A (1994), 5.0
+They Made Me a Criminal (1939), 5.0
+Marlene Dietrich: Shadow and Light (1996) , 5.0
+Star Kid (1997), 5.0
+Saint of Fort Washington, The (1993), 5.0
+Santa with Muscles (1996), 5.0
+Aiqing wansui (1994), 5.0
+Someone Else's America (1995), 5.0
+Entertaining Angels: The Dorothy Day Story (1996), 5.0
+Prefontaine (1997), 4.999999999999999
+Pather Panchali (1955), 4.684690456371893
+Maya Lin: A Strong Clear Vision (1994), 4.670888071891262
+Schindler's List (1993), 4.5709593711432515
+Casablanca (1942), 4.545988652111945
+Wrong Trousers, The (1993), 4.536470774435054
+Letter From Death Row, A (1998), 4.524734462661365
+Anna (1996), 4.517121825096192
+Everest (1998), 4.512029686886599
+Close Shave, A (1995), 4.500931116151514
+Some Mother's Son (1996), 4.493483354880413
+
+
