@@ -9,6 +9,7 @@ import argparse
 import pandas as pd
 import numpy as np
 from utils import movielens_to_df
+import matplotlib.pyplot as plt
 
 
 # # platform specific globals
@@ -86,6 +87,7 @@ def main(args):
         
     err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
     print(err_df)
+    err_df.to_csv('err_df.csv')
     print(err_df.mean())
     
         
