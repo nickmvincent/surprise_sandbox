@@ -105,7 +105,9 @@ def main(args):
             }
             
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = 'err_df-{}-{}.csv'.format(config['type'], config['size'])
+        outname = 'err_df-type_{}-size_{}-sample_size_{}.csv'.format(
+            config['type'], config['size'],
+            args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
         means = err_df.mean()
         means.to_csv(outname.replace('err_df', 'err_df_means'))
