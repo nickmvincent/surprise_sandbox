@@ -20,9 +20,10 @@ def main(args):
         subplot_y_max = (len(cols) + 1) // NCOLS
 
         fig, axes = plt.subplots(nrows=subplot_y_max, ncols=NCOLS)
+        fig.suptitle(args.f)
         for i_col, col in enumerate(df.columns.values):
-            subplot_x = (i_col + 1) % NCOLS
-            subplot_y = (i_col + 1) // NCOLS
+            subplot_x = (i_col) % NCOLS
+            subplot_y = (i_col) // NCOLS
             print(subplot_y, subplot_x)
             ax = axes[subplot_y, subplot_x]
             
