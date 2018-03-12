@@ -6,51 +6,50 @@ import json
 
 import pandas as pd
 import numpy as np
-from utils import movielens_to_df
+from utils import movielens_to_df, movielens_1m_to_df
 
-
-# # platform specific globals
-# if platform.system() == 'Windows':
-#     sys.path.append("C:/Users/Nick/Documents/GitHub/recsys_experiments/Surprise")
-# else:
-#     raise ValueError('todo')
-
-# import pyximport
-# pyximport.install()
 
 from surprise.model_selection import cross_validate
 from surprise import SVD, KNNBasic, Dataset
 from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
+# TODO: re-run everything on 1mil
+# TODO: how sparse is gender, ocupation, and age?
+
 
 def main(args):
     """
     Run the sandbox experiments
     """
-    # Load the movielens-100k dataset (download it if needed).
     # HEY LISTEN
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
     # data = Dataset.load_builtin('ml-1m')
     algos = {
         'SVD': SVD(),
-        'KNNBasic_user_msd': KNNBasic(),
+        # 'KNNBasic_user_msd': KNNBasic(),
         'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
-        'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine', }),
-        'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson', }),
+        # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine', }),
+        # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson', }),
     }
 
-    ratings_path = BUILTIN_DATASETS['ml-100k'].path
+    dataset_suffix = '1m'
+    
+
+    ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
     users_path = ratings_path.replace('.data', '.user')
     movies_path = ratings_path.replace('.data', '.item')
-    dfs = movielens_to_df(ratings_path, users_path, movies_path)
+
+    if dataset_suffix = '100k':
+        dfs = movielens_to_df(ratings_path, users_path, movies_path)
+    elif dataset_suffix = '1m'
+        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+    
     ratings_df, users_df, items_df = dfs['ratings'], dfs['users'], dfs['movies']
     data = Dataset.load_from_df(
         ratings_df[['user_id', 'movie_id', 'rating']],
         reader=Reader()
     )
-    # Run 5-fold cross-validation and print results.
-
     measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10']
     standard_results = {}
     for algo_name in algos:
@@ -116,10 +115,11 @@ def main(args):
             ]
             users_df = users_df.assign(gte40=gte40)
             experimental_iterations = [
-                {'df': users_df[users_df.gte40 == 1], 'name': 'exclude gte 40 users'},
-                {'df': users_df[users_df.gte40 == 0], 'name': 'exclude lt 40 users'},
+                {'df': users_df[users_df.gte40 == 1], 'name': 'exclude gte age 40 users'},
+                {'df': users_df[users_df.gte40 == 0], 'name': 'exclude lt age 40 users'},
             ]
         elif config['type'] == 'rural':
+            # TODO
             pass
 
         for i, experimental_iteration in enumerate(experimental_iterations):
@@ -142,6 +142,7 @@ def main(args):
                 reader=Reader()
             )
             for algo_name in algos:
+                identifier = str(identifier) + '_' + algo_name
                 subset_results = cross_validate(
                     algos[algo_name], subset_data, measures=measures,
                     cv=5, verbose=False)
@@ -164,7 +165,7 @@ def main(args):
                 }
             
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = 'err_df-type_{}-size_{}-sample_size_{}.csv'.format(
+        outname = 'results/err_df-type_{}-size_{}-sample_size_{}.csv'.format(
             config['type'], config['size'],
             args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
