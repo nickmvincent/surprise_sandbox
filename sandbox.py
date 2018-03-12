@@ -15,7 +15,6 @@ from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
 # TODO: re-run everything on 1mil
-# TODO: how sparse is gender, ocupation, and age?
 
 
 def main(args):
@@ -25,6 +24,7 @@ def main(args):
     # HEY LISTEN
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
     # data = Dataset.load_builtin('ml-1m')
+    # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     algos = {
         'SVD': SVD(),
         # 'KNNBasic_user_msd': KNNBasic(),
@@ -126,8 +126,18 @@ def main(args):
             # TODO
             pass
 
+        n = len(experimental_iterations)
+        mins = n * 8
+        hours = mins / 60
+        msg = 'You are about run {} iterations for {} different algorithms'
+        time_estimate = """
+            Assuming that you're running KNN and SVD, this will probably take
+            an upper bound of {} * 8 = {} minutes, or {} hours.
+        """.format(n, mins, hours)
+        print(msg)
+        print(time_estimate)
+
         for i, experimental_iteration in enumerate(experimental_iterations):
-            print(experimental_iteration)
             if config['type'] == 'individual_users':
                 if args.num_users_to_stop_at:
                     if i >= args.num_users_to_stop_at - 1:
