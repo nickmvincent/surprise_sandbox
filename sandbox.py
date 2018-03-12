@@ -98,6 +98,23 @@ def main(args):
         experiment_configs += [{'type': 'age', 'size': None}]
         print(users_df.age.unique())
 
+
+    n = len(experiment_configs)
+    if args.sample_sizes:
+        n = n * args.sample_sizes
+        print('{} total train/tests will be run because you chose {} experimental configs and {} sample_sizes'.format(
+            len(experiment_configs), n
+        ))
+    else:
+        print('{} total train/tests will be run because you chose {} experimental configs')
+    # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
+    secs = 125 * n
+    hours = secs / 3600
+    time_estimate = """
+        Assuming that you're running KNN and SVD, this will probably take
+        an upper bound of {} seconds ({} hours)
+    """.format(n, secs, hours)
+    print(time_estimate)
     uid_to_error = {}
     for config in experiment_configs:
         if config['type'] == 'individual_users':
@@ -125,17 +142,6 @@ def main(args):
         elif config['type'] == 'rural':
             # TODO
             pass
-
-        n = len(experimental_iterations)
-        mins = n * 8
-        hours = mins / 60
-        msg = 'You are about run {} iterations for {} different algorithms'
-        time_estimate = """
-            Assuming that you're running KNN and SVD, this will probably take
-            an upper bound of {} * 8 = {} minutes, or {} hours.
-        """.format(n, mins, hours)
-        print(msg)
-        print(time_estimate)
 
         for i, experimental_iteration in enumerate(experimental_iterations):
             if config['type'] == 'individual_users':
