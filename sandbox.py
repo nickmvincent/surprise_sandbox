@@ -36,13 +36,17 @@ def main(args):
     dataset_suffix = '1m'
     
 
-    ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
-    users_path = ratings_path.replace('.data', '.user')
-    movies_path = ratings_path.replace('.data', '.item')
+    
 
-    if dataset_suffix = '100k':
+    if dataset_suffix == '100k':
+        ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
+        users_path = ratings_path.replace('.data', '.user')
+        movies_path = ratings_path.replace('.data', '.item')
         dfs = movielens_to_df(ratings_path, users_path, movies_path)
-    elif dataset_suffix = '1m'
+    elif dataset_suffix == '1m':
+        ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
+        users_path = ratings_path.replace('ratings.', 'users.')
+        movies_path = ratings_path.replace('ratings.', 'movies.')
         dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
     
     ratings_df, users_df, items_df = dfs['ratings'], dfs['users'], dfs['movies']
@@ -92,7 +96,7 @@ def main(args):
         print(users_df.gender.head())
     elif args.grouping == 'age':
         experiment_configs += [{'type': 'age', 'size': None}]
-        print(users_df.age)
+        print(users_df.age.unique())
 
     uid_to_error = {}
     for config in experiment_configs:
@@ -142,13 +146,12 @@ def main(args):
                 reader=Reader()
             )
             for algo_name in algos:
-                identifier = str(identifier) + '_' + algo_name
                 subset_results = cross_validate(
                     algos[algo_name], subset_data, measures=measures,
                     cv=5, verbose=False)
                 num_users = len(subset_ratings_df.user_id.value_counts())
                 num_movies = len(subset_ratings_df.movie_id.value_counts())
-                uid_to_error[identifier] = {
+                uid_to_error[str(identifier) + '_' + algo_name] = {
                     'mae increase': np.mean(subset_results['test_mae']) - standard_results[algo_name]['mae'],
                     'rmse increase': np.mean(subset_results['test_rmse']) - standard_results[algo_name]['rmse'],
                     'precision10t4 decrease': standard_results[algo_name]['precision10t4'] - np.mean(subset_results['test_precision10t4']),
