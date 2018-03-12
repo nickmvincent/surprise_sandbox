@@ -101,9 +101,9 @@ def main(args):
 
     n = len(experiment_configs)
     if args.sample_sizes:
-        n = n * args.sample_sizes
+        n = n * len(args.sample_sizes)
         print('{} total train/tests will be run because you chose {} experimental configs and {} sample_sizes'.format(
-            len(experiment_configs), n
+            n, len(experiment_configs), len(args.sample_sizes)
         ))
     else:
         print('{} total train/tests will be run because you chose {} experimental configs')
