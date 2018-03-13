@@ -15,7 +15,7 @@ from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
 # TODO: re-run everything on 1mil
-
+# TODO: abstract this code so it will work w/ WP algorithms
 
 def main(args):
     """
@@ -93,27 +93,32 @@ def main(args):
             raise ValueError('When using grouping="sample", you must provide a set of sample sizes')
     elif args.grouping == 'gender':
         experiment_configs += [{'type': 'gender', 'size': None}]
-        print(users_df.gender.head())
+        print(users_df.gender.unique())
     elif args.grouping == 'age':
         experiment_configs += [{'type': 'age', 'size': None}]
         print(users_df.age.unique())
+    elif args.grouping == 'zip':
+        experiment_configs += [{'type': 'zip', 'size': None}]
+        print(users_df.zip_code.unique())
+    elif args.grouping == 'genre':
+        experiment_configs += [{'type': 'genre', 'size': None}]
 
 
-    n = len(experiment_configs)
+    num_configs = len(experiment_configs)
     if args.sample_sizes:
-        n = n * len(args.sample_sizes)
-        print('{} total train/tests will be run because you chose {} experimental configs and {} sample_sizes'.format(
-            n, len(experiment_configs), len(args.sample_sizes)
+        num_runs = num_configs * len(args.sample_sizes)
+        print('{} total train/tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
+            num_runs, num_configs, args.num_samples
         ))
     else:
-        print('{} total train/tests will be run because you chose {} experimental configs')
+        print('{} total train/tests will be run because you chose {} experimental configs'.format(num_configs))
     # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
     secs = 125 * n
     hours = secs / 3600
     time_estimate = """
-        Assuming that you're running KNN and SVD, this will probably take
+        Assuming that you're running KNN (65 sec) and SVD (60 sec), this will probably take
         an upper bound of {} seconds ({} hours)
-    """.format(n, secs, hours)
+    """.format(secs, hours)
     print(time_estimate)
     uid_to_error = {}
     for config in experiment_configs:
@@ -139,7 +144,10 @@ def main(args):
                 {'df': users_df[users_df.gte40 == 1], 'name': 'exclude gte age 40 users'},
                 {'df': users_df[users_df.gte40 == 0], 'name': 'exclude lt age 40 users'},
             ]
-        elif config['type'] == 'rural':
+        elif config['type'] == 'zip':
+            # TODO
+            pass
+        elif config['type'] == 'genre':
             # TODO
             pass
 
