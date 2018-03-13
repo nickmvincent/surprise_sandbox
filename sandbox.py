@@ -112,8 +112,9 @@ def main(args):
         ))
     else:
         print('{} total train/tests will be run because you chose {} experimental configs'.format(num_configs))
+        num_runs = num_configs
     # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
-    secs = 125 * n
+    secs = 125 * num_runs
     hours = secs / 3600
     time_estimate = """
         Assuming that you're running KNN (65 sec) and SVD (60 sec), this will probably take
