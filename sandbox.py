@@ -34,9 +34,6 @@ def main(args):
     }
 
     dataset_suffix = '1m'
-    
-
-    
 
     if dataset_suffix == '100k':
         ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
@@ -106,12 +103,12 @@ def main(args):
 
     num_configs = len(experiment_configs)
     if args.sample_sizes:
-        num_runs = num_configs * len(args.sample_sizes)
+        num_runs = num_configs * args.num_samples
         print('{} total train/tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
             num_runs, num_configs, args.num_samples
         ))
     else:
-        print('{} total train/tests will be run because you chose {} experimental configs'.format(num_configs))
+        print('{} total train/tests will be run'.format(num_configs))
         num_runs = num_configs
     # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
     secs = 125 * num_runs
