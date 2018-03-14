@@ -33,15 +33,14 @@ def main(args):
         # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson', }),
     }
 
-    dataset_suffix = '1m'
 
-    if dataset_suffix == '100k':
-        ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
+    if args.dataset == 'ml-100k':
+        ratings_path = BUILTIN_DATASETS[args.dataset].path
         users_path = ratings_path.replace('.data', '.user')
         movies_path = ratings_path.replace('.data', '.item')
         dfs = movielens_to_df(ratings_path, users_path, movies_path)
-    elif dataset_suffix == '1m':
-        ratings_path = BUILTIN_DATASETS['ml-' + dataset_suffix].path
+    elif args.dataset == 'ml-1m':
+        ratings_path = BUILTIN_DATASETS[args.dataset].path
         users_path = ratings_path.replace('ratings.', 'users.')
         movies_path = ratings_path.replace('ratings.', 'movies.')
         dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
@@ -54,7 +53,7 @@ def main(args):
     measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10']
     standard_results = {}
     for algo_name in algos:
-        standard_results_filename = 'standard_measures_{}.json'.format(algo_name)
+        standard_results_filename = '{}_standard_measures_{}.json'.format(args.dataset, algo_name)
         try:
             with open(standard_results_filename, 'r') as f:
                 results = json.load(f)
@@ -190,8 +189,8 @@ def main(args):
                 }
             
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = 'results/err_df-type_{}-size_{}-sample_size_{}.csv'.format(
-            config['type'], config['size'],
+        outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
+            args.dataset, config['type'], config['size'],
             args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
         means = err_df.mean()
@@ -208,6 +207,7 @@ def parse():
     parser.add_argument('--grouping', default='individual_users')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
+    parser.add_argument('--dataset', default='ml-1m')
     args = parser.parse_args()
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
