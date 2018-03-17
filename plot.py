@@ -42,7 +42,7 @@ def parse():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', default='hist')
-    parser.add_argument('--f', default='err_df-sample_users-250.csv')
+    parser.add_argument('--f', default='indivs.csv')
     args = parser.parse_args()
     main(args)
 

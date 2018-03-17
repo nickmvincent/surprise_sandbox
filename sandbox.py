@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import numpy as np
 from utils import movielens_to_df, movielens_1m_to_df
-
+from joblib import Parallel, delayed
 
 from surprise.model_selection import cross_validate
 from surprise import SVD, KNNBasic, Dataset
@@ -16,6 +16,14 @@ from surprise.reader import Reader
 
 # TODO: re-run everything on 1mil
 # TODO: abstract this code so it will work w/ WP algorithms
+def task(algo_name, algo, subset_data, measures, cv=5, verbose, identifier, num_ratings, num_movies, name, out_ids):
+    return {
+        'subset_results': cross_validate(algo_name, subset_data, measures=measures, cv, verbose, out_ids),
+        'num_ratings': num_ratings,
+        'num_movies': num_movies,
+        'name': name,
+    }
+
 
 def main(args):
     """
@@ -148,6 +156,8 @@ def main(args):
             # TODO
             pass
 
+        # do multiple iterations at once - there's no dependence between them
+        delayed_iteration_list = []
         for i, experimental_iteration in enumerate(experimental_iterations):
             if config['type'] == 'individual_users':
                 if args.num_users_to_stop_at:
@@ -155,38 +165,56 @@ def main(args):
                         break
                 row = experimental_iteration[1]
                 subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
+                excluded_ratings_df = ratings_df[ratings_df.user_id == row.user_id]
                 identifier = row.user_id
                 name = 'individual'
             elif config['type'] in ['sample_users', 'gender', 'age', 'rural']:
                 ids = list(experimental_iteration['df'].user_id)
                 subset_ratings_df = ratings_df[~ratings_df.user_id.isin(ids)]
+                excluded_ratings_df = ratings_df[ratings_df.user_id.isin(ids)]
+                
                 identifier = i
                 name = experimental_iteration['name']
             subset_data = Dataset.load_from_df(
                 subset_ratings_df[['user_id', 'movie_id', 'rating']],
                 reader=Reader()
             )
-            for algo_name in algos:
-                subset_results = cross_validate(
-                    algos[algo_name], subset_data, measures=measures,
-                    cv=5, verbose=False)
-                num_users = len(subset_ratings_df.user_id.value_counts())
-                num_movies = len(subset_ratings_df.movie_id.value_counts())
-                uid_to_error[str(identifier) + '_' + algo_name] = {
-                    'mae increase': np.mean(subset_results['test_mae']) - standard_results[algo_name]['mae'],
-                    'rmse increase': np.mean(subset_results['test_rmse']) - standard_results[algo_name]['rmse'],
-                    'precision10t4 decrease': standard_results[algo_name]['precision10t4'] - np.mean(subset_results['test_precision10t4']),
-                    'recall10t4 decrease': standard_results[algo_name]['recall10t4'] - np.mean(subset_results['test_recall10t4']),
-                    'ndcg10 decrease': standard_results[algo_name]['ndcg10'] - np.mean(subset_results['test_ndcg10']),
-                    'num_ratings': len(subset_ratings_df.index),
-                    'num_tested': np.mean(subset_results['num_tested']),
-                    'num_users': num_users,
-                    'num_movies': num_movies,
-                    'fit_time': np.mean(subset_results['fit_time']),
-                    'test_time': np.mean(subset_results['test_time']),
-                    'name': name,
-                    'algo_name': algo_name,
-                }
+            out_ids = list(excluded_ratings_df.user_id)
+            # candidate
+            # excluded_data = Dataset.load_from_df(
+            #     excluded_ratings_df[['user_id', 'movie_id', 'rating']],
+            #     reader=Reader()
+            # )
+
+            
+            num_users = len(subset_ratings_df.user_id.value_counts())
+            num_movies = len(subset_ratings_df.movie_id.value_counts())
+            delayed_iteration_list += [delayed(task(
+                algo_name, algos[algo_name], subset_data, measures, 5, False, identifier,  len(subset_ratings_df.index), num_movies, name, out_ids
+            )) for algo_name in algo]
+            
+            # for algo_name in algos:
+            #     subset_results = cross_validate(
+            #         algos[algo_name], subset_data, measures=measures,
+            #         cv=5, verbose=False)
+        out_dicts = Parallel(n_jobs=-1)(delayed_iteration_list)
+        for d in out_dicts:
+            res = d['subset_results']
+            uid_to_error[str(d['identifier']) + '_' + d['algo_name']] = {
+                'mae increase': np.mean(res['test_mae']) - standard_results[algo_name]['mae'],
+                'rmse increase': np.mean(res['test_rmse']) - standard_results[algo_name]['rmse'],
+                'precision10t4 decrease': standard_results[algo_name]['precision10t4'] - np.mean(res['test_precision10t4']),
+                'recall10t4 decrease': standard_results[algo_name]['recall10t4'] - np.mean(res['test_recall10t4']),
+                'ndcg10 decrease': standard_results[algo_name]['ndcg10'] - np.mean(res['test_ndcg10']),
+                'num_ratings':, d['num_ratings']
+                'num_tested': np.mean(res['num_tested']),
+                'num_users': d['num_users'],
+                'num_movies': d['num_movies'],
+                'fit_time': np.mean(res['fit_time']),
+                'test_time': np.mean(res['test_time']),
+                'name': d['name'],
+                'algo_name': d['algo_name'],
+            }
             
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
         outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
