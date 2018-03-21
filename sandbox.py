@@ -1,6 +1,7 @@
 """
 sandbox.py includes a simple experimentation with Surprise and the ML-100k dataset
 """
+# pylint: disable=E0401
 import argparse
 import json
 
@@ -9,21 +10,48 @@ import numpy as np
 from utils import movielens_to_df, movielens_1m_to_df
 from joblib import Parallel, delayed
 
-from surprise.model_selection import cross_validate
+from surprise.model_selection import cross_validate, cross_validate_users
 from surprise import SVD, KNNBasic, Dataset
 from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
-# TODO: re-run everything on 1mil
 # TODO: abstract this code so it will work w/ WP algorithms
-def task(algo_name, algo, subset_data, measures, cv=5, verbose, identifier, num_ratings, num_movies, name, out_ids):
+
+
+# Notes on default algo params:
+# KNN uses 40 max neighbors by default
+# min neighbors is 1, and if there's no neighbors then use global average!
+# default similarity is MSD
+# default user or item is USER-BASED but we override that.
+
+
+def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
     return {
-        'subset_results': cross_validate(algo_name, subset_data, measures=measures, cv, verbose, out_ids),
+        'subset_results': cross_validate_users(algo, data, all_uids, out_uids, measures, cv),
         'num_ratings': num_ratings,
+        'num_users': num_users,
         'num_movies': num_movies,
         'name': name,
+        'algo_name': algo_name,
+        'identifier': identifier
     }
 
+
+def get_dfs(dataset):
+    """
+    Takes a dataset string and return that data in a dataframe!
+    """
+    if dataset == 'ml-100k':
+        ratings_path = BUILTIN_DATASETS[dataset].path
+        users_path = ratings_path.replace('.data', '.user')
+        movies_path = ratings_path.replace('.data', '.item')
+        dfs = movielens_to_df(ratings_path, users_path, movies_path)
+    elif dataset == 'ml-1m':
+        ratings_path = BUILTIN_DATASETS[dataset].path
+        users_path = ratings_path.replace('ratings.', 'users.')
+        movies_path = ratings_path.replace('ratings.', 'movies.')
+        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+    return dfs
 
 def main(args):
     """
@@ -37,52 +65,61 @@ def main(args):
         'SVD': SVD(),
         # 'KNNBasic_user_msd': KNNBasic(),
         'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
+        'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
+        'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
         # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine', }),
         # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson', }),
     }
 
+    dfs = get_dfs(args.dataset)
 
-    if args.dataset == 'ml-100k':
-        ratings_path = BUILTIN_DATASETS[args.dataset].path
-        users_path = ratings_path.replace('.data', '.user')
-        movies_path = ratings_path.replace('.data', '.item')
-        dfs = movielens_to_df(ratings_path, users_path, movies_path)
-    elif args.dataset == 'ml-1m':
-        ratings_path = BUILTIN_DATASETS[args.dataset].path
-        users_path = ratings_path.replace('ratings.', 'users.')
-        movies_path = ratings_path.replace('ratings.', 'movies.')
-        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
-    
-    ratings_df, users_df, items_df = dfs['ratings'], dfs['users'], dfs['movies']
+    ratings_df, users_df, _ = dfs['ratings'], dfs['users'], dfs['movies']
+    all_uids = list(set(ratings_df.user_id))
     data = Dataset.load_from_df(
         ratings_df[['user_id', 'movie_id', 'rating']],
         reader=Reader()
     )
+
+    # why are precision, recall, and ndcg all stuffed together in one string
+    # this ensures they will be computed all at once. Evaluation code will split them up for presentation
     measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10']
-    standard_results = {}
+    baseline = {}
+
     for algo_name in algos:
-        standard_results_filename = '{}_standard_measures_{}.json'.format(args.dataset, algo_name)
+        baseline_filename = '{}_usercv_baseline_for_{}.json'.format(
+            args.dataset, algo_name)
         try:
-            with open(standard_results_filename, 'r') as f:
+            with open(baseline_filename, 'r') as f:
                 results = json.load(f)
-            print('Loaded standard results for {} from {}'.format(algo_name, standard_results_filename))
+            print('Loaded standard results for {} from {}'.format(
+                algo_name, baseline_filename))
             print(results)
         except:
             print('Computing standard results for {}'.format(algo_name))
-            results = cross_validate(
-                algos[algo_name], data, measures=measures,
-                cv=5, verbose=True)
+            results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, 5)
             results = {
-                'mae': np.mean(results['test_mae']),
-                'rmse': np.mean(results['test_rmse']),
-                'precision10t4': np.mean(results['test_precision10t4']),
-                'recall10t4': np.mean(results['test_recall10t4']),
-                'ndcg10': np.mean(results['test_ndcg10']),
+                'mae': np.mean(results['test_mae_all']),
+                'rmse': np.mean(results['test_rmse_all']),
+                'precision10t4': np.mean(results['test_precision10t4_all']),
+                'recall10t4': np.mean(results['test_recall10t4_all']),
+                'ndcg10': np.mean(results['test_ndcg10_all']),
             }
-            with open(standard_results_filename, 'w') as f:
-                json.dump(results, f)
-        standard_results[algo_name] = results
 
+            results_itemsplit = cross_validate(algos[algo_name], data, measures, 5)
+            results_itemsplit = {
+                'mae': np.mean(results['test_mae_all']),
+                'rmse': np.mean(results['test_rmse_all']),
+                'precision10t4': np.mean(results['test_precision10t4_all']),
+                'recall10t4': np.mean(results['test_recall10t4_all']),
+                'ndcg10': np.mean(results['test_ndcg10_all']),
+            }
+            with open(baseline_filename, 'w') as f:
+                json.dump(results, f)
+            with open('ITEMSPLIT'+ baseline_filename, 'w') as f:
+                json.dump(results, f)
+        baseline[algo_name] = results
+
+    return
 
     experiment_configs = []
     if args.grouping == 'individual_users':
@@ -94,7 +131,8 @@ def main(args):
                     'type': 'sample_users', 'size': sample_size
                 } for sample_size in args.sample_sizes]
         else:
-            raise ValueError('When using grouping="sample", you must provide a set of sample sizes')
+            raise ValueError(
+                'When using grouping="sample", you must provide a set of sample sizes')
     elif args.grouping == 'gender':
         experiment_configs += [{'type': 'gender', 'size': None}]
         print(users_df.gender.unique())
@@ -106,7 +144,6 @@ def main(args):
         print(users_df.zip_code.unique())
     elif args.grouping == 'genre':
         experiment_configs += [{'type': 'genre', 'size': None}]
-
 
     num_configs = len(experiment_configs)
     if args.sample_sizes:
@@ -131,14 +168,16 @@ def main(args):
             experimental_iterations = users_df.iterrows()
         elif config['type'] == 'sample_users':
             experimental_iterations = [{
-                    'df': users_df.sample(config['size']),
-                    'name': '{} user sample'.format(config['size'])
-                } for _ in range(args.num_samples)
+                'df': users_df.sample(config['size']),
+                'name': '{} user sample'.format(config['size'])
+            } for _ in range(args.num_samples)
             ]
         elif config['type'] == 'gender':
             experimental_iterations = [
-                {'df': users_df[users_df.gender == 'M'], 'name': 'exclude male users'},
-                {'df': users_df[users_df.gender == 'F'], 'name': 'exclude female users'},
+                {'df': users_df[users_df.gender == 'M'],
+                    'name': 'exclude male users'},
+                {'df': users_df[users_df.gender == 'F'],
+                    'name': 'exclude female users'},
             ]
         elif config['type'] == 'age':
             gte40 = [
@@ -146,17 +185,18 @@ def main(args):
             ]
             users_df = users_df.assign(gte40=gte40)
             experimental_iterations = [
-                {'df': users_df[users_df.gte40 == 1], 'name': 'exclude gte age 40 users'},
-                {'df': users_df[users_df.gte40 == 0], 'name': 'exclude lt age 40 users'},
+                {'df': users_df[users_df.gte40 == 1],
+                    'name': 'exclude gte age 40 users'},
+                {'df': users_df[users_df.gte40 == 0],
+                    'name': 'exclude lt age 40 users'},
             ]
         elif config['type'] == 'zip':
-            # TODO
+            # implement
             pass
         elif config['type'] == 'genre':
-            # TODO
+            # implement
             pass
 
-        # do multiple iterations at once - there's no dependence between them
         delayed_iteration_list = []
         for i, experimental_iteration in enumerate(experimental_iterations):
             if config['type'] == 'individual_users':
@@ -172,58 +212,52 @@ def main(args):
                 ids = list(experimental_iteration['df'].user_id)
                 subset_ratings_df = ratings_df[~ratings_df.user_id.isin(ids)]
                 excluded_ratings_df = ratings_df[ratings_df.user_id.isin(ids)]
-                
+
                 identifier = i
                 name = experimental_iteration['name']
-            subset_data = Dataset.load_from_df(
-                subset_ratings_df[['user_id', 'movie_id', 'rating']],
-                reader=Reader()
-            )
-            out_ids = list(excluded_ratings_df.user_id)
-            # candidate
-            # excluded_data = Dataset.load_from_df(
-            #     excluded_ratings_df[['user_id', 'movie_id', 'rating']],
-            #     reader=Reader()
-            # )
 
-            
+            out_uids = list(set(excluded_ratings_df.user_id))
             num_users = len(subset_ratings_df.user_id.value_counts())
             num_movies = len(subset_ratings_df.movie_id.value_counts())
-            delayed_iteration_list += [delayed(task(
-                algo_name, algos[algo_name], subset_data, measures, 5, False, identifier,  len(subset_ratings_df.index), num_movies, name, out_ids
-            )) for algo_name in algo]
-            
-            # for algo_name in algos:
-            #     subset_results = cross_validate(
-            #         algos[algo_name], subset_data, measures=measures,
-            #         cv=5, verbose=False)
-        out_dicts = Parallel(n_jobs=-1)(delayed_iteration_list)
+            delayed_iteration_list += [delayed(task)(
+                algo_name, algos[algo_name], data, all_uids, out_uids, measures, 5,
+                False, identifier,
+                len(subset_ratings_df.index), #num ratings
+                num_users,
+                num_movies, name
+            ) for algo_name in algos]
+
+        out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
         for d in out_dicts:
             res = d['subset_results']
-            uid_to_error[str(d['identifier']) + '_' + d['algo_name']] = {
-                'mae increase': np.mean(res['test_mae']) - standard_results[algo_name]['mae'],
-                'rmse increase': np.mean(res['test_rmse']) - standard_results[algo_name]['rmse'],
-                'precision10t4 decrease': standard_results[algo_name]['precision10t4'] - np.mean(res['test_precision10t4']),
-                'recall10t4 decrease': standard_results[algo_name]['recall10t4'] - np.mean(res['test_recall10t4']),
-                'ndcg10 decrease': standard_results[algo_name]['ndcg10'] - np.mean(res['test_ndcg10']),
-                'num_ratings':, d['num_ratings']
-                'num_tested': np.mean(res['num_tested']),
-                'num_users': d['num_users'],
-                'num_movies': d['num_movies'],
-                'fit_time': np.mean(res['fit_time']),
-                'test_time': np.mean(res['test_time']),
+            algo_name = d['algo_name']
+            print(d)
+            uid = str(d['identifier']) + '_' + d['algo_name']
+            uid_to_error[uid] = {
+                'num_ratings_in-group': d['num_ratings'],
+                'num_users_in-group': d['num_users'],
+                'num_movies_in-group': d['num_movies'],
                 'name': d['name'],
                 'algo_name': d['algo_name'],
             }
-            
+            for metric in ['rmse', 'ndcg10', ]:
+                for group in ['all', 'in-group', 'out-group']:
+                    key = '{}_{}'.format(metric, group)
+                    val = np.mean(res['test_' + key])
+                    uid_to_error[uid].update({
+                        key: val,
+                        'increase_from_baseline_{}'.format(key): val - baseline[algo_name][metric],
+                        'avg_fit_time' + key: np.mean(res['fit_times_' + key]),
+                        'avg_test_time' + key: np.mean(res['test_times_' + key]),
+                    })
+
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
         outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
             args.dataset, config['type'], config['size'],
             args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
         means = err_df.mean()
-        means.to_csv(outname.replace('err_df', 'err_df_means'))
-        print(means)
+        means.to_csv(outname.replace('err_df', 'means'))
 
 
 def parse():
@@ -242,6 +276,7 @@ def parse():
         if args.num_samples is None:
             args.num_samples = 1000
     main(args)
+
 
 if __name__ == '__main__':
     parse()
