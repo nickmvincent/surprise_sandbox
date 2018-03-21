@@ -106,12 +106,13 @@ def main(args):
             }
 
             results_itemsplit = cross_validate(algos[algo_name], data, measures, 5)
+            print(results_itemsplit)
             results_itemsplit = {
-                'mae': np.mean(results_itemsplit['test_mae']),
-                'rmse': np.mean(results_itemsplit['test_rmse']),
-                'precision10t4': np.mean(results_itemsplit['test_precision10t4']),
-                'recall10t4': np.mean(results_itemsplit['test_recall10t4']),
-                'ndcg10': np.mean(results_itemsplit['test_ndcg10']),
+                'mae': np.mean(results_itemsplit['test_mae_standard']),
+                'rmse': np.mean(results_itemsplit['test_rmse_standard']),
+                'precision10t4': np.mean(results_itemsplit['test_precision10t4_standard']),
+                'recall10t4': np.mean(results_itemsplit['test_recall10t4_standard']),
+                'ndcg10': np.mean(results_itemsplit['test_ndcg10_standard']),
             }
             with open(baseline_filename, 'w') as f:
                 json.dump(results, f)
