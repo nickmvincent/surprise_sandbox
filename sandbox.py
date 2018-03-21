@@ -12,12 +12,14 @@ from utils import movielens_to_df, movielens_1m_to_df
 from joblib import Parallel, delayed
 
 from surprise.model_selection import cross_validate, cross_validate_users
-from surprise import SVD, KNNBasic, Dataset
+from surprise import SVD, KNNBasic, Dataset, KNNBaseline
 from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
-# TODO: abstract this code so it will work w/ WP algorithms
+# long task: abstract this code so it will work w/ WP algorithms
 
+
+# Quick TODO: zero pad the identifiers for the spreadsheet output
 
 # Notes on default algo params:
 # KNN uses 40 max neighbors by default
@@ -67,12 +69,15 @@ def main(args):
     }
     algos = {
         'SVD': SVD(),
-        # 'KNNBasic_user_msd': KNNBasic(),
+        'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': False}),
+        'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
+        'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
         'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
         'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
         'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
-        # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine', }),
-        # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson', }),
+        'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+        'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
+        'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
     }
 
     dfs = get_dfs(args.dataset)
