@@ -116,11 +116,9 @@ def main(args):
             }
             with open(baseline_filename, 'w') as f:
                 json.dump(results, f)
-            with open('ITEMSPLIT'+ baseline_filename, 'w') as f:
+            with open('ITEMSPLIT_'+ baseline_filename, 'w') as f:
                 json.dump(results_itemsplit, f)
         baseline[algo_name] = results
-
-    return
 
     experiment_configs = []
     if args.grouping == 'individual_users':
