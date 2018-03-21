@@ -4,6 +4,7 @@ sandbox.py includes a simple experimentation with Surprise and the ML-100k datas
 # pylint: disable=E0401
 import argparse
 import json
+import time
 
 import pandas as pd
 import numpy as np
@@ -61,6 +62,9 @@ def main(args):
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
     # data = Dataset.load_builtin('ml-1m')
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
+    times = {
+        'start': time.time()
+    }
     algos = {
         'SVD': SVD(),
         # 'KNNBasic_user_msd': KNNBasic(),
@@ -147,11 +151,11 @@ def main(args):
     num_configs = len(experiment_configs)
     if args.sample_sizes:
         num_runs = num_configs * args.num_samples
-        print('{} total train/tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
+        print('{} total 1train/3tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
             num_runs, num_configs, args.num_samples
         ))
     else:
-        print('{} total train/tests will be run'.format(num_configs))
+        print('{} total 1rain/3tests will be run'.format(num_configs))
         num_runs = num_configs
     # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
     secs = 125 * num_runs
@@ -257,6 +261,7 @@ def main(args):
         err_df.to_csv(outname)
         means = err_df.mean()
         means.to_csv(outname.replace('err_df', 'means'))
+        print('Full runtime was: {} for {} runs'.format(time.time() - times['start'], num_runs))
 
 
 def parse():
