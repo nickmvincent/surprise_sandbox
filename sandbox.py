@@ -65,8 +65,8 @@ def main(args):
         'SVD': SVD(),
         # 'KNNBasic_user_msd': KNNBasic(),
         'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
-        'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-        'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
+        'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
+        'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
         # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine', }),
         # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson', }),
     }
@@ -96,7 +96,7 @@ def main(args):
             print(results)
         except:
             print('Computing standard results for {}'.format(algo_name))
-            results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, 5)
+            results = cross_validate_users(algos[algo_name], data, all_uids, [0], measures, 5)
             results = {
                 'mae': np.mean(results['test_mae_all']),
                 'rmse': np.mean(results['test_rmse_all']),
@@ -107,16 +107,16 @@ def main(args):
 
             results_itemsplit = cross_validate(algos[algo_name], data, measures, 5)
             results_itemsplit = {
-                'mae': np.mean(results['test_mae_all']),
-                'rmse': np.mean(results['test_rmse_all']),
-                'precision10t4': np.mean(results['test_precision10t4_all']),
-                'recall10t4': np.mean(results['test_recall10t4_all']),
-                'ndcg10': np.mean(results['test_ndcg10_all']),
+                'mae': np.mean(results_itemsplit['test_mae']),
+                'rmse': np.mean(results_itemsplit['test_rmse']),
+                'precision10t4': np.mean(results_itemsplit['test_precision10t4']),
+                'recall10t4': np.mean(results_itemsplit['test_recall10t4']),
+                'ndcg10': np.mean(results_itemsplit['test_ndcg10']),
             }
             with open(baseline_filename, 'w') as f:
                 json.dump(results, f)
             with open('ITEMSPLIT'+ baseline_filename, 'w') as f:
-                json.dump(results, f)
+                json.dump(results_itemsplit, f)
         baseline[algo_name] = results
 
     return
