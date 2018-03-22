@@ -69,15 +69,15 @@ def main(args):
     }
     algos = {
         'SVD': SVD(),
-        'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': False}),
-        'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-        'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
+        #'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': False}),
+        #'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
+        #'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
         'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
-        'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-        'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
-        'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-        'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
-        'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
+        #'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
+        #'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
+        #'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+        #'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
+        #'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
     }
 
     dfs = get_dfs(args.dataset)
@@ -102,7 +102,6 @@ def main(args):
                 results = json.load(f)
             print('Loaded standard results for {} from {}'.format(
                 algo_name, baseline_filename))
-            print(results)
         except:
             print('Computing standard results for {}'.format(algo_name))
             results = cross_validate_users(algos[algo_name], data, all_uids, [0], measures, 5)
@@ -115,7 +114,6 @@ def main(args):
             }
 
             results_itemsplit = cross_validate(algos[algo_name], data, measures, 5)
-            print(results_itemsplit)
             results_itemsplit = {
                 'mae': np.mean(results_itemsplit['test_mae_standard']),
                 'rmse': np.mean(results_itemsplit['test_rmse_standard']),
@@ -160,7 +158,7 @@ def main(args):
             num_runs, num_configs, args.num_samples
         ))
     else:
-        print('{} total 1rain/3tests will be run'.format(num_configs))
+        print('{} total 1train/3tests will be run'.format(num_configs))
         num_runs = num_configs
     # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
     secs = 125 * num_runs
@@ -239,7 +237,6 @@ def main(args):
         for d in out_dicts:
             res = d['subset_results']
             algo_name = d['algo_name']
-            print(d)
             uid = str(d['identifier']) + '_' + d['algo_name']
             uid_to_error[uid] = {
                 'num_ratings_in-group': d['num_ratings'],
