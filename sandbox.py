@@ -69,15 +69,15 @@ def main(args):
     }
     algos = {
         'SVD': SVD(),
-        #'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': False}),
-        #'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-        #'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
-        'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
-        #'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-        #'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
-        #'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-        #'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
-        #'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
+        # 'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
+        # 'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}),
+        # 'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': True, 'name': 'pearson'}),
+        # 'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
+        # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
+        # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
+        'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+        # 'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
+        # 'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
     }
 
     dfs = get_dfs(args.dataset)
@@ -95,16 +95,18 @@ def main(args):
     baseline = {}
 
     for algo_name in algos:
-        baseline_filename = '{}_usercv_baseline_for_{}.json'.format(
+        filename_usercv_standards = 'standard_results/{}_usercv_standards_for_{}.json'.format(
+            args.dataset, algo_name)
+        filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
             args.dataset, algo_name)
         try:
-            with open(baseline_filename, 'r') as f:
+            with open(filename_usercv_standards, 'r') as f:
                 results = json.load(f)
             print('Loaded standard results for {} from {}'.format(
-                algo_name, baseline_filename))
+                algo_name, filename_ratingcv_standards))
         except:
             print('Computing standard results for {}'.format(algo_name))
-            results = cross_validate_users(algos[algo_name], data, all_uids, [0], measures, 5)
+            results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, 5)
             results = {
                 'mae': np.mean(results['test_mae_all']),
                 'rmse': np.mean(results['test_rmse_all']),
@@ -121,9 +123,9 @@ def main(args):
                 'recall10t4': np.mean(results_itemsplit['test_recall10t4_standard']),
                 'ndcg10': np.mean(results_itemsplit['test_ndcg10_standard']),
             }
-            with open(baseline_filename, 'w') as f:
+            with open(filename_usercv_standards, 'w') as f:
                 json.dump(results, f)
-            with open('ITEMSPLIT_'+ baseline_filename, 'w') as f:
+            with open(filename_ratingcv_standards, 'w') as f:
                 json.dump(results_itemsplit, f)
         baseline[algo_name] = results
 
@@ -245,16 +247,21 @@ def main(args):
                 'name': d['name'],
                 'algo_name': d['algo_name'],
             }
-            for metric in ['rmse', 'ndcg10', ]:
+            for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times']:
                 for group in ['all', 'in-group', 'out-group']:
                     key = '{}_{}'.format(metric, group)
-                    val = np.mean(res['test_' + key])
+                    print(res[key])
+                    val = np.mean(res[key])
                     uid_to_error[uid].update({
                         key: val,
-                        'increase_from_baseline_{}'.format(key): val - baseline[algo_name][metric],
-                        'avg_fit_time' + key: np.mean(res['fit_times_' + key]),
-                        'avg_test_time' + key: np.mean(res['test_times_' + key]),
                     })
+                    try:
+                        uid_to_error[uid].update({
+                            'increase_from_baseline_{}'.format(key): val - baseline[algo_name][metric],
+                        })
+                    except KeyError:
+                        pass
+            
 
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
         outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
