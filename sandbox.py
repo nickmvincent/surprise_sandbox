@@ -106,22 +106,24 @@ def main(args):
                 algo_name, filename_ratingcv_standards))
         except:
             print('Computing standard results for {}'.format(algo_name))
+            # todo fix keys here...
             results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, 5)
             results = {
-                'mae': np.mean(results['test_mae_all']),
-                'rmse': np.mean(results['test_rmse_all']),
-                'precision10t4': np.mean(results['test_precision10t4_all']),
-                'recall10t4': np.mean(results['test_recall10t4_all']),
-                'ndcg10': np.mean(results['test_ndcg10_all']),
+                'mae': np.mean(results['mae_all']),
+                'rmse': np.mean(results['rmse_all']),
+                'precision10t4': np.mean(results['precision10t4_all']),
+                'recall10t4': np.mean(results['recall10t4_all']),
+                'ndcg10': np.mean(results['ndcg10_all']),
             }
 
             results_itemsplit = cross_validate(algos[algo_name], data, measures, 5)
+            print(results_itemsplit)
             results_itemsplit = {
-                'mae': np.mean(results_itemsplit['test_mae_standard']),
-                'rmse': np.mean(results_itemsplit['test_rmse_standard']),
-                'precision10t4': np.mean(results_itemsplit['test_precision10t4_standard']),
-                'recall10t4': np.mean(results_itemsplit['test_recall10t4_standard']),
-                'ndcg10': np.mean(results_itemsplit['test_ndcg10_standard']),
+                'mae': np.mean(results_itemsplit['test_mae']),
+                'rmse': np.mean(results_itemsplit['test_rmse']),
+                'precision10t4': np.mean(results_itemsplit['test_precision10t4']),
+                'recall10t4': np.mean(results_itemsplit['test_recall10t4']),
+                'ndcg10': np.mean(results_itemsplit['test_ndcg10']),
             }
             with open(filename_usercv_standards, 'w') as f:
                 json.dump(results, f)

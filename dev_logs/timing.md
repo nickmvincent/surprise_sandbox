@@ -33,3 +33,10 @@ demographics:
 gender (2); each age group bin (10ish); each 1st digit zip (9ish); each genre (19ish);
 
 (9000 + 600 + 40) * 28.6 / 36000
+
+
+## 3/23/2018 (after large code improvements)
+python sandbox.py --dataset ml-100k --grouping individual_users --num_users_to_stop_at 100
+SVD and KNNBaseline
+Full runtime was: 172.33767223358154 for 1 runs
+172.3 sec / 198 runs = 0.87 sec/run. 2x improvement from before.
