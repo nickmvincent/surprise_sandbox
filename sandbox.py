@@ -207,64 +207,64 @@ def main(args):
             # implement
             pass
 
-        delayed_iteration_list = []
-        for i, experimental_iteration in enumerate(experimental_iterations):
-            if config['type'] == 'individual_users':
-                if args.num_users_to_stop_at:
-                    if i >= args.num_users_to_stop_at - 1:
-                        break
-                row = experimental_iteration[1]
-                subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
-                excluded_ratings_df = ratings_df[ratings_df.user_id == row.user_id]
-                identifier = row.user_id
-                name = 'individual'
-            elif config['type'] in ['sample_users', 'gender', 'age', 'rural']:
-                ids = list(experimental_iteration['df'].user_id)
-                subset_ratings_df = ratings_df[~ratings_df.user_id.isin(ids)]
-                excluded_ratings_df = ratings_df[ratings_df.user_id.isin(ids)]
 
-                identifier = i
-                name = experimental_iteration['name']
+        for algo_name in algos:
+            delayed_iteration_list = []
+            for i, experimental_iteration in enumerate(experimental_iterations):
+                if config['type'] == 'individual_users':
+                    if args.num_users_to_stop_at:
+                        if i >= args.num_users_to_stop_at - 1:
+                            break
+                    row = experimental_iteration[1]
+                    subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
+                    excluded_ratings_df = ratings_df[ratings_df.user_id == row.user_id]
+                    identifier = row.user_id
+                    name = 'individual'
+                elif config['type'] in ['sample_users', 'gender', 'age', 'rural']:
+                    ids = list(experimental_iteration['df'].user_id)
+                    subset_ratings_df = ratings_df[~ratings_df.user_id.isin(ids)]
+                    excluded_ratings_df = ratings_df[ratings_df.user_id.isin(ids)]
 
-            out_uids = list(set(excluded_ratings_df.user_id))
-            num_users = len(subset_ratings_df.user_id.value_counts())
-            num_movies = len(subset_ratings_df.movie_id.value_counts())
-            delayed_iteration_list += [delayed(task)(
-                algo_name, algos[algo_name], data, all_uids, out_uids, measures, 5,
-                False, identifier,
-                len(subset_ratings_df.index), #num ratings
-                num_users,
-                num_movies, name
-            ) for algo_name in algos]
+                    identifier = i
+                    name = experimental_iteration['name']
 
-        out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
-        for d in out_dicts:
-            res = d['subset_results']
-            algo_name = d['algo_name']
-            uid = str(d['identifier']) + '_' + d['algo_name']
-            uid_to_error[uid] = {
-                'num_ratings_in-group': d['num_ratings'],
-                'num_users_in-group': d['num_users'],
-                'num_movies_in-group': d['num_movies'],
-                'name': d['name'],
-                'algo_name': d['algo_name'],
-            }
-            for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times']:
-                for group in ['all', 'in-group', 'out-group']:
-                    key = '{}_{}'.format(metric, group)
-                    print(res[key])
-                    val = np.mean(res[key])
-                    uid_to_error[uid].update({
-                        key: val,
-                    })
-                    try:
+                out_uids = list(set(excluded_ratings_df.user_id))
+                num_users = len(subset_ratings_df.user_id.value_counts())
+                num_movies = len(subset_ratings_df.movie_id.value_counts())
+                delayed_iteration_list += [delayed(task)(
+                    algo_name, algos[algo_name], data, all_uids, out_uids, measures, 5,
+                    False, identifier,
+                    len(subset_ratings_df.index), #num ratings
+                    num_users,
+                    num_movies, name
+                )]
+
+            out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
+            for d in out_dicts:
+                res = d['subset_results']
+                algo_name = d['algo_name']
+                uid = str(d['identifier']) + '_' + d['algo_name']
+                uid_to_error[uid] = {
+                    'num_ratings_in-group': d['num_ratings'],
+                    'num_users_in-group': d['num_users'],
+                    'num_movies_in-group': d['num_movies'],
+                    'name': d['name'],
+                    'algo_name': d['algo_name'],
+                }
+                for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times']:
+                    for group in ['all', 'in-group', 'out-group']:
+                        key = '{}_{}'.format(metric, group)
+                        print(res[key])
+                        val = np.mean(res[key])
                         uid_to_error[uid].update({
-                            'increase_from_baseline_{}'.format(key): val - baseline[algo_name][metric],
+                            key: val,
                         })
-                    except KeyError:
-                        pass
-            
-
+                        try:
+                            uid_to_error[uid].update({
+                                'increase_from_baseline_{}'.format(key): val - baseline[algo_name][metric],
+                            })
+                        except KeyError:
+                            pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
         outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
             args.dataset, config['type'], config['size'],

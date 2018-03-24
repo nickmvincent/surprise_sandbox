@@ -40,3 +40,9 @@ python sandbox.py --dataset ml-100k --grouping individual_users --num_users_to_s
 SVD and KNNBaseline
 Full runtime was: 172.33767223358154 for 1 runs
 172.3 sec / 198 runs = 0.87 sec/run. 2x improvement from before.
+
+python sandbox.py --dataset ml-1m --grouping individual_users --num_users_to_stop_at 101
+Full runtime was: 3752.996297597885 for 1 runs
+3723 / 200 = 18 sec/run
+Included excessive print statements and other processes running, should try this again.
+
