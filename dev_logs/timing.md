@@ -46,3 +46,12 @@ Full runtime was: 3752.996297597885 for 1 runs
 3723 / 200 = 18 sec/run
 Included excessive print statements and other processes running, should try this again.
 
+Aftering parallelization each algorithm separately, it goes *slightly* faster.
+Full runtime was: 3656.2129049301147 for 1 runs
+
+Analyzing this runtime:
+KNN takes 26 + 12 seconds
+SVD takes about 100 + 12 seconds
+
+Together, average time is 70 seconds per run.
+

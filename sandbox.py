@@ -239,7 +239,7 @@ def main(args):
                     num_movies, name
                 )]
 
-            out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
+            out_dicts = Parallel(n_jobs=-1, max_nbytes=1e7)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
                 algo_name = d['algo_name']
@@ -254,7 +254,6 @@ def main(args):
                 for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times']:
                     for group in ['all', 'in-group', 'out-group']:
                         key = '{}_{}'.format(metric, group)
-                        print(res[key])
                         val = np.mean(res[key])
                         uid_to_error[uid].update({
                             key: val,
