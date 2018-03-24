@@ -31,7 +31,7 @@ from surprise.reader import Reader
 
 def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
     return {
-        'subset_results': cross_validate_users(algo, data, all_uids, out_uids, measures, cv),
+        'subset_results': cross_validate_users(algo, data, all_uids, out_uids, measures, cv, n_jobs=1),
         'num_ratings': num_ratings,
         'num_users': num_users,
         'num_movies': num_movies,

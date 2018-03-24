@@ -60,4 +60,13 @@ Together, average time is 70 seconds per run.
 Full runtime was: 3646
 
 
+Each cross fold procedure takes:
+596.9851765632629
+
+So this means each run ACTUALLY takes 670 seconds (about 11.2 minutes)
+With this in mind, the theoretical max rate should be about
+670 / 56 = 11.2 second/run. Which is close to our actual speed of 18 sec/run
+
+
+
 
