@@ -25,33 +25,39 @@ One strange observation is that the fit time is different for different metrics.
 Explanation:  the model is re-fitting for each evaluation group! So this 3x slower than it should be...
 
 At this rate:
-1 per users = 9000 experiments
+1 per users = 6000 experiments
 2, 4, 8, 16, 32, 64 = 600 experiments
 
 
 demographics:
 gender (2); each age group bin (10ish); each 1st digit zip (9ish); each genre (19ish);
 
-(9000 + 600 + 40) * 28.6 / 36000
+(6000 + 600 + 40) * 28.6 / 36000
 
 
 ## 3/23/2018 (after large code improvements)
 python sandbox.py --dataset ml-100k --grouping individual_users --num_users_to_stop_at 100
 SVD and KNNBaseline
-Full runtime was: 172.33767223358154 for 1 runs
+Full runtime was: 172.3
 172.3 sec / 198 runs = 0.87 sec/run. 2x improvement from before.
 
 python sandbox.py --dataset ml-1m --grouping individual_users --num_users_to_stop_at 101
-Full runtime was: 3752.996297597885 for 1 runs
-3723 / 200 = 18 sec/run
+Full runtime was: 3753
+3753 / 200 = 18 sec/run
 Included excessive print statements and other processes running, should try this again.
 
-Aftering parallelization each algorithm separately, it goes *slightly* faster.
-Full runtime was: 3656.2129049301147 for 1 runs
+### Aftering parallelization each algorithm separately
+Full runtime was: 3656.2
+18.28 sec/run
 
 Analyzing this runtime:
 KNN takes 26 + 12 seconds
 SVD takes about 100 + 12 seconds
 
 Together, average time is 70 seconds per run.
+
+### After using memmap
+Full runtime was: 3646
+
+
 

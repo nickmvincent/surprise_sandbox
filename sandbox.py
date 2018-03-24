@@ -5,6 +5,7 @@ sandbox.py includes a simple experimentation with Surprise and the ML-100k datas
 import argparse
 import json
 import time
+from collections import OrderedDict
 
 import pandas as pd
 import numpy as np
@@ -64,9 +65,8 @@ def main(args):
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
     # data = Dataset.load_builtin('ml-1m')
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
-    times = {
-        'start': time.time()
-    }
+    times = OrderedDict()
+    times['start'] = time.time()
     algos = {
         'SVD': SVD(),
         # 'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
@@ -82,12 +82,14 @@ def main(args):
 
     dfs = get_dfs(args.dataset)
 
+    times['dfs_loaded'] = time.time() - times['start']
     ratings_df, users_df, _ = dfs['ratings'], dfs['users'], dfs['movies']
     all_uids = list(set(ratings_df.user_id))
     data = Dataset.load_from_df(
         ratings_df[['user_id', 'movie_id', 'rating']],
         reader=Reader()
     )
+    times['data_constructed'] = time.time() - times['dfs_loaded']
 
     # why are precision, recall, and ndcg all stuffed together in one string
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
@@ -130,6 +132,8 @@ def main(args):
             with open(filename_ratingcv_standards, 'w') as f:
                 json.dump(results_itemsplit, f)
         baseline[algo_name] = results
+
+    times['standards_loaded'] = time.time() - times['data_constructed']
 
     experiment_configs = []
     if args.grouping == 'individual_users':
@@ -206,7 +210,6 @@ def main(args):
         elif config['type'] == 'genre':
             # implement
             pass
-
 
         for algo_name in algos:
             delayed_iteration_list = []
