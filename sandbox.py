@@ -182,7 +182,7 @@ def main(args):
     uid_to_error = {}
     for config in experiment_configs:
         if config['type'] == 'individual_users':
-            experimental_iterations = users_df.iterrows()
+            experimental_iterations = list(users_df.iterrows())
         elif config['type'] == 'sample_users':
             experimental_iterations = [{
                 'df': users_df.sample(config['size']),
@@ -217,11 +217,13 @@ def main(args):
         for algo_name in algos:
             delayed_iteration_list = []
             for i, experimental_iteration in enumerate(experimental_iterations):
+                print(i, algo_name)
                 if config['type'] == 'individual_users':
                     if args.num_users_to_stop_at:
-                        if i >= (args.num_users_to_stop_at * len(algos)) - 1:
+                        if i >= args.num_users_to_stop_at:
                             break
                     row = experimental_iteration[1]
+                    print(row)
                     subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
                     excluded_ratings_df = ratings_df[ratings_df.user_id == row.user_id]
                     identifier = row.user_id
@@ -235,7 +237,6 @@ def main(args):
                     name = experimental_iteration['name']
 
                 identifier = str(identifier).zfill(4)
-
                 out_uids = list(set(excluded_ratings_df.user_id))
                 num_users = len(subset_ratings_df.user_id.value_counts())
                 num_movies = len(subset_ratings_df.movie_id.value_counts())
@@ -250,8 +251,10 @@ def main(args):
             out_dicts = Parallel(n_jobs=-1, max_nbytes=1e7)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
+                print(res)
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
+                print(uid)
                 uid_to_error[uid] = {
                     'num_ratings_in-group': d['num_ratings'],
                     'num_users_in-group': d['num_users'],
@@ -259,7 +262,7 @@ def main(args):
                     'name': d['name'],
                     'algo_name': d['algo_name'],
                 }
-                for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times']:
+                for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times', 'num_tested']:
                     for group in ['all', 'in-group', 'out-group']:
                         key = '{}_{}'.format(metric, group)
 
@@ -281,8 +284,8 @@ def main(args):
             args.dataset, config['type'], config['size'],
             args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
-        means = err_df.mean()
-        means.to_csv(outname.replace('err_df', 'means'))
+        # means = err_df.mean()
+        # means.to_csv(outname.replace('err_df', 'means'))
         print('Full runtime was: {} for {} runs'.format(time.time() - times['start'], num_runs))
 
 
@@ -301,6 +304,7 @@ def parse():
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
         if args.num_samples is None:
             args.num_samples = 1000
+    print(args.num_users_to_stop_at)
     main(args)
 
 
