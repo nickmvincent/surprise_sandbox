@@ -68,5 +68,22 @@ With this in mind, the theoretical max rate should be about
 670 / 56 = 11.2 second/run. Which is close to our actual speed of 18 sec/run
 
 
+## 3/24
+python sandbox.py --dataset ml-1m --grouping individual_users --num_users_to_stop_at 60
+Full runtime was: 1195.000543832779 for 1 runs
+
+1195 / (59*2)
+
+python sandbox.py --dataset ml-1m --grouping individual_users --num_users_to_stop_at 101
+Full runtime was: 1513.766033411026 for 1 runs
+
+1514 / 200
+7.57
+
+
+## 3/25
+Full runtime was: 61179.8658721447 for 1 runs
+61180 / 12000
+5.09
 
 

@@ -28,6 +28,8 @@ from surprise.reader import Reader
 # default similarity is MSD
 # default user or item is USER-BASED but we override that.
 
+NUM_FOLDS = 5
+
 
 def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
     return {
@@ -42,7 +44,7 @@ def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, ident
 
 
 def get_dfs(dataset):
-    """
+    """i
     Takes a dataset string and return that data in a dataframe!
     """
     if dataset == 'ml-100k':
@@ -109,7 +111,7 @@ def main(args):
         except:
             print('Computing standard results for {}'.format(algo_name))
             # todo fix keys here...
-            results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, 5)
+            results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, NUM_FOLDS)
             results = {
                 'mae': np.mean(results['mae_all']),
                 'rmse': np.mean(results['rmse_all']),
@@ -118,19 +120,21 @@ def main(args):
                 'ndcg10': np.mean(results['ndcg10_all']),
             }
 
-            results_itemsplit = cross_validate(algos[algo_name], data, measures, 5)
-            print(results_itemsplit)
-            results_itemsplit = {
-                'mae': np.mean(results_itemsplit['test_mae']),
-                'rmse': np.mean(results_itemsplit['test_rmse']),
-                'precision10t4': np.mean(results_itemsplit['test_precision10t4']),
-                'recall10t4': np.mean(results_itemsplit['test_recall10t4']),
-                'ndcg10': np.mean(results_itemsplit['test_ndcg10']),
-            }
+            # results_itemsplit = cross_validate(algos[algo_name], data, measures, NUM_FOLDS)
+            # print(results_itemsplit)
+            # results_itemsplit = {
+            #     'mae': np.mean(results_itemsplit['test_mae']),
+            #     'rmse': np.mean(results_itemsplit['test_rmse']),
+            #     'precision10t4': np.mean(results_itemsplit['test_precision10t4']),
+            #     'recall10t4': np.mean(results_itemsplit['test_recall10t4']),
+            #     'ndcg10': np.mean(results_itemsplit['test_ndcg10']),
+            # }
+            # with open(filename_ratingcv_standards, 'w') as f:
+            #     json.dump(results_itemsplit, f)
+
             with open(filename_usercv_standards, 'w') as f:
                 json.dump(results, f)
-            with open(filename_ratingcv_standards, 'w') as f:
-                json.dump(results_itemsplit, f)
+            
         baseline[algo_name] = results
 
     times['standards_loaded'] = time.time() - times['data_constructed']
@@ -168,7 +172,6 @@ def main(args):
     else:
         print('{} total 1train/3tests will be run'.format(num_configs))
         num_runs = num_configs
-    # in experiments butter can run SVD in 60 seconds for 1M ratings, and KNN in 65 seconds for 1M ratings
     secs = 125 * num_runs
     hours = secs / 3600
     time_estimate = """
@@ -216,7 +219,7 @@ def main(args):
             for i, experimental_iteration in enumerate(experimental_iterations):
                 if config['type'] == 'individual_users':
                     if args.num_users_to_stop_at:
-                        if i >= args.num_users_to_stop_at - 1:
+                        if i >= (args.num_users_to_stop_at * len(algos)) - 1:
                             break
                     row = experimental_iteration[1]
                     subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
@@ -231,11 +234,13 @@ def main(args):
                     identifier = i
                     name = experimental_iteration['name']
 
+                identifier = str(identifier).zfill(4)
+
                 out_uids = list(set(excluded_ratings_df.user_id))
                 num_users = len(subset_ratings_df.user_id.value_counts())
                 num_movies = len(subset_ratings_df.movie_id.value_counts())
                 delayed_iteration_list += [delayed(task)(
-                    algo_name, algos[algo_name], data, all_uids, out_uids, measures, 5,
+                    algo_name, algos[algo_name], data, all_uids, out_uids, measures, NUM_FOLDS,
                     False, identifier,
                     len(subset_ratings_df.index), #num ratings
                     num_users,
@@ -257,7 +262,11 @@ def main(args):
                 for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times']:
                     for group in ['all', 'in-group', 'out-group']:
                         key = '{}_{}'.format(metric, group)
-                        val = np.mean(res[key])
+
+                        if group == 'out-group':
+                            val = np.nanmean(res[key])
+                        else:
+                            val = np.mean(res[key])
                         uid_to_error[uid].update({
                             key: val,
                         })
