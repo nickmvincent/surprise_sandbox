@@ -104,10 +104,12 @@ def main(args):
         filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
             args.dataset, algo_name)
         try:
+            if args.recompute_standards:
+                raise ValueError('This might be a bad pattern, but we need to go to the except block!')
             with open(filename_usercv_standards, 'r') as f:
                 results = json.load(f)
-            print('Loaded standard results for {} from {}'.format(
-                algo_name, filename_ratingcv_standards))
+            # print('Loaded standard results for {} from {}'.format(
+            #     algo_name, filename_ratingcv_standards))
         except:
             print('Computing standard results for {}'.format(algo_name))
             # todo fix keys here...
@@ -121,7 +123,6 @@ def main(args):
             }
 
             # results_itemsplit = cross_validate(algos[algo_name], data, measures, NUM_FOLDS)
-            # print(results_itemsplit)
             # results_itemsplit = {
             #     'mae': np.mean(results_itemsplit['test_mae']),
             #     'rmse': np.mean(results_itemsplit['test_rmse']),
@@ -172,11 +173,10 @@ def main(args):
     else:
         print('{} total 1train/3tests will be run'.format(num_configs))
         num_runs = num_configs
-    secs = 125 * num_runs
+    secs = 47 * num_runs
     hours = secs / 3600
     time_estimate = """
-        Assuming that you're running KNN (65 sec) and SVD (60 sec), this will probably take
-        an upper bound of {} seconds ({} hours)
+        At a rate of 47 seconds per run, this should take: {} seconds ({} hours)
     """.format(secs, hours)
     print(time_estimate)
     uid_to_error = {}
@@ -251,10 +251,8 @@ def main(args):
             out_dicts = Parallel(n_jobs=-1, max_nbytes=1e7)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
-                print(res)
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
-                print(uid)
                 uid_to_error[uid] = {
                     'num_ratings_in-group': d['num_ratings'],
                     'num_users_in-group': d['num_users'],
@@ -299,12 +297,12 @@ def parse():
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
+    parser.add_argument('--recompute_standards')
     args = parser.parse_args()
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
         if args.num_samples is None:
             args.num_samples = 1000
-    print(args.num_users_to_stop_at)
     main(args)
 
 
