@@ -1,5 +1,7 @@
 """
-sandbox.py includes a simple experimentation with Surprise and the ML-100k dataset
+A flexible script for exploring performance of the
+Surprise recommender system library
+using various MovieLens datasets
 """
 # pylint: disable=E0401
 import argparse
@@ -17,10 +19,7 @@ from surprise import SVD, KNNBasic, Dataset, KNNBaseline
 from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
-# long task: abstract this code so it will work w/ WP algorithms
-
-
-# Quick TODO: zero pad the identifiers for the spreadsheet output
+# long-term task: massively abstract this code so it will work w/ non-recsys algorithsm
 
 # Notes on default algo params:
 # KNN uses 40 max neighbors by default
@@ -93,7 +92,7 @@ def main(args):
     )
     times['data_constructed'] = time.time() - times['dfs_loaded']
 
-    # why are precision, recall, and ndcg all stuffed together in one string
+    # note to reader: why are precision, recall, and ndcg all stuffed together in one string?
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
     measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10']
     baseline = {}
@@ -290,6 +289,8 @@ def main(args):
 def parse():
     """
     Parse args and handles list splitting
+
+    Example: 
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_users_to_stop_at', type=int)
