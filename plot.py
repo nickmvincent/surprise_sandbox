@@ -11,16 +11,15 @@ import pandas as pd
 
 NCOLS = 3
 
-def main(args):
+def plot_all(df, mode='hist', name=''):
     """Do the plotting"""
-    if args.mode == 'hist':
-        df = pd.DataFrame.from_csv(args.f)
+    if mode == 'hist':
         cols = df.columns.values
         print(len(cols))
         subplot_y_max = (len(cols) + 1) // NCOLS
 
         fig, axes = plt.subplots(nrows=subplot_y_max, ncols=NCOLS)
-        fig.suptitle(args.f)
+        fig.suptitle(name)
         for i_col, col in enumerate(df.columns.values):
             subplot_x = (i_col) % NCOLS
             subplot_y = (i_col) // NCOLS
@@ -33,8 +32,9 @@ def main(args):
             ax.axvline(X.mean(), color='b', linestyle='dashed', linewidth=2)
 
 
-    plt.show()
 
+def main():
+    raise ValueError('implement this')
 
 def parse():
     """
@@ -44,7 +44,7 @@ def parse():
     parser.add_argument('--mode', default='hist')
     parser.add_argument('--f', default='indivs.csv')
     args = parser.parse_args()
-    main(args)
+    main()
 
 
 if __name__ == '__main__':

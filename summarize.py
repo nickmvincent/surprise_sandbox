@@ -1,8 +1,10 @@
 import argparse
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
+from plot import plot_all
 
 def main(args):
     for sample_size in args.sample_sizes:
@@ -27,7 +29,13 @@ def main(args):
                         key = '{}_{}'.format(metric, group)
                         colname = 'increase_from_baseline_{}'.format(key)
                         colnames.append(colname)
-                print(filtered_df[colnames].mean())
+                cols = filtered_df[colnames]
+                print(cols.mean())
+                if args.show_plots:
+                    plot_all(cols, 'hist', outname)
+        
+        if args.show_plots:
+            plt.show()
 
 
 def parse():
@@ -40,6 +48,7 @@ def parse():
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument('--verbose')
+    parser.add_argument('--show_plots')
     args = parser.parse_args()
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
@@ -47,6 +56,8 @@ def parse():
             args.num_samples = 1000
     else:
         args.sample_sizes = [None]
+    if args.grouping == 'sample':
+        args.grouping = 'sample_users'
     main(args)
 
 
