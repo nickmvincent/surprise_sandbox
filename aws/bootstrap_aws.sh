@@ -38,7 +38,7 @@ cd ..
 mkdir .aws
 cat >.aws/credentials << EOF
 [default]
-aws_access_key_id = AKIAJXMF3MK7C3K2NIFQ
+aws_access_key_id = AKIAIRJV7PKUOLIXHCSA
 aws_secret_access_key = ${secret_access_key}
 EOF
 echo "[default]" >.aws/config
