@@ -21,7 +21,7 @@ set -e
 set -x
 
 # install
-yum update
+yum update -y
 yum install -y git gcc gcc-c++
 yum install -y atlas-devel lapack-devel blas-devel libgfortran
 yum install -y python36 python36-devel
@@ -44,8 +44,8 @@ aws_secret_access_key = ${secret_access_key}
 EOF
 echo "[default]" >.aws/config
 
-# Install our package
-git clone https://github.com/nickmvincent/surprise_sandbox.git
+# Install our package TODO: change to nick's directory once PR is merged.
+git clone https://github.com/shilad/surprise_sandbox.git
 cd surprise_sandbox
 
 ./run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
