@@ -10,10 +10,11 @@
 # Usage: ./bootstrap_aws.sh secret_access_key s3://path/to/jobs worker_id num_workers
 #
 
-secret_access_key="$1"
-s3_job_dir="$2"
-worker_id="$3"
-num_workers="$4"
+# These parameters get rewritten by the manage_aws.sh script.
+secret_access_key=SECRET_ACCESS_KEY
+s3_job_dir=S3_JOB_DIR
+worker_id=WORKER_ID
+num_workers=NUM_WORKERS
 
 # fail on error and enable logging
 set -e
@@ -47,3 +48,4 @@ echo "[default]" >.aws/config
 git clone https://github.com/nickmvincent/surprise_sandbox.git
 cd surprise_sandbox
 
+./run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"

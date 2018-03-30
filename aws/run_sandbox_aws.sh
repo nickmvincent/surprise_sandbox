@@ -4,7 +4,7 @@
 #
 
 if [ $# -ne 3 ]; then
-    echo "Usage: ./run_aws_job.sh s3://path/to/jobs worker_id num_workers" >&2
+    echo "Usage: $0_aws.sh s3://path/to/jobs worker_id num_workers" >&2
     exit 1
 fi
 
