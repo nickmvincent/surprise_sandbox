@@ -28,7 +28,7 @@ yum install -y git gcc gcc-c++
 yum install -y atlas-devel lapack-devel blas-devel libgfortran
 yum install -y python36 python36-devel
 
-pip-3.6 install Cython numpy scipy
+pip-3.6 install Cython numpy scipy pandas
 
 # Install custom surprise
 git clone https://github.com/nickmvincent/Surprise.git
@@ -40,7 +40,7 @@ cd ..
 mkdir .aws
 cat >.aws/credentials << EOF
 [default]
-aws_access_key_id = AKIAIRJV7PKUOLIXHCSA
+aws_access_key_id = AKIAJHG4JDWYRJITSUMQ
 aws_secret_access_key = ${secret_access_key}
 EOF
 echo "[default]" >.aws/config
