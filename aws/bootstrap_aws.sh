@@ -47,4 +47,4 @@ echo "[default]" >.aws/config
 git clone https://github.com/shilad/surprise_sandbox.git
 cd surprise_sandbox
 
-./run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
+./aws/run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
