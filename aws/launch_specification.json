@@ -1,0 +1,35 @@
+{
+    "EbsOptimized": true,
+    "BlockDeviceMappings": [
+        {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+                "DeleteOnTermination": true
+            }
+        }
+    ],
+    "NetworkInterfaces": [
+        {
+            "DeviceIndex": 0,
+            "AssociatePublicIpAddress": true,
+            "DeleteOnTermination": true,
+            "Description": "",
+            "Groups": [
+                "sg-448c8d32"
+            ],
+            "SubnetId": "subnet-18171730"
+        }
+    ],
+    "ImageId": "ami-1853ac65",
+    "InstanceType": "m5.2xlarge",
+    "KeyName": "feb2016-keypair",
+    "Monitoring": {
+        "Enabled": false
+    },
+    "Placement": {
+        "AvailabilityZone": "us-east-1e",
+        "GroupName": "",
+        "Tenancy": "default"
+    },
+    "UserData" : "USER_DATA"
+}

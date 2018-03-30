@@ -1,9 +1,12 @@
 """
 Utility functions that might be useful outside the context of this project.
 """
+import os.path
 import pandas as pd
 
 from surprise.builtin_datasets import BUILTIN_DATASETS
+
+from surprise.builtin_datasets import download_builtin_dataset
 
 GENRES = ['Action', 'Adventure', 'Animation', 
               "Children's", 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
@@ -14,16 +17,19 @@ def get_dfs(dataset):
     """i
     Takes a dataset string and return that data in a dataframe!
     """
+    ratings_path = BUILTIN_DATASETS[dataset].path
+    if not os.path.isfile(ratings_path):
+        download_builtin_dataset(dataset)
     if dataset == 'ml-100k':
-        ratings_path = BUILTIN_DATASETS[dataset].path
         users_path = ratings_path.replace('.data', '.user')
         movies_path = ratings_path.replace('.data', '.item')
         dfs = movielens_to_df(ratings_path, users_path, movies_path)
     elif dataset == 'ml-1m':
-        ratings_path = BUILTIN_DATASETS[dataset].path
         users_path = ratings_path.replace('ratings.', 'users.')
         movies_path = ratings_path.replace('ratings.', 'movies.')
         dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+    else:
+        raise Exception("Unknown dataset: " + dataset)
     return dfs
 
 def movielens_to_df(ratings_file, users_file, movies_file):
