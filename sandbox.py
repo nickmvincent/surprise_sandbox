@@ -9,8 +9,11 @@ import json
 import time
 from collections import OrderedDict
 
+import os.path
 import pandas as pd
 import numpy as np
+
+from surprise.builtin_datasets import download_builtin_dataset
 from utils import movielens_to_df, movielens_1m_to_df
 from joblib import Parallel, delayed
 
@@ -28,6 +31,7 @@ from surprise.reader import Reader
 # default user or item is USER-BASED but we override that.
 
 NUM_FOLDS = 5
+RESULTS_DIR = 'results'
 
 
 def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
@@ -46,16 +50,19 @@ def get_dfs(dataset):
     """i
     Takes a dataset string and return that data in a dataframe!
     """
+    ratings_path = BUILTIN_DATASETS[dataset].path
+    if not os.path.isfile(ratings_path):
+        download_builtin_dataset(dataset)
     if dataset == 'ml-100k':
-        ratings_path = BUILTIN_DATASETS[dataset].path
         users_path = ratings_path.replace('.data', '.user')
         movies_path = ratings_path.replace('.data', '.item')
         dfs = movielens_to_df(ratings_path, users_path, movies_path)
     elif dataset == 'ml-1m':
-        ratings_path = BUILTIN_DATASETS[dataset].path
         users_path = ratings_path.replace('ratings.', 'users.')
         movies_path = ratings_path.replace('ratings.', 'movies.')
         dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+    else:
+        raise Exception("Unknown dataset: " + dataset)
     return dfs
 
 def main(args):
@@ -64,7 +71,7 @@ def main(args):
     """
     # HEY LISTEN
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
-    # data = Dataset.load_builtin('ml-1m')
+    # data =
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     times = OrderedDict()
     times['start'] = time.time()
@@ -277,7 +284,9 @@ def main(args):
                         except KeyError:
                             pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
+        if not os.path.isdir(RESULTS_DIR):
+            os.makedirs(RESULTS_DIR)
+        outname = RESULTS_DIR + '/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
             args.dataset, config['type'], config['size'],
             args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
