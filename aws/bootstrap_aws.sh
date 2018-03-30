@@ -50,3 +50,5 @@ git clone https://github.com/shilad/surprise_sandbox.git
 cd surprise_sandbox
 
 ./aws/run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
+
+/sbin/halt
