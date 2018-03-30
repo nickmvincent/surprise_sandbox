@@ -20,6 +20,8 @@ num_workers=NUM_WORKERS
 set -e
 set -x
 
+cd /root
+
 # install
 yum update -y
 yum install -y git gcc gcc-c++
