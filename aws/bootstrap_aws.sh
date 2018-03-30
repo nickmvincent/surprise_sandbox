@@ -26,7 +26,6 @@ yum install -y git gcc gcc-c++
 yum install -y atlas-devel lapack-devel blas-devel libgfortran
 yum install -y python36 python36-devel
 
-pip-3.6 install --upgrade pip
 pip-3.6 install Cython numpy scipy
 
 # Install custom surprise
