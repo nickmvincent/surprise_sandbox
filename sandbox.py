@@ -9,17 +9,13 @@ import json
 import time
 from collections import OrderedDict
 
-import os.path
 import pandas as pd
 import numpy as np
-
-from surprise.builtin_datasets import download_builtin_dataset
-from utils import movielens_to_df, movielens_1m_to_df
+from utils import get_dfs
 from joblib import Parallel, delayed
 
 from surprise.model_selection import cross_validate, cross_validate_users
 from surprise import SVD, KNNBasic, Dataset, KNNBaseline
-from surprise.builtin_datasets import BUILTIN_DATASETS
 from surprise.reader import Reader
 
 # long-term task: massively abstract this code so it will work w/ non-recsys algorithsm
@@ -31,7 +27,6 @@ from surprise.reader import Reader
 # default user or item is USER-BASED but we override that.
 
 NUM_FOLDS = 5
-RESULTS_DIR = 'results'
 
 
 def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
@@ -46,32 +41,13 @@ def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, ident
     }
 
 
-def get_dfs(dataset):
-    """i
-    Takes a dataset string and return that data in a dataframe!
-    """
-    ratings_path = BUILTIN_DATASETS[dataset].path
-    if not os.path.isfile(ratings_path):
-        download_builtin_dataset(dataset)
-    if dataset == 'ml-100k':
-        users_path = ratings_path.replace('.data', '.user')
-        movies_path = ratings_path.replace('.data', '.item')
-        dfs = movielens_to_df(ratings_path, users_path, movies_path)
-    elif dataset == 'ml-1m':
-        users_path = ratings_path.replace('ratings.', 'users.')
-        movies_path = ratings_path.replace('ratings.', 'movies.')
-        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
-    else:
-        raise Exception("Unknown dataset: " + dataset)
-    return dfs
-
 def main(args):
     """
     Run the sandbox experiments
     """
     # HEY LISTEN
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
-    # data =
+    # data = Dataset.load_builtin('ml-1m')
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     times = OrderedDict()
     times['start'] = time.time()
@@ -92,6 +68,10 @@ def main(args):
 
     times['dfs_loaded'] = time.time() - times['start']
     ratings_df, users_df, _ = dfs['ratings'], dfs['users'], dfs['movies']
+    if args.mode == 'info':
+        print(ratings_df.info())
+        print(users_df.info())
+        return
     all_uids = list(set(ratings_df.user_id))
     data = Dataset.load_from_df(
         ratings_df[['user_id', 'movie_id', 'rating']],
@@ -160,11 +140,9 @@ def main(args):
                 'When using grouping="sample", you must provide a set of sample sizes')
     elif args.grouping == 'gender':
         experiment_configs += [{'type': 'gender', 'size': None}]
-        print(users_df.gender.unique())
     elif args.grouping == 'age':
         experiment_configs += [{'type': 'age', 'size': None}]
-        print(users_df.age.unique())
-    elif args.grouping == 'zip':
+    elif args.grouping == 'state':
         experiment_configs += [{'type': 'zip', 'size': None}]
         print(users_df.zip_code.unique())
     elif args.grouping == 'genre':
@@ -284,9 +262,7 @@ def main(args):
                         except KeyError:
                             pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        if not os.path.isdir(RESULTS_DIR):
-            os.makedirs(RESULTS_DIR)
-        outname = RESULTS_DIR + '/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
+        outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
             args.dataset, config['type'], config['size'],
             args.num_samples if args.num_samples else None)
         err_df.to_csv(outname)
@@ -308,6 +284,7 @@ def parse():
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument('--recompute_standards')
+    parser.add_argument('--mode', default='compute')
     args = parser.parse_args()
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]

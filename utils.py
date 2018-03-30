@@ -3,6 +3,29 @@ Utility functions that might be useful outside the context of this project.
 """
 import pandas as pd
 
+from surprise.builtin_datasets import BUILTIN_DATASETS
+
+GENRES = ['Action', 'Adventure', 'Animation', 
+              "Children's", 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
+              'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
+              'Thriller', 'War', 'Western', ]
+
+def get_dfs(dataset):
+    """i
+    Takes a dataset string and return that data in a dataframe!
+    """
+    if dataset == 'ml-100k':
+        ratings_path = BUILTIN_DATASETS[dataset].path
+        users_path = ratings_path.replace('.data', '.user')
+        movies_path = ratings_path.replace('.data', '.item')
+        dfs = movielens_to_df(ratings_path, users_path, movies_path)
+    elif dataset == 'ml-1m':
+        ratings_path = BUILTIN_DATASETS[dataset].path
+        users_path = ratings_path.replace('ratings.', 'users.')
+        movies_path = ratings_path.replace('ratings.', 'movies.')
+        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+    return dfs
+
 def movielens_to_df(ratings_file, users_file, movies_file):
     """
     This function takes a movielens dataset and returns three dataframes
@@ -13,16 +36,14 @@ def movielens_to_df(ratings_file, users_file, movies_file):
     users_names = ['user_id', 'age', 'gender', 'occupation', 'zip_code']
     users_delim = '|'
     movies_names = [ 'movie_id', 'movie_title', 'release_date', 'video_release_date',
-              'IMDb_URL', 'unknown', 'Action', 'Adventure', 'Animation', 
-              "Children's", 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
-              'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-              'Thriller', 'War', 'Western', ]
+              'IMDb_URL', 'unknown',] + GENRES
     movies_delim = '|'
     encoding = 'latin-1'
+    engine = 'python'
 
-    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding)
-    users_df = pd.read_csv(users_file, sep=users_delim, names=users_names, encoding=encoding)
-    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding)
+    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding, engine=engine)
+    users_df = pd.read_csv(users_file, sep=users_delim, names=users_names, encoding=encoding, engine=engine)
+    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding, engine=engine)
 
     return {
         'ratings': ratings_df,
@@ -40,16 +61,14 @@ def movielens_1m_to_df(ratings_file, users_file, movies_file):
     ratings_delim = '::'
     users_names = ['user_id', 'gender', 'age', 'occupation', 'zip_code']
     users_delim = '::'
-    movies_names = [ 'movie_id', 'movie_title', 'Action', 'Adventure', 'Animation', 
-              "Children's", 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
-              'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-              'Thriller', 'War', 'Western', ]
+    movies_names = [ 'movie_id', 'movie_title', 'genres']
     movies_delim = '::'
     encoding = 'latin-1'
+    engine = 'python'
 
-    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding)
-    users_df = pd.read_csv(users_file, sep=users_delim, names=users_names, encoding=encoding)
-    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding)
+    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding, engine=engine)
+    users_df = pd.read_csv(users_file, sep=users_delim, names=users_names, encoding=encoding, engine=engine)
+    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding, engine=engine)
 
     return {
         'ratings': ratings_df,
