@@ -18,6 +18,7 @@ import json
 from utils import get_dfs, GENRES
 
 import pandas as pd
+import numpy as np
 
 DIRECTORY = 'boycott_files'
 
@@ -92,7 +93,7 @@ def group_by_occupation(users_df):
     return ret
 
 
-def group_by_genre(ratings_df, movies_df):
+def group_by_genre(users_df, ratings_df, movies_df):
     """
     Group by users who like a particular genre
 
@@ -132,14 +133,52 @@ def group_by_genre(ratings_df, movies_df):
                 users_to_genre_ratings[rating_row.user_id][genre].append(rating_row.rating)
         with open(DIRECTORY + '/users_to_genre_ratings.json', 'w') as fileobj:
             json.dump(users_to_genre_ratings, fileobj)
+    
+    genres_to_uids = defaultdict(list)
+    for user, genre_ratings in users_to_genre_ratings.items():
+        for genre, ratings, in genre_ratings.items():
+            if len(ratings) > 10 and np.mean(ratings) >= 4:
+                genres_to_uids[genre].append(user)
+    ret = [{
+        'df': users_df[users_df.user_id.isin(uids)],
+        'name': 'Fans of {} excluded'.format(genre),
+    } for genre, uids in genres_to_uids.items()]
 
     return ret
 
 
-def group_by_power(users_df):
+def group_by_power(users_df, ratings_df):
     """
     Group power users and non-power users, based on number of contributions
     """
+    ret = []
+    try:
+        with open(DIRECTORY + '/user_to_num_ratings.json', 'r') as fileobj:
+            user_to_num_ratings = json.load(fileobj)
+    except FileNotFoundError:
+        user_to_num_ratings = defaultdict(int)
+        for i_rating, rating_row in ratings_df.iterrows():
+            user_to_num_ratings[str(rating_row.user_id)] += 1
+        with open(DIRECTORY + '/user_to_num_ratings.json', 'w') as fileobj:
+            json.dump(user_to_num_ratings, fileobj)
+
+    bot10, top10 = np.percentile(list(user_to_num_ratings.values()), [10, 90])
+
+    bot10_uids, top10_uids = [], []
+    for user, user_to_num_ratings in user_to_num_ratings.items():
+        if user_to_num_ratings <= bot10:
+            bot10_uids.append(user)
+        if user_to_num_ratings >= top10:
+            top10_uids.append(user)
+
+    ret = [{
+        'df': users_df[users_df.user_id.isin(top10_uids)],
+        'name': 'Top 10% contributors excluded',
+    }, {
+        'df': users_df[users_df.user_id.isin(bot10_uids)],
+        'name': 'Bottom 10% contributors excluded',
+    }]
+    return ret
 
 
 
@@ -202,10 +241,11 @@ def group_by_state(users_df):
     for state, zips in places_to_zips.items():
         place_to_df[state] = users_df[users_df.zip_code.isin(zips)]
     for state, df in place_to_df.items():
-        ret.append({
-            'df': df,
-            'name': 'users from state {} exlcuded'.format(state)
-        })
+        if 'US_' in state:
+            ret.append({
+                'df': df,
+                'name': 'users from state {} excluded'.format(state)
+            })
     print(errs)
     for key, val in places_to_zips.items():
         print(key, len(val))
@@ -222,16 +262,19 @@ def parse():
     args = parser.parse_args()
     dfs = get_dfs(args.dataset)
     if args.grouping == 'genre':
-        print(dfs['movies'].head())
-        group_by_genre(dfs['ratings'], dfs['movies'])
+        groups = group_by_genre(dfs['users'], dfs['ratings'], dfs['movies'])
+    elif args.grouping == 'power':
+        groups = group_by_power(dfs['users'], dfs['ratings'])
     else:
         grouping_to_func = {
             'gender': group_by_gender,
             'age': group_by_age,
             'state': group_by_state,
-            'power': group_by_power,
         }
-        grouping_to_func[args.grouping](dfs['users'])
+        groups = grouping_to_func[args.grouping](dfs['users'])
+    for group in groups:
+        print(group['name'], len(group['df'].index))
+    print(len(groups))
 
 
 if __name__ == '__main__':
