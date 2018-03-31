@@ -201,13 +201,11 @@ def main(args):
         for algo_name in algos:
             delayed_iteration_list = []
             for i, experimental_iteration in enumerate(experimental_iterations):
-                print(i, algo_name)
                 if config['type'] == 'individual_users':
                     if args.num_users_to_stop_at:
                         if i >= args.num_users_to_stop_at:
                             break
                     row = experimental_iteration[1]
-                    print(row)
                     subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
                     excluded_ratings_df = ratings_df[ratings_df.user_id == row.user_id]
                     identifier = row.user_id
