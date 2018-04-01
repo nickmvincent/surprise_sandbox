@@ -12,9 +12,13 @@ from collections import OrderedDict
 import pandas as pd
 import numpy as np
 from utils import get_dfs
+from prep_organized_boycotts import (
+    group_by_age, group_by_gender, group_by_genre,
+    group_by_occupation, group_by_power, group_by_state
+)
 from joblib import Parallel, delayed
 
-from surprise.model_selection import cross_validate, cross_validate_users
+from surprise.model_selection import cross_validate, cross_validate_custom
 from surprise import SVD, KNNBasic, Dataset, KNNBaseline
 from surprise.reader import Reader
 
@@ -29,9 +33,9 @@ from surprise.reader import Reader
 NUM_FOLDS = 5
 
 
-def task(algo_name, algo, data, all_uids, out_uids, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
+def task(algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
     return {
-        'subset_results': cross_validate_users(algo, data, all_uids, out_uids, measures, cv, n_jobs=1),
+        'subset_results': cross_validate_custom(algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, n_jobs=1),
         'num_ratings': num_ratings,
         'num_users': num_users,
         'num_movies': num_movies,
@@ -67,7 +71,7 @@ def main(args):
     dfs = get_dfs(args.dataset)
 
     times['dfs_loaded'] = time.time() - times['start']
-    ratings_df, users_df, _ = dfs['ratings'], dfs['users'], dfs['movies']
+    ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     if args.mode == 'info':
         print(ratings_df.info())
         print(users_df.info())
@@ -82,24 +86,20 @@ def main(args):
     # note to reader: why are precision, recall, and ndcg all stuffed together in one string?
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
     measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10']
-    baseline = {}
+    standard_results = {}
 
     for algo_name in algos:
-        filename_usercv_standards = 'standard_results/{}_usercv_standards_for_{}.json'.format(
-            args.dataset, algo_name)
         filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
             args.dataset, algo_name)
         try:
             if args.recompute_standards:
                 raise ValueError('This might be a bad pattern, but we need to go to the except block!')
-            with open(filename_usercv_standards, 'r') as f:
+            with open(filename_ratingcv_standards, 'r') as f:
                 results = json.load(f)
-            # print('Loaded standard results for {} from {}'.format(
-            #     algo_name, filename_ratingcv_standards))
         except:
             print('Computing standard results for {}'.format(algo_name))
             # todo fix keys here...
-            results = cross_validate_users(algos[algo_name], data, all_uids, [], measures, NUM_FOLDS)
+            results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
             results = {
                 'mae': np.mean(results['mae_all']),
                 'rmse': np.mean(results['rmse_all']),
@@ -108,21 +108,10 @@ def main(args):
                 'ndcg10': np.mean(results['ndcg10_all']),
             }
 
-            # results_itemsplit = cross_validate(algos[algo_name], data, measures, NUM_FOLDS)
-            # results_itemsplit = {
-            #     'mae': np.mean(results_itemsplit['test_mae']),
-            #     'rmse': np.mean(results_itemsplit['test_rmse']),
-            #     'precision10t4': np.mean(results_itemsplit['test_precision10t4']),
-            #     'recall10t4': np.mean(results_itemsplit['test_recall10t4']),
-            #     'ndcg10': np.mean(results_itemsplit['test_ndcg10']),
-            # }
-            # with open(filename_ratingcv_standards, 'w') as f:
-            #     json.dump(results_itemsplit, f)
-
-            with open(filename_usercv_standards, 'w') as f:
+            with open(filename_ratingcv_standards, 'w') as f:
                 json.dump(results, f)
             
-        baseline[algo_name] = results
+        standard_results[algo_name] = results
 
     times['standards_loaded'] = time.time() - times['data_constructed']
 
@@ -151,11 +140,11 @@ def main(args):
     num_configs = len(experiment_configs)
     if args.sample_sizes:
         num_runs = num_configs * args.num_samples
-        print('{} total 1train/3tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
+        print('{} total train/tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
             num_runs, num_configs, args.num_samples
         ))
     else:
-        print('{} total 1train/3tests will be run'.format(num_configs))
+        print('{} total train/tests will be will be run'.format(num_configs))
         num_runs = num_configs
     secs = 47 * num_runs
     hours = secs / 3600
@@ -174,58 +163,85 @@ def main(args):
             } for _ in range(args.num_samples)
             ]
         elif config['type'] == 'gender':
-            experimental_iterations = [
-                {'df': users_df[users_df.gender == 'M'],
-                    'name': 'exclude male users'},
-                {'df': users_df[users_df.gender == 'F'],
-                    'name': 'exclude female users'},
-            ]
+            experimental_iterations = group_by_gender(users_df)
         elif config['type'] == 'age':
-            gte40 = [
-                x >= 40 for x in list(users_df.age)
-            ]
-            users_df = users_df.assign(gte40=gte40)
-            experimental_iterations = [
-                {'df': users_df[users_df.gte40 == 1],
-                    'name': 'exclude gte age 40 users'},
-                {'df': users_df[users_df.gte40 == 0],
-                    'name': 'exclude lt age 40 users'},
-            ]
-        elif config['type'] == 'zip':
-            # implement
-            pass
+            experimental_iterations = group_by_age(users_df)
+        elif config['type'] == 'state':
+            experimental_iterations = group_by_state(users_df)
         elif config['type'] == 'genre':
-            # implement
-            pass
+            experimental_iterations = group_by_genre(
+                users_df=users_df, ratings_df=ratings_df, movies_df=movies_df)
+        elif config['type'] == 'power':
+            experimental_iterations = group_by_power(users_df=users_df, ratings_df=ratings_df)
+        elif config['type'] == 'occupation':
+            experimental_iterations = group_by_occupation(users_df)
 
         for algo_name in algos:
             delayed_iteration_list = []
             for i, experimental_iteration in enumerate(experimental_iterations):
                 if config['type'] == 'individual_users':
+                    identifier = row.user_id
+                    name = 'individual'
+
                     if args.num_users_to_stop_at:
                         if i >= args.num_users_to_stop_at:
                             break
                     row = experimental_iteration[1]
-                    subset_ratings_df = ratings_df[ratings_df.user_id != row.user_id]
-                    excluded_ratings_df = ratings_df[ratings_df.user_id == row.user_id]
-                    identifier = row.user_id
-                    name = 'individual'
+                    boycott_uid_set = set([row.user_id])
+                    like_boycotters_uid_set = set([])
+                    
                 elif config['type'] in ['sample_users', 'gender', 'age', 'rural']:
-                    ids = list(experimental_iteration['df'].user_id)
-                    subset_ratings_df = ratings_df[~ratings_df.user_id.isin(ids)]
-                    excluded_ratings_df = ratings_df[ratings_df.user_id.isin(ids)]
-
                     identifier = i
                     name = experimental_iteration['name']
 
+                    possible_boycotters_df = experimental_iteration['df']
+                    if args.frac_of_group != 1.0:
+                        boycotters_df = possible_boycotters_df.sample(frac=args.frac_of_group)
+                    else:
+                        boycotters_df = possible_boycotters_df
+                    boycott_uid_set = set(boycotters_df.user_id)
+                    like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
+                    like_boycotters_uid_set = set(like_boycotters_df.user_id)
+
+                non_boycott_user_ratings_df = users_df[~ratings_df.user_id.isin(boycott_uid_set)]
+
+                boycott_ratings_df = None
+                boycott_user_lingering_ratings_df = None
+
+                for uid in boycott_uid_set:
+                    ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
+                    boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=0.5, random_state=0)
+                    lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
+                    if boycott_ratings_df is None:
+                        boycott_ratings_df = boycott_ratings_for_user
+                    else:
+                        boycott_ratings_df = pd.concat([boycott_ratings_df, boycott_ratings_for_user])
+                    if boycott_user_lingering_ratings_df is None:
+                        boycott_user_lingering_ratings_df = lingering_ratings_for_user
+                    else:
+                        boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
+                print(boycott_ratings_df.head())
+                print(boycott_user_lingering_ratings_df.head())
+                print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
+                    len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
+                ))
+                all_non_boycott_ratings_df = pd.concat([non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
+                nonboycott = Dataset.load_from_df(
+                    all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
+                    reader=Reader()
+                )
+                boycott = Dataset.load_from_df(
+                    boycott_ratings_df[['user_id', 'movie_id', 'rating']],
+                    reader=Reader()
+                )
                 identifier = str(identifier).zfill(4)
-                out_uids = list(set(excluded_ratings_df.user_id))
-                num_users = len(subset_ratings_df.user_id.value_counts())
-                num_movies = len(subset_ratings_df.movie_id.value_counts())
+                num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
+                num_movies = len(all_non_boycott_ratings_df.movie_id.value_counts())
+                num_ratings =  len(all_non_boycott_ratings_df.index)
                 delayed_iteration_list += [delayed(task)(
-                    algo_name, algos[algo_name], data, all_uids, out_uids, measures, NUM_FOLDS,
+                    algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, NUM_FOLDS,
                     False, identifier,
-                    len(subset_ratings_df.index), #num ratings
+                    num_ratings,
                     num_users,
                     num_movies, name
                 )]
@@ -236,17 +252,16 @@ def main(args):
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
                 uid_to_error[uid] = {
-                    'num_ratings_in-group': d['num_ratings'],
-                    'num_users_in-group': d['num_users'],
-                    'num_movies_in-group': d['num_movies'],
+                    'num_ratings': d['num_ratings'],
+                    'num_users': d['num_users'],
+                    'num_movies': d['num_movies'],
                     'name': d['name'],
                     'algo_name': d['algo_name'],
                 }
                 for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times', 'num_tested']:
-                    for group in ['all', 'in-group', 'out-group']:
+                    for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
                         key = '{}_{}'.format(metric, group)
-
-                        if group == 'out-group':
+                        if group == 'boycott':
                             val = np.nanmean(res[key])
                         else:
                             val = np.mean(res[key])
@@ -255,7 +270,7 @@ def main(args):
                         })
                         try:
                             uid_to_error[uid].update({
-                                'increase_from_baseline_{}'.format(key): val - baseline[algo_name][metric],
+                                'increase_from_baseline_{}'.format(key): val - standard_results[algo_name][metric],
                             })
                         except KeyError:
                             pass
@@ -281,8 +296,10 @@ def parse():
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
-    parser.add_argument('--recompute_standards')
+    parser.add_argument('--recompute_standards', action='store_false')
     parser.add_argument('--mode', default='compute')
+    parser.add_argument('--partial_boycott', action='store_true', default=False)
+    parser.add_argument('--frac_of_group', type=float, default=1.0)
     args = parser.parse_args()
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
