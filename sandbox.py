@@ -85,7 +85,7 @@ def main(args):
 
     # note to reader: why are precision, recall, and ndcg all stuffed together in one string?
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
-    measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10_5_full']
+    measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10_ndcg5_ndcgfull']
     
     standard_results = {}
     for algo_name in algos:
