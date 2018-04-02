@@ -22,7 +22,7 @@ from surprise.model_selection import cross_validate, cross_validate_custom
 from surprise import SVD, KNNBasic, Dataset, KNNBaseline
 from surprise.reader import Reader
 
-# long-term task: massively abstract this code so it will work w/ non-recsys algorithsm
+# long-term: massively abstract this code so it will work w/ non-recsys algorithsm
 
 # Notes on default algo params:
 # KNN uses 40 max neighbors by default
@@ -85,14 +85,14 @@ def main(args):
 
     # note to reader: why are precision, recall, and ndcg all stuffed together in one string?
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
-    measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10']
+    measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10_5_full']
+    
     standard_results = {}
-
     for algo_name in algos:
         filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
             args.dataset, algo_name)
         try:
-            if args.recompute_standards:
+            if not args.use_precomputed:
                 raise ValueError('This might be a bad pattern, but we need to go to the except block!')
             with open(filename_ratingcv_standards, 'r') as f:
                 results = json.load(f)
@@ -133,7 +133,6 @@ def main(args):
         experiment_configs += [{'type': 'age', 'size': None}]
     elif args.grouping == 'state':
         experiment_configs += [{'type': 'zip', 'size': None}]
-        print(users_df.zip_code.unique())
     elif args.grouping == 'genre':
         experiment_configs += [{'type': 'genre', 'size': None}]
 
@@ -180,13 +179,13 @@ def main(args):
             delayed_iteration_list = []
             for i, experimental_iteration in enumerate(experimental_iterations):
                 if config['type'] == 'individual_users':
+                    row = experimental_iteration[1]
                     identifier = row.user_id
                     name = 'individual'
 
                     if args.num_users_to_stop_at:
                         if i >= args.num_users_to_stop_at:
                             break
-                    row = experimental_iteration[1]
                     boycott_uid_set = set([row.user_id])
                     like_boycotters_uid_set = set([])
                     
@@ -195,22 +194,25 @@ def main(args):
                     name = experimental_iteration['name']
 
                     possible_boycotters_df = experimental_iteration['df']
-                    if args.frac_of_group != 1.0:
-                        boycotters_df = possible_boycotters_df.sample(frac=args.frac_of_group)
+                    if args.userfrac != 1.0:
+                        boycotters_df = possible_boycotters_df.sample(frac=args.userfrac)
                     else:
                         boycotters_df = possible_boycotters_df
                     boycott_uid_set = set(boycotters_df.user_id)
                     like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
                     like_boycotters_uid_set = set(like_boycotters_df.user_id)
+                    if not like_boycotters_uid_set:
+                        print('**Nobody like boycotters...')
 
-                non_boycott_user_ratings_df = users_df[~ratings_df.user_id.isin(boycott_uid_set)]
-
+                non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)]
                 boycott_ratings_df = None
                 boycott_user_lingering_ratings_df = None
-
                 for uid in boycott_uid_set:
                     ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
-                    boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=0.5, random_state=0)
+                    if args.ratingfrac != 1.0:
+                        boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac)
+                    else:
+                        boycott_ratings_for_user = ratings_belonging_to_user
                     lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
                     if boycott_ratings_df is None:
                         boycott_ratings_df = boycott_ratings_for_user
@@ -220,12 +222,13 @@ def main(args):
                         boycott_user_lingering_ratings_df = lingering_ratings_for_user
                     else:
                         boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
-                print(boycott_ratings_df.head())
-                print(boycott_user_lingering_ratings_df.head())
+                # print(boycott_ratings_df.head())
+                # print(boycott_user_lingering_ratings_df.head())
                 print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
                     len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
                 ))
                 all_non_boycott_ratings_df = pd.concat([non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
+
                 nonboycott = Dataset.load_from_df(
                     all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
                     reader=Reader()
@@ -249,6 +252,7 @@ def main(args):
             out_dicts = Parallel(n_jobs=-1, max_nbytes=1e7)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
+                print(res)
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
                 uid_to_error[uid] = {
@@ -261,23 +265,31 @@ def main(args):
                 for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times', 'num_tested']:
                     for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
                         key = '{}_{}'.format(metric, group)
-                        if group == 'boycott':
-                            val = np.nanmean(res[key])
-                        else:
+                        # if group in ['boycott', ]:
+                        #     val = np.nanmean(res[key])
+                        vals = res.get(key)
+                        if vals:
                             val = np.mean(res[key])
-                        uid_to_error[uid].update({
-                            key: val,
-                        })
-                        try:
                             uid_to_error[uid].update({
-                                'increase_from_baseline_{}'.format(key): val - standard_results[algo_name][metric],
+                                key: val,
                             })
-                        except KeyError:
-                            pass
+                            try:
+                                uid_to_error[uid].update({
+                                    'increase_from_baseline_{}'.format(key): val - standard_results[algo_name][metric],
+                                })
+                            except KeyError:
+                                pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
-            args.dataset, config['type'], config['size'],
-            args.num_samples if args.num_samples else None)
+
+        outname = 'results/dataset-{}_type-{}_userfrac-{}_ratingfrac-{}'.format(
+            args.dataset, config['type'],
+            args.userfrac, args.ratingfrac
+        )
+        if args.num_samples:
+            outname += '_sample_size-{}_num_samples-{}'.format(
+                config['size'], args.num_samples
+            )
+        outname += '.csv'
         err_df.to_csv(outname)
         # means = err_df.mean()
         # means.to_csv(outname.replace('err_df', 'means'))
@@ -296,15 +308,19 @@ def parse():
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
-    parser.add_argument('--recompute_standards', action='store_false')
+    parser.add_argument(
+        '--use_precomputed', action='store_true',
+        help='Defaults to false. Pass --use_precomputed if you WANT to use precomputed')
     parser.add_argument('--mode', default='compute')
-    parser.add_argument('--partial_boycott', action='store_true', default=False)
-    parser.add_argument('--frac_of_group', type=float, default=1.0)
+    parser.add_argument('--userfrac', type=float, default=1.0)
+    parser.add_argument('--ratingfrac', type=float, default=1.0)
     args = parser.parse_args()
+
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
         if args.num_samples is None:
             args.num_samples = 1000
+
     main(args)
 
 
