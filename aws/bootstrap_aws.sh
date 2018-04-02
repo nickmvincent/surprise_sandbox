@@ -45,8 +45,7 @@ aws_secret_access_key = ${secret_access_key}
 EOF
 echo "[default]" >.aws/config
 
-# Install our package TODO: change to nick's directory once PR is merged.
-git clone https://github.com/shilad/surprise_sandbox.git
+git clone https://github.com/nickmvincent/surprise_sandbox.git
 cd surprise_sandbox
 
 ./aws/run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
