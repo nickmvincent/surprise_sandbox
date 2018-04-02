@@ -32,7 +32,6 @@ from surprise.reader import Reader
 
 NUM_FOLDS = 5
 
-
 def task(algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
     return {
         'subset_results': cross_validate_custom(algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, n_jobs=1),
@@ -127,14 +126,10 @@ def main(args):
         else:
             raise ValueError(
                 'When using grouping="sample", you must provide a set of sample sizes')
-    elif args.grouping == 'gender':
-        experiment_configs += [{'type': 'gender', 'size': None}]
-    elif args.grouping == 'age':
-        experiment_configs += [{'type': 'age', 'size': None}]
-    elif args.grouping == 'state':
-        experiment_configs += [{'type': 'zip', 'size': None}]
-    elif args.grouping == 'genre':
-        experiment_configs += [{'type': 'genre', 'size': None}]
+    elif args.grouping in [
+        'gender', 'age', 'power', 'state', 'genre',
+    ]:
+        experiment_configs += [{'type': args.grouping, 'size': None}]
 
     num_configs = len(experiment_configs)
     if args.sample_sizes:
@@ -166,12 +161,13 @@ def main(args):
         elif config['type'] == 'age':
             experimental_iterations = group_by_age(users_df)
         elif config['type'] == 'state':
-            experimental_iterations = group_by_state(users_df)
+            experimental_iterations = group_by_state(users_df, dataset=args.dataset)
         elif config['type'] == 'genre':
             experimental_iterations = group_by_genre(
-                users_df=users_df, ratings_df=ratings_df, movies_df=movies_df)
+                users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
+                dataset=args.dataset)
         elif config['type'] == 'power':
-            experimental_iterations = group_by_power(users_df=users_df, ratings_df=ratings_df)
+            experimental_iterations = group_by_power(users_df=users_df, ratings_df=ratings_df, dataset=args.dataset)
         elif config['type'] == 'occupation':
             experimental_iterations = group_by_occupation(users_df)
 
@@ -189,11 +185,16 @@ def main(args):
                     boycott_uid_set = set([row.user_id])
                     like_boycotters_uid_set = set([])
                     
-                elif config['type'] in ['sample_users', 'gender', 'age', 'rural']:
+                elif config['type'] in [
+                    'sample_users',
+                    'gender', 'age', 'power', 'state', 'genre',
+                ]:
                     identifier = i
                     name = experimental_iteration['name']
 
                     possible_boycotters_df = experimental_iteration['df']
+                    print(name)
+                    print(possible_boycotters_df.head())
                     if args.userfrac != 1.0:
                         boycotters_df = possible_boycotters_df.sample(frac=args.userfrac)
                     else:
@@ -201,8 +202,6 @@ def main(args):
                     boycott_uid_set = set(boycotters_df.user_id)
                     like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
                     like_boycotters_uid_set = set(like_boycotters_df.user_id)
-                    if not like_boycotters_uid_set:
-                        print('**Nobody like boycotters...')
 
                 non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)]
                 boycott_ratings_df = None
@@ -227,7 +226,8 @@ def main(args):
                 print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
                     len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
                 ))
-                all_non_boycott_ratings_df = pd.concat([non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
+                all_non_boycott_ratings_df = pd.concat(
+                    [non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
 
                 nonboycott = Dataset.load_from_df(
                     all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
@@ -252,7 +252,6 @@ def main(args):
             out_dicts = Parallel(n_jobs=-1, max_nbytes=1e7)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
-                print(res)
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
                 uid_to_error[uid] = {
@@ -262,7 +261,7 @@ def main(args):
                     'name': d['name'],
                     'algo_name': d['algo_name'],
                 }
-                for metric in ['rmse', 'ndcg10', 'fit_time', 'test_times', 'num_tested']:
+                for metric in ['rmse', 'ndcg10', 'ndcg5', 'ndcgfull', 'fit_time', 'test_times', 'num_tested']:
                     for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
                         key = '{}_{}'.format(metric, group)
                         # if group in ['boycott', ]:
