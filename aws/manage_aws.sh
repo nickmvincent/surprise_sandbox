@@ -20,14 +20,14 @@ for worker_id in $(seq 0 $((num_workers - 1))); do
     echo "doing worker $worker_id"
 
     cp -p ./aws/bootstrap_aws.sh ./aws/custom_bootstrap.sh
-    sed -i '' "s#S3_JOB_DIR#${s3_job_dir}#g" ./aws/custom_bootstrap.sh
-    sed -i '' "s/WORKER_ID/${worker_id}/g" ./aws/custom_bootstrap.sh
-    sed -i '' "s/NUM_WORKERS/${num_workers}/g" ./aws/custom_bootstrap.sh
-    sed -i '' "s#SECRET_ACCESS_KEY#${secret_access_key}#g" ./aws/custom_bootstrap.sh
+    sed -i "s#S3_JOB_DIR#${s3_job_dir}#g" ./aws/custom_bootstrap.sh
+    sed -i "s/WORKER_ID/${worker_id}/g" ./aws/custom_bootstrap.sh
+    sed -i "s/NUM_WORKERS/${num_workers}/g" ./aws/custom_bootstrap.sh
+    sed -i "s#SECRET_ACCESS_KEY#${secret_access_key}#g" ./aws/custom_bootstrap.sh
 
     userdata="$(cat ./aws/custom_bootstrap.sh | base64 | tr -d '\n' )"
     cp -p ./aws/launch_specification.json ./aws/launch_specification_custom.json
-    sed -i '' "s/USER_DATA/${userdata}/g" ./aws/launch_specification_custom.json
+    sed -i "s/USER_DATA/${userdata}/g" ./aws/launch_specification_custom.json
 
     aws ec2 request-spot-instances \
         --valid-until "2018-05-06T02:52:51.000Z" \
