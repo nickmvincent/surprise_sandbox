@@ -1,3 +1,5 @@
 results/
 standard_results/
 *.pyc
+aws/custom_bootstrap.sh
+aws/launch_specification_custom.json
