@@ -24,7 +24,7 @@ cd /root
 
 # install
 yum update -y
-yum install -y git gcc gcc-c++
+yum install -y git gcc gcc-c++ parallel
 yum install -y atlas-devel lapack-devel blas-devel libgfortran
 yum install -y python36 python36-devel
 
