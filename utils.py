@@ -30,6 +30,7 @@ def get_dfs(dataset):
     """
     Takes a dataset string and return that data in a dataframe!
     """
+    print(dataset)
     ratings_path = BUILTIN_DATASETS[dataset].path
     print('Path to ratings file is: {}'.format(ratings_path))
     if not os.path.isfile(ratings_path):
