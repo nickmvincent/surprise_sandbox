@@ -1,55 +1,96 @@
+"""
+Summarize results using prints and plots
+"""
 import argparse
+from collections import defaultdict
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
+from utils import concat_output_filename
 from plot import plot_all
 
 def main(args):
+    across = defaultdict(lambda: defaultdict(list))
+    algo_names = [
+        'SVD',
+        'KNNBaseline_item_msd',
+    ]
+    metrics = [
+        'rmse', 'ndcg10',
+        #'ndcg5', 'ndcgfull',
+    ]
     for sample_size in args.sample_sizes:
-        outname = 'results/err_df-dataset_{}_type_{}-size_{}-sample_size_{}.csv'.format(
-            args.dataset, args.grouping, sample_size,
-            args.num_samples if args.num_samples else None)
-        print(outname)
+        outname = concat_output_filename(
+            args.dataset, args.grouping,
+            args.userfrac,
+            args.ratingfrac,
+            sample_size, args.num_samples
+        )
         err_df = pd.read_csv(outname)
 
-        for algo_name in [
-            'SVD',
-            'KNNBaseline_item_msd',
-        ]:
+        for algo_name in algo_names:
             print('===\n' + algo_name)
             filtered_df = err_df[err_df.algo_name == algo_name]
             if args.verbose:
                 print(filtered_df.mean())
             else:
                 colnames = []
-                for metric in ['rmse', 'ndcg10']:
-                    for group in ['all', 'in-group', 'out-group']:
+                for metric in metrics:
+                    for group in args.test_groups:
                         key = '{}_{}'.format(metric, group)
                         colname = 'increase_from_baseline_{}'.format(key)
                         colnames.append(colname)
                 cols = filtered_df[colnames]
-                print(cols.mean())
-                if args.show_plots:
-                    plot_all(cols, 'hist', outname)
+                means = cols.mean()
+                print(means)
+                if args.plot_across:    
+                    for col in cols.columns.values:
+                        across[algo_name][col].append(means[col])
+                if args.plot_histograms:
+                    plot_all(cols, 'hist', algo_name + '_' + outname)
         
-        if args.show_plots:
-            plt.show()
-
+    if args.plot_across:
+        for algo_name in algo_names:
+            _, axes = plt.subplots(ncols=len(metrics))
+            _, zoomaxes = plt.subplots(ncols=len(across[algo_name]))
+            metric_to_index = {}
+            for i_metric, metric in enumerate(metrics):
+                metric_to_index[metric] = i_metric
+            for i, (key, val) in enumerate(across[algo_name].items()):
+                for metric, index in metric_to_index.items():
+                    if metric in key:
+                        i_metric = index
+                ax = axes[i_metric]
+                ax.plot(val)
+                ax.set_title(algo_name)
+                zoomax = zoomaxes[i]
+                zoomax.plot(val)
+                zoomax.set_title(algo_name + ' ' + key)
+    plt.show()
+    
 
 def parse():
     """
     Parse args and handles list splitting
+
+    samples
     """
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('--grouping', default='sample_users')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument('--verbose')
-    parser.add_argument('--show_plots')
+    parser.add_argument('--plot_histograms', action='store_true')
+    parser.add_argument('--plot_across', action='store_true')
+    parser.add_argument('--userfrac', type=float, default=1.0)
+    parser.add_argument('--ratingfrac', type=float, default=1.0)
+    parser.add_argument('--test_groups', default='non-boycott,boycott')
     args = parser.parse_args()
+
+    args.test_groups = args.test_groups.split(',')
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
         if args.num_samples is None:

@@ -139,7 +139,7 @@ def group_by_genre(users_df, ratings_df, movies_df, dataset):
     genres_to_uids = defaultdict(list)
     for user, genre_ratings in user_to_genre_ratings.items():
         for genre, ratings, in genre_ratings.items():
-            if len(ratings) > 10 and np.mean(ratings) >= 4:
+            if len(ratings) > 10 and np.mean(ratings) >= 4.5:
                 genres_to_uids[genre].append(user)
     ret = [{
         'df': users_df[users_df.user_id.isin(uids)],
@@ -170,10 +170,8 @@ def group_by_power(users_df, ratings_df, dataset):
     bot10_uids, top10_uids = [], []
     for user, num_ratings in user_to_num_ratings.items():
         if num_ratings <= bot10:
-            print('bot', num_ratings)
             bot10_uids.append(user)
         if num_ratings >= top10:
-            print('top', num_ratings)
             top10_uids.append(user)
 
     ret = [{
@@ -269,11 +267,12 @@ def parse():
         groups = group_by_genre(dfs['users'], dfs['ratings'], dfs['movies'], args.dataset)
     elif args.grouping == 'power':
         groups = group_by_power(dfs['users'], dfs['ratings'], args.dataset)
+    elif args.grouping == 'state':
+        groups = group_by_state(dfs['users'], args.dataset)
     else:
         grouping_to_func = {
             'gender': group_by_gender,
             'age': group_by_age,
-            'state': group_by_state,
         }
         groups = grouping_to_func[args.grouping](dfs['users'])
     for group in groups:

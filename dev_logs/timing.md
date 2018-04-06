@@ -20,3 +20,10 @@ Full runtime was: 2039.7360241413116 for 1 runs
 ## 3/28
 python sandbox.py --grouping sample --num_samples 100 --sample_sizes 2,4,8
 Full runtime was: 13894.118345737457 for 300 runs
+
+
+## 4/3
+
+Full runtime was: 28615.726298093796 for 400 runs
+400 total train/tests will be run because you chose 4 sample_sizes and number of samples of 100
+71.54 seconds per run

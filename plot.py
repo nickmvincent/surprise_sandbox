@@ -15,7 +15,6 @@ def plot_all(df, mode='hist', name=''):
     """Do the plotting"""
     if mode == 'hist':
         cols = df.columns.values
-        print(len(cols))
         subplot_y_max = (len(cols) + 1) // NCOLS
 
         fig, axes = plt.subplots(nrows=subplot_y_max, ncols=NCOLS)
@@ -23,9 +22,7 @@ def plot_all(df, mode='hist', name=''):
         for i_col, col in enumerate(df.columns.values):
             subplot_x = (i_col) % NCOLS
             subplot_y = (i_col) // NCOLS
-            print(subplot_y, subplot_x)
             ax = axes[subplot_y, subplot_x]
-            
             X = df[col]
             ax.set_title(col)
             X.plot.hist(ax=ax, alpha=0.5)

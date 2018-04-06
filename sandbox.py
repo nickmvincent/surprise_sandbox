@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 import pandas as pd
 import numpy as np
-from utils import get_dfs
+from utils import get_dfs, concat_output_filename
 from prep_organized_boycotts import (
     group_by_age, group_by_gender, group_by_genre,
     group_by_occupation, group_by_power, group_by_state
@@ -56,6 +56,7 @@ def main(args):
     times['start'] = time.time()
     algos = {
         'SVD': SVD(),
+        # 'SVD50': SVD(n_factors=50),
         # 'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
         # 'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}),
         # 'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': True, 'name': 'pearson'}),
@@ -84,7 +85,13 @@ def main(args):
 
     # note to reader: why are precision, recall, and ndcg all stuffed together in one string?
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
-    measures = ['RMSE', 'MAE', 'precision10t4_recall10t4_ndcg10_ndcg5_ndcgfull']
+    measures = ['RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull']
+    metric_names = []
+    for measure in measures:
+        if '_' in measure:
+            metric_names += measure.lower().split('_')
+        else:
+            metric_names.append(measure.lower())
     
     standard_results = {}
     for algo_name in algos:
@@ -97,18 +104,17 @@ def main(args):
                 results = json.load(f)
         except:
             print('Computing standard results for {}'.format(algo_name))
-            # todo fix keys here...
             results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
-            results = {
-                'mae': np.mean(results['mae_all']),
-                'rmse': np.mean(results['rmse_all']),
-                'precision10t4': np.mean(results['precision10t4_all']),
-                'recall10t4': np.mean(results['recall10t4_all']),
-                'ndcg10': np.mean(results['ndcg10_all']),
-            }
+            print(results)
+            saved_results = {}
+            for metric in metric_names:
+                saved_results[metric] = np.mean(results[metric + '_all'])
+                frac_key = metric + '_frac_all'
+                if frac_key in results:
+                    saved_results[frac_key] = np.mean(results[frac_key])
 
             with open(filename_ratingcv_standards, 'w') as f:
-                json.dump(results, f)
+                json.dump(saved_results, f)
             
         standard_results[algo_name] = results
 
@@ -162,6 +168,7 @@ def main(args):
             experimental_iterations = group_by_age(users_df)
         elif config['type'] == 'state':
             experimental_iterations = group_by_state(users_df, dataset=args.dataset)
+
         elif config['type'] == 'genre':
             experimental_iterations = group_by_genre(
                 users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
@@ -178,10 +185,9 @@ def main(args):
                     row = experimental_iteration[1]
                     identifier = row.user_id
                     name = 'individual'
-
-                    if args.num_users_to_stop_at:
-                        if i >= args.num_users_to_stop_at:
-                            break
+                    if args.indices != 'all':
+                        if identifier < args.indices[0] or identifier > args.indices[1]:
+                            continue
                     boycott_uid_set = set([row.user_id])
                     like_boycotters_uid_set = set([])
                     
@@ -261,7 +267,7 @@ def main(args):
                     'name': d['name'],
                     'algo_name': d['algo_name'],
                 }
-                for metric in ['rmse', 'ndcg10', 'ndcg5', 'ndcgfull', 'fit_time', 'test_times', 'num_tested']:
+                for metric in metric_names + ['fit_time', 'test_times', 'num_tested']:
                     for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
                         key = '{}_{}'.format(metric, group)
                         # if group in ['boycott', ]:
@@ -280,15 +286,11 @@ def main(args):
                                 pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
 
-        outname = 'results/dataset-{}_type-{}_userfrac-{}_ratingfrac-{}'.format(
-            args.dataset, config['type'],
-            args.userfrac, args.ratingfrac
+        outname = concat_output_filename(
+            args.dataset, config['type'], args.userfrac,
+            args.ratingfrac,
+            config['size'], args.num_samples
         )
-        if args.num_samples:
-            outname += '_sample_size-{}_num_samples-{}'.format(
-                config['size'], args.num_samples
-            )
-        outname += '.csv'
         err_df.to_csv(outname)
         # means = err_df.mean()
         # means.to_csv(outname.replace('err_df', 'means'))
@@ -300,9 +302,10 @@ def parse():
     Parse args and handles list splitting
 
     Example: 
+    python sandbox.py --grouping state
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_users_to_stop_at', type=int)
+    parser.add_argument('--indices', default='all')
     parser.add_argument('--grouping', default='individual_users')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
@@ -319,6 +322,9 @@ def parse():
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
         if args.num_samples is None:
             args.num_samples = 1000
+
+    if ',' in  args.indices:
+        args.indices = [int(x) for x in args.indices.split(',')]
 
     main(args)
 

@@ -13,6 +13,19 @@ GENRES = ['Action', 'Adventure', 'Animation',
               'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
               'Thriller', 'War', 'Western', ]
 
+
+def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_samples=None):
+    ret = 'results/dataset-{}_type-{}_userfrac-{}_ratingfrac-{}'.format(
+        dataset, type_,
+        userfrac, ratingfrac
+    )
+    if size and num_samples:
+        ret += '_sample_size-{}_num_samples-{}'.format(
+            size, num_samples
+        )
+    ret += '.csv'
+    return ret
+
 def get_dfs(dataset):
     """i
     Takes a dataset string and return that data in a dataframe!
