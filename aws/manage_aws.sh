@@ -34,7 +34,7 @@ for worker_id in $(seq 0 $((num_workers - 1))); do
         --instance-interruption-behavior terminate \
         --type one-time \
         --instance-count 1 \
-        --spot-price "2.00" \
+        --spot-price "5.00" \
         --launch-specification "file://aws/launch_specification_custom.json"
 
 done

@@ -15,7 +15,7 @@ s3_job_dir="$1"
 worker_id="$2"
 num_workers="$3"
 dirs="results standard_results"
-num_parallel_jobs=2
+num_parallel_jobs=1
 
 for d in $dirs; do
     [ -d "$d" ] || mkdir -p "$d"
