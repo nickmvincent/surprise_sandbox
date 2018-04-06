@@ -323,7 +323,7 @@ def parse():
         if args.num_samples is None:
             args.num_samples = 1000
 
-    if ',' in  args.indices:
+    if ',' in args.indices:
         args.indices = [int(x) for x in args.indices.split(',')]
 
     main(args)
