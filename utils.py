@@ -31,6 +31,7 @@ def get_dfs(dataset):
     Takes a dataset string and return that data in a dataframe!
     """
     ratings_path = BUILTIN_DATASETS[dataset].path
+    print('Path to ratings file is: {}'.format(ratings_path))
     if not os.path.isfile(ratings_path):
         download_builtin_dataset(dataset)
     if dataset == 'ml-100k':

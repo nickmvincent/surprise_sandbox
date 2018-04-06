@@ -67,16 +67,16 @@ def main(args):
         # 'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
         # 'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
     }
-
+    print('Going to load data in pd dataframes')
     dfs = get_dfs(args.dataset)
-
     times['dfs_loaded'] = time.time() - times['start']
+    print('Got dataframes, took {} seconds'.format(times['dfs_loaded']))
+
     ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     if args.mode == 'info':
         print(ratings_df.info())
         print(users_df.info())
         return
-    all_uids = list(set(ratings_df.user_id))
     data = Dataset.load_from_df(
         ratings_df[['user_id', 'movie_id', 'rating']],
         reader=Reader()
