@@ -22,6 +22,7 @@ done
 
 aws s3 cp ${s3_job_dir}/jobs.txt .
 
+awk "NR % ${num_workers} == ${worker_id}" ./jobs.txt |
 while read line; do
     $line
 done 2>&1 | tee log.txt
