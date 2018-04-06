@@ -15,7 +15,6 @@ s3_job_dir="$1"
 worker_id="$2"
 num_workers="$3"
 dirs="results standard_results"
-num_parallel_jobs=1
 
 for d in $dirs; do
     [ -d "$d" ] || mkdir -p "$d"
@@ -23,9 +22,9 @@ done
 
 aws s3 cp ${s3_job_dir}/jobs.txt .
 
-awk "NR % ${num_workers} == ${worker_id}" ./jobs.txt |
-parallel -n ${num_parallel_jobs} bash -c '{}' |
-tee log.txt
+while read line; do
+    $line
+done 2>&1 | tee log.txt
 
 aws s3 cp ./log.txt ${s3_job_dir}/${worker_id}/log.txt
 
