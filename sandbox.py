@@ -50,7 +50,7 @@ def main(args):
     """
     # HEY LISTEN
     # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
-    # data = Dataset.load_builtin('ml-1m')
+    data = Dataset.load_builtin('ml-1m')
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     times = OrderedDict()
     times['start'] = time.time()
