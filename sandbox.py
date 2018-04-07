@@ -195,6 +195,7 @@ def main(args):
                 elif config['type'] in [
                     'sample_users',
                     'gender', 'age', 'power', 'state', 'genre',
+                    'occupation',
                 ]:
                     identifier = i
                     name = experimental_iteration['name']
