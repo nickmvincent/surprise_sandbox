@@ -74,6 +74,10 @@ def main(args):
 
     ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     if args.mode == 'info':
+        print(ratings_df.memory_usage())
+        print(users_df.memory_usage())
+        print(movies_df.memory_usage())
+
         print(ratings_df.info())
         print(users_df.info())
         return
@@ -93,30 +97,29 @@ def main(args):
         else:
             metric_names.append(measure.lower())
     
-    standard_results = {}
-    for algo_name in algos:
-        filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
-            args.dataset, algo_name)
-        try:
-            if not args.use_precomputed:
-                raise ValueError('This might be a bad pattern, but we need to go to the except block!')
-            with open(filename_ratingcv_standards, 'r') as f:
-                results = json.load(f)
-        except:
-            print('Computing standard results for {}'.format(algo_name))
-            results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
-            print(results)
-            saved_results = {}
-            for metric in metric_names:
-                saved_results[metric] = np.mean(results[metric + '_all'])
-                frac_key = metric + '_frac_all'
-                if frac_key in results:
-                    saved_results[frac_key] = np.mean(results[frac_key])
+    if args.compute_standards:
+        standard_results = {}
+        for algo_name in algos:
+            filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
+                args.dataset, algo_name)
+            try:
+                with open(filename_ratingcv_standards, 'r') as f:
+                    saved_results = json.load(f)
+            except:
+                print('Computing standard results for {}'.format(algo_name))
+                results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
+                print(results)
+                saved_results = {}
+                for metric in metric_names:
+                    saved_results[metric] = np.mean(results[metric + '_all'])
+                    frac_key = metric + '_frac_all'
+                    if frac_key in results:
+                        saved_results[frac_key] = np.mean(results[frac_key])
 
-            with open(filename_ratingcv_standards, 'w') as f:
-                json.dump(saved_results, f)
-            
-        standard_results[algo_name] = saved_results
+                with open(filename_ratingcv_standards, 'w') as f:
+                    json.dump(saved_results, f)
+                
+            standard_results[algo_name] = saved_results
 
     times['standards_loaded'] = time.time() - times['data_constructed']
 
@@ -255,7 +258,8 @@ def main(args):
                     num_movies, name
                 )]
 
-            out_dicts = Parallel(n_jobs=-1, max_nbytes=1e7)(tuple(delayed_iteration_list))
+            # data should be ~30 MB
+            out_dicts = Parallel(n_jobs=-1, max_nbytes='30M')(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
                 algo_name = d['algo_name']
@@ -278,18 +282,22 @@ def main(args):
                             uid_to_error[uid].update({
                                 key: val,
                             })
-                            try:
-                                uid_to_error[uid].update({
-                                    'increase_from_baseline_{}'.format(key): val - standard_results[algo_name][metric],
-                                })
-                            except KeyError:
-                                pass
+                            # in order to keep the pipeline simple, I think we should NOT calculate increase right here
+                            # it makes more sense to calculate all the increases in aggregate after th fact
+                            # this makes it simpler because then we can just use one set of standard results
+                            # as opposed to computing standard results every time (which may slightly different due to seeding)
+                            # try:
+                            #     uid_to_error[uid].update({
+                            #         'increase_from_baseline_{}'.format(key): val - standard_results[algo_name][metric],
+                            #     })
+                            # except KeyError:
+                            #     pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
 
         outname = concat_output_filename(
             args.dataset, config['type'], args.userfrac,
             args.ratingfrac,
-            config['size'], args.num_samples
+            config['size'], args.num_samples, args.indices
         )
         err_df.to_csv(outname)
         # means = err_df.mean()
@@ -311,8 +319,8 @@ def parse():
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument(
-        '--use_precomputed', action='store_true',
-        help='Defaults to false. Pass --use_precomputed if you WANT to use precomputed')
+        '--compute_standards', action='store_true',
+        help='Defaults to false. Pass --compute_standards if you want to compute standards (you really only need to do this once)')
     parser.add_argument('--mode', default='compute')
     parser.add_argument('--userfrac', type=float, default=1.0)
     parser.add_argument('--ratingfrac', type=float, default=1.0)

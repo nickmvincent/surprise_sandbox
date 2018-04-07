@@ -33,3 +33,7 @@ Full runtime was: 28615.726298093796 for 400 runs
 AWS m5.large
 Full runtime was: 163.09114909172058 for 1 runs
 incudes download time.
+
+AWS m5.12xlarge
+Full runtime was: 2085.207819700241 for 20 runs
+104 seconds per run

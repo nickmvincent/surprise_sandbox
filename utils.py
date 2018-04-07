@@ -14,7 +14,7 @@ GENRES = ['Action', 'Adventure', 'Animation',
               'Thriller', 'War', 'Western', ]
 
 
-def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_samples=None):
+def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_samples=None, indices='all'):
     ret = 'results/dataset-{}_type-{}_userfrac-{}_ratingfrac-{}'.format(
         dataset, type_,
         userfrac, ratingfrac
@@ -23,6 +23,8 @@ def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_
         ret += '_sample_size-{}_num_samples-{}'.format(
             size, num_samples
         )
+    if indices != 'all':
+        ret += '_{}-to-{}'.format(indices[0], indices[1])
     ret += '.csv'
     return ret
 
