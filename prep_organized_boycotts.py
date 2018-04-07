@@ -85,6 +85,7 @@ def group_by_occupation(users_df):
         19:  "unemployed",
         20:  "writer",
     }
+    print(users_df.occupation)
     for occ_key, occ in num_to_occ.items():
         ret.append({
             'df': users_df[users_df.occupation == occ_key],
@@ -273,6 +274,7 @@ def parse():
         grouping_to_func = {
             'gender': group_by_gender,
             'age': group_by_age,
+            'occupation': group_by_occupation,
         }
         groups = grouping_to_func[args.grouping](dfs['users'])
     for group in groups:
