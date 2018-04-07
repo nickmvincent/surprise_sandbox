@@ -134,7 +134,7 @@ def main(args):
             raise ValueError(
                 'When using grouping="sample", you must provide a set of sample sizes')
     elif args.grouping in [
-        'gender', 'age', 'power', 'state', 'genre',
+        'gender', 'age', 'power', 'state', 'genre', 'occupation', 
     ]:
         experiment_configs += [{'type': args.grouping, 'size': None}]
 
