@@ -259,7 +259,7 @@ def main(args):
                 )]
 
             # data should be ~30 MB
-            out_dicts = Parallel(n_jobs=-1, max_nbytes='30M')(tuple(delayed_iteration_list))
+            out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']
                 algo_name = d['algo_name']
