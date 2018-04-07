@@ -24,7 +24,7 @@ def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_
             size, num_samples
         )
     if indices != 'all':
-        ret += '_{}-to-{}'.format(indices[0], indices[1])
+        ret += '_indices-{}-to-{}'.format(indices[0], indices[1])
     ret += '.csv'
     return ret
 
