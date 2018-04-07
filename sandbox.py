@@ -116,7 +116,7 @@ def main(args):
             with open(filename_ratingcv_standards, 'w') as f:
                 json.dump(saved_results, f)
             
-        standard_results[algo_name] = results
+        standard_results[algo_name] = saved_results
 
     times['standards_loaded'] = time.time() - times['data_constructed']
 

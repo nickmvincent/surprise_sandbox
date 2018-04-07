@@ -27,3 +27,9 @@ Full runtime was: 13894.118345737457 for 300 runs
 Full runtime was: 28615.726298093796 for 400 runs
 400 total train/tests will be run because you chose 4 sample_sizes and number of samples of 100
 71.54 seconds per run
+
+
+## 4/6
+AWS m5.large
+Full runtime was: 163.09114909172058 for 1 runs
+incudes download time.

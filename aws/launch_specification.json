@@ -21,7 +21,7 @@
         }
     ],
     "ImageId": "ami-1853ac65",
-    "InstanceType": "m5.large",
+    "InstanceType": "m5.12xlarge",
     "KeyName": "feb2016-keypair",
     "Monitoring": {
         "Enabled": false

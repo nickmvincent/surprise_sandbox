@@ -85,8 +85,8 @@ def parse():
     parser.add_argument('--verbose')
     parser.add_argument('--plot_histograms', action='store_true')
     parser.add_argument('--plot_across', action='store_true')
-    parser.add_argument('--userfrac', type=float, default=1.0)
-    parser.add_argument('--ratingfrac', type=float, default=1.0)
+    parser.add_argument('--userfracs', type=float, default=1.0)
+    parser.add_argument('--ratingfracs', type=float, default=1.0)
     parser.add_argument('--test_groups', default='non-boycott,boycott')
     args = parser.parse_args()
 
@@ -97,6 +97,8 @@ def parse():
             args.num_samples = 1000
     else:
         args.sample_sizes = [None]
+    
+    # for convenience
     if args.grouping == 'sample':
         args.grouping = 'sample_users'
     main(args)
