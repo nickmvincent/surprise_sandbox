@@ -67,7 +67,6 @@ def main(args):
         # 'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
         # 'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
     }
-    print('Going to load data in pd dataframes')
     dfs = get_dfs(args.dataset)
     times['dfs_loaded'] = time.time() - times['start']
     print('Got dataframes, took {} seconds'.format(times['dfs_loaded']))
@@ -93,7 +92,9 @@ def main(args):
     metric_names = []
     for measure in measures:
         if '_' in measure:
-            metric_names += measure.lower().split('_')
+            splitnames = measure.lower().split('_')
+            metric_names += splitnames
+            metric_names += [x + '_frac' for x in splitnames]
         else:
             metric_names.append(measure.lower())
     
@@ -102,22 +103,19 @@ def main(args):
         for algo_name in algos:
             filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
                 args.dataset, algo_name)
-            try:
-                with open(filename_ratingcv_standards, 'r') as f:
-                    saved_results = json.load(f)
-            except:
-                print('Computing standard results for {}'.format(algo_name))
-                results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
-                print(results)
-                saved_results = {}
-                for metric in metric_names:
-                    saved_results[metric] = np.mean(results[metric + '_all'])
-                    frac_key = metric + '_frac_all'
-                    if frac_key in results:
-                        saved_results[frac_key] = np.mean(results[frac_key])
 
-                with open(filename_ratingcv_standards, 'w') as f:
-                    json.dump(saved_results, f)
+            print('Computing standard results for {}'.format(algo_name))
+            results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
+            print(results)
+            saved_results = {}
+            for metric in metric_names:
+                saved_results[metric] = np.mean(results[metric + '_all'])
+                frac_key = metric + '_frac_all'
+                if frac_key in results:
+                    saved_results[frac_key] = np.mean(results[frac_key])
+
+            with open(filename_ratingcv_standards, 'w') as f:
+                json.dump(saved_results, f)
                 
             standard_results[algo_name] = saved_results
 
