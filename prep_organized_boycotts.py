@@ -147,7 +147,7 @@ def group_by_genre(users_df, ratings_df, movies_df, dataset, threshold=4):
                 genres_to_uids[genre].append(user)
     ret = [{
         'df': users_df[users_df.user_id.isin(uids)],
-        'name': 'Fans of {} excluded'.format(genre),
+        'name': 'Fans of {} excluded using threshold {}'.format(genre, threshold),
     } for genre, uids in genres_to_uids.items()]
 
     return ret

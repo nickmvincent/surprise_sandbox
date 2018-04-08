@@ -1,3 +1,11 @@
+"""
+Process results
+
+Currently this just means computing metric increases,
+in both additive units and percent units.
+"""
+
+
 import argparse
 import json
 
@@ -8,21 +16,20 @@ from utils import concat_output_filename
 from plot import plot_all
 
 def main(args):
+    algo_names = [
+        'SVD',
+        'KNNBaseline_item_msd',
+    ]
+    measures = ['RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull']
+    metric_names = []
+    for measure in measures:
+        if '_' in measure:
+            metric_names += measure.lower().split('_')
+        else:
+            metric_names.append(measure.lower())
+    standard_results = {}    
     for userfrac in args.userfracs:
         for ratingfrac in args.ratingfracs:
-            algo_names = [
-                'SVD',
-                'KNNBaseline_item_msd',
-            ]
-            measures = ['RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull']
-            metric_names = []
-            for measure in measures:
-                if '_' in measure:
-                    metric_names += measure.lower().split('_')
-                else:
-                    metric_names.append(measure.lower())
-
-            standard_results = {}
             for sample_size in args.sample_sizes:
                 outname = concat_output_filename(
                     args.dataset, args.grouping,
@@ -30,7 +37,11 @@ def main(args):
                     ratingfrac,
                     sample_size, args.num_samples
                 )
-                err_df = pd.read_csv(outname)
+                try:
+                    err_df = pd.read_csv(outname)
+                except FileNotFoundError:
+                    print('skipping ' + outname)
+                    continue
                 err_df = err_df.set_index('Unnamed: 0')
                 uid_to_metric = err_df.to_dict(orient='index')
                 for algo_name in algo_names:
@@ -61,7 +72,7 @@ def main(args):
                                         # assert(add_inc == add_inc_computed)
                                     uid_to_metric[uid][new_add_inc_key] = add_inc_computed
                                     uid_to_metric[uid][per_inc_key] = per_inc_computed
-                pd.DataFrame.from_dict(uid_to_metric, orient='index').to_csv(outname.replace('results/', 'results/TEST'))
+                pd.DataFrame.from_dict(uid_to_metric, orient='index').to_csv(outname.replace('results/', 'processed_results/'))
 
                             
 
@@ -70,15 +81,14 @@ def parse():
     Parse args and handles list splitting
 
     Example:
-    python calculate_metric_increases.py --sample_sizes 4,5,6,7 --num_samples 100
+    python process_results --sample_sizes 4,5,6,7 --num_samples 100
+    python process_results --grouping gender --userfracs 0.5,1 --ratingfracs 0.5,1
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--grouping', default='sample_users')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
-    parser.add_argument('--verbose')
-    parser.add_argument('--show_plots', action='store_true')
     parser.add_argument('--userfracs')
     parser.add_argument('--ratingfracs')
     args = parser.parse_args()
@@ -90,11 +100,11 @@ def parse():
         args.sample_sizes = [None]
 
     if args.userfracs:
-        args.userfracs = [int(x) for x in args.userfracs.split(',')]
+        args.userfracs = [float(x) for x in args.userfracs.split(',')]
     else:
         args.userfracs = [1.0]
     if args.ratingfracs:
-        args.ratingfracs = [int(x) for x in args.ratingfracs.split(',')]
+        args.ratingfracs = [float(x) for x in args.ratingfracs.split(',')]
     else:
         args.ratingfracs = [1.0]
 

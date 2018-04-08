@@ -20,55 +20,56 @@ def main(args):
         'rmse', 'ndcg10',
         #'ndcg5', 'ndcgfull',
     ]
-    for userfrac in args.userfracs:
-        for ratingfrac in args.ratingfracs:
-            for sample_size in args.sample_sizes:
-                outname = concat_output_filename(
-                    args.dataset, args.grouping,
-                    userfrac,
-                    ratingfrac,
-                    sample_size, args.num_samples
-                )
-                err_df = pd.read_csv(outname)
+    for colunit in ['increase_{}', 'percent_increase_{}']:
+        for userfrac in args.userfracs:
+            for ratingfrac in args.ratingfracs:
+                for sample_size in args.sample_sizes:
+                    outname = 'processed_' + concat_output_filename(
+                        args.dataset, args.grouping,
+                        userfrac,
+                        ratingfrac,
+                        sample_size, args.num_samples
+                    )
+                    err_df = pd.read_csv(outname)
 
-                for algo_name in algo_names:
-                    print('===\n' + algo_name)
-                    filtered_df = err_df[err_df.algo_name == algo_name]
-                    if args.verbose:
-                        print(filtered_df.mean())
-                    else:
-                        colnames = []
-                        for metric in metrics:
-                            for group in args.test_groups:
-                                key = '{}_{}'.format(metric, group)
-                                colname = 'increase_from_baseline_{}'.format(key)
-                                colnames.append(colname)
-                        cols = filtered_df[colnames]
-                        means = cols.mean()
-                        print(means)
-                        if args.plot_across:    
-                            for col in cols.columns.values:
-                                across[algo_name][col].append(means[col])
-                        if args.plot_histograms:
-                            plot_all(cols, 'hist', algo_name + '_' + outname)
-                
-            if args.plot_across:
-                for algo_name in algo_names:
-                    _, axes = plt.subplots(ncols=len(metrics))
-                    _, zoomaxes = plt.subplots(ncols=len(across[algo_name]))
-                    metric_to_index = {}
-                    for i_metric, metric in enumerate(metrics):
-                        metric_to_index[metric] = i_metric
-                    for i, (key, val) in enumerate(across[algo_name].items()):
-                        for metric, index in metric_to_index.items():
-                            if metric in key:
-                                i_metric = index
-                        ax = axes[i_metric]
-                        ax.plot(val)
-                        ax.set_title(algo_name)
-                        zoomax = zoomaxes[i]
-                        zoomax.plot(val)
-                        zoomax.set_title(algo_name + ' ' + key)
+                    for algo_name in algo_names:
+                        print('===\n' + algo_name)
+                        filtered_df = err_df[err_df.algo_name == algo_name]
+                        if args.verbose:
+                            print(filtered_df.mean())
+                        else:
+                            colnames = []
+                            for metric in metrics:
+                                for group in args.test_groups:
+                                    key = '{}_{}'.format(metric, group)
+                                    colname = colunit.format(key)
+                                    colnames.append(colname)
+                            cols = filtered_df[colnames]
+                            means = cols.mean()
+                            print(means)
+                            if args.plot_across:    
+                                for col in cols.columns.values:
+                                    across[algo_name][col].append(means[col])
+                            if args.plot_histograms:
+                                plot_all(cols, 'hist', algo_name + '_' + outname)
+                    
+                if args.plot_across:
+                    for algo_name in algo_names:
+                        _, axes = plt.subplots(ncols=len(metrics))
+                        _, zoomaxes = plt.subplots(ncols=len(across[algo_name]))
+                        metric_to_index = {}
+                        for i_metric, metric in enumerate(metrics):
+                            metric_to_index[metric] = i_metric
+                        for i, (key, val) in enumerate(across[algo_name].items()):
+                            for metric, index in metric_to_index.items():
+                                if metric in key:
+                                    i_metric = index
+                            ax = axes[i_metric]
+                            ax.plot(val)
+                            ax.set_title(algo_name)
+                            zoomax = zoomaxes[i]
+                            zoomax.plot(val)
+                            zoomax.set_title(algo_name + ' ' + key)
     plt.show()
     
 
@@ -78,6 +79,7 @@ def parse():
 
     example
     python summarize.py --sample_sizes 4,5,6,7 --num_samples 100 --plot_across
+    python summarize.py --grouping gender --userfracs 0.5,1 --ratingfracs 0.5,1
     """
     
     parser = argparse.ArgumentParser()
@@ -102,11 +104,11 @@ def parse():
         args.sample_sizes = [None]
     
     if args.userfracs:
-        args.userfracs = [int(x) for x in args.userfracs.split(',')]
+        args.userfracs = [float(x) for x in args.userfracs.split(',')]
     else:
         args.userfracs = [1.0]
     if args.ratingfracs:
-        args.ratingfracs = [int(x) for x in args.ratingfracs.split(',')]
+        args.ratingfracs = [float(x) for x in args.ratingfracs.split(',')]
     else:
         args.ratingfracs = [1.0]
     # for convenience
