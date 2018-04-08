@@ -17,3 +17,11 @@ python sandbox.py --grouping power --userfrac 0.5 --ratingfrac 1.0 --dataset ml-
 python sandbox.py --grouping occupation --userfrac 1.0 --ratingfrac 1.0 --dataset ml-1m
 python sandbox.py --grouping occupation --userfrac 1.0 --ratingfrac 0.5 --dataset ml-1m
 python sandbox.py --grouping occupation --userfrac 0.5 --ratingfrac 1.0 --dataset ml-1m
+
+python sandbox.py --grouping genre --userfrac 1.0 --ratingfrac 1.0 --dataset ml-1m
+python sandbox.py --grouping genre --userfrac 1.0 --ratingfrac 0.5 --dataset ml-1m
+python sandbox.py --grouping genre --userfrac 0.5 --ratingfrac 1.0 --dataset ml-1m
+
+python sandbox.py --grouping genre_strict --userfrac 1.0 --ratingfrac 1.0 --dataset ml-1m
+python sandbox.py --grouping genre_strict --userfrac 1.0 --ratingfrac 0.5 --dataset ml-1m
+python sandbox.py --grouping genre_strict --userfrac 0.5 --ratingfrac 1.0 --dataset ml-1m

@@ -94,7 +94,10 @@ def group_by_occupation(users_df):
     return ret
 
 
-def group_by_genre(users_df, ratings_df, movies_df, dataset):
+def group_by_genre_strict(users_df, ratings_df, movies_df, dataset):
+    return group_by_genre(users_df, ratings_df, movies_df, dataset, 4.5)
+
+def group_by_genre(users_df, ratings_df, movies_df, dataset, threshold=4):
     """
     Group by users who like a particular genre
 
@@ -140,7 +143,7 @@ def group_by_genre(users_df, ratings_df, movies_df, dataset):
     genres_to_uids = defaultdict(list)
     for user, genre_ratings in user_to_genre_ratings.items():
         for genre, ratings, in genre_ratings.items():
-            if len(ratings) > 10 and np.mean(ratings) >= 4.5:
+            if len(ratings) > 10 and np.mean(ratings) >= threshold:
                 genres_to_uids[genre].append(user)
     ret = [{
         'df': users_df[users_df.user_id.isin(uids)],

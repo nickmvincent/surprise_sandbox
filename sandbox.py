@@ -14,7 +14,7 @@ import numpy as np
 from utils import get_dfs, concat_output_filename
 from prep_organized_boycotts import (
     group_by_age, group_by_gender, group_by_genre,
-    group_by_occupation, group_by_power, group_by_state
+    group_by_occupation, group_by_power, group_by_state, group_by_genre_strict
 )
 from joblib import Parallel, delayed
 
@@ -134,7 +134,7 @@ def main(args):
             raise ValueError(
                 'When using grouping="sample", you must provide a set of sample sizes')
     elif args.grouping in [
-        'gender', 'age', 'power', 'state', 'genre', 'occupation', 
+        'gender', 'age', 'power', 'state', 'genre', 'genre_strict', 'occupation', 
     ]:
         experiment_configs += [{'type': args.grouping, 'size': None}]
 
@@ -169,9 +169,12 @@ def main(args):
             experimental_iterations = group_by_age(users_df)
         elif config['type'] == 'state':
             experimental_iterations = group_by_state(users_df, dataset=args.dataset)
-
         elif config['type'] == 'genre':
             experimental_iterations = group_by_genre(
+                users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
+                dataset=args.dataset)
+        elif config['type'] == 'genre_strict':
+            experimental_iterations = group_by_genre_strict(
                 users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
                 dataset=args.dataset)
         elif config['type'] == 'power':
@@ -195,6 +198,7 @@ def main(args):
                 elif config['type'] in [
                     'sample_users',
                     'gender', 'age', 'power', 'state', 'genre',
+                    'genre_strict',
                     'occupation',
                 ]:
                     identifier = i
