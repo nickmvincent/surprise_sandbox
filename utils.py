@@ -100,3 +100,29 @@ def movielens_1m_to_df(ratings_file, users_file, movies_file):
     }
 
 
+def extract_from_filename(text, comes_after, length=None, ends_at=None):
+    """
+    dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0
+    """
+    i = text.find(comes_after)
+    if i == -1:
+        raise ValueError('could not find')
+    start = i + len(comes_after)
+    if length:
+        end = start + length
+    elif ends_at:
+        end = text.find(ends_at)
+    return text[start:end]
+
+
+if __name__ == '__main__':
+    print('Testing...')
+    assert extract_from_filename("dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0", "userfrac-", 3) == '1.0'
+    assert extract_from_filename("dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0", "ratingfrac-", 3) == '1.0'
+    assert extract_from_filename(
+        "dataset-ml-1m_type-sample_users_userfrac-1.0_ratingfrac-1.0_sample_size-1_num_samples-250_indices-251-to-500.csv",
+        "indices-", 3) == '251'
+    assert extract_from_filename(
+        "dataset-ml-1m_type-sample_users_userfrac-1.0_ratingfrac-1.0_sample_size-1_num_samples-250_indices-251-to-500.csv",
+        "indices-", None, '.csv') == '251-to-500'
+    print('Success')
