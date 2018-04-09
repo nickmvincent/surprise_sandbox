@@ -48,6 +48,7 @@ def main(args):
 
         userfrac = extract_from_filename(outname, 'userfrac-', 3)
         ratingfrac = extract_from_filename(outname, 'ratingfrac-', 3)
+        experiment_type = extract_from_filename(outname, 'type-', None, '_userfrac')
         if 'indices' in outname:
             indices = extract_from_filename(outname, 'indices-', None, '.csv')
         print(outname)
@@ -88,6 +89,7 @@ def main(args):
                             uid_to_metric[uid][per_inc_key] = per_inc_computed
                             uid_to_metric[uid]['userfrac'] = userfrac
                             uid_to_metric[uid]['ratingfrac'] = ratingfrac
+                            uid_to_metric[uid]['type'] = experiment_type
                             if 'indices' in outname:
                                 uid_to_metric[uid]['indices'] = indices
         as_df = pd.DataFrame.from_dict(uid_to_metric, orient='index')
