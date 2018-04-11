@@ -1,3 +1,4 @@
+SVD
 mae                  0.685789
 ndcg10               0.793464
 ndcg10_frac          0.724024
@@ -21,3 +22,28 @@ rec5t4               0.441617
 rec5t4_frac          0.991577
 rec5t4_frac_all      0.991577
 rmse                 0.873676
+
+KNNBaseline_item_msd
+mae                  0.695031
+ndcg10               0.791513
+ndcg10_frac          0.723864
+ndcg10_frac_all      0.723864
+ndcg5                0.783153
+ndcg5_frac           0.925392
+ndcg5_frac_all       0.925392
+ndcgfull             0.908314
+ndcgfull_frac        1.000000
+ndcgfull_frac_all    1.000000
+prec10t4             0.891833
+prec10t4_frac        0.991576
+prec10t4_frac_all    0.991576
+prec5t4              0.867874
+prec5t4_frac         0.991576
+prec5t4_frac_all     0.991576
+rec10t4              0.638319
+rec10t4_frac         0.991576
+rec10t4_frac_all     0.991576
+rec5t4               0.439618
+rec5t4_frac          0.991576
+rec5t4_frac_all      0.991576
+rmse                 0.885227
