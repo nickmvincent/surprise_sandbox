@@ -45,3 +45,6 @@ Full runtime was: 4740.389183282852 for 100 runs
 47.4 seconds per run
 
 Full runtime was: 6950.251708745956 for 150 runs
+
+# 4/10
+11904.232759714127 for 250 runs

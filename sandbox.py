@@ -7,7 +7,7 @@ using various MovieLens datasets
 import argparse
 import json
 import time
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 import pandas as pd
 import numpy as np
@@ -19,7 +19,7 @@ from prep_organized_boycotts import (
 from joblib import Parallel, delayed
 
 from surprise.model_selection import cross_validate, cross_validate_custom
-from surprise import SVD, KNNBasic, Dataset, KNNBaseline
+from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMean
 from surprise.reader import Reader
 
 # long-term: massively abstract this code so it will work w/ non-recsys algorithsm
@@ -48,9 +48,6 @@ def main(args):
     """
     Run the sandbox experiments
     """
-    # HEY LISTEN
-    # uncomment to make sure the dataset is downloaded (e.g. first time on a new machine)
-    # data = Dataset.load_builtin('ml-1m')
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     times = OrderedDict()
     times['start'] = time.time()
@@ -66,6 +63,20 @@ def main(args):
         'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
         # 'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
         # 'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
+        # 'MovieMean': MovieMean(),
+    }
+    if args.movie_mean:
+        algos = {
+            'MovieMean': MovieMean(),
+            'GlobalMean': GlobalMean(),
+        }
+    algos_for_standards = {
+        # flag: uncomment when done
+        'SVD': SVD(),
+        'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+        # 'GuessThree': GuessThree(),
+        # 'GlobalMean': GlobalMean(),
+        # 'MovieMean': MovieMean(),
     }
     dfs = get_dfs(args.dataset)
     times['dfs_loaded'] = time.time() - times['start']
@@ -99,25 +110,27 @@ def main(args):
             metric_names.append(measure.lower())
     
     if args.compute_standards:
-        standard_results = {}
-        for algo_name in algos:
-            filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
-                args.dataset, algo_name)
+        standard_results = defaultdict(list)
+        for algo_name in algos_for_standards:
+            for _ in range(args.num_standards):        
+                filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
+                    args.dataset, algo_name)
 
-            print('Computing standard results for {}'.format(algo_name))
-            results = cross_validate_custom(algos[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
-            print(results)
-            saved_results = {}
-            for metric in metric_names:
-                saved_results[metric] = np.mean(results[metric + '_all'])
-                frac_key = metric + '_frac_all'
-                if frac_key in results:
-                    saved_results[frac_key] = np.mean(results[frac_key])
+                print('Computing standard results for {}'.format(algo_name))
+                results = cross_validate_custom(algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
+                saved_results = {}
+                for metric in metric_names:
+                    saved_results[metric] = np.mean(results[metric + '_all'])
+                    frac_key = metric + '_frac_all'
+                    if frac_key in results:
+                        saved_results[frac_key] = np.mean(results[frac_key])
 
-            with open(filename_ratingcv_standards, 'w') as f:
-                json.dump(saved_results, f)
-                
-            standard_results[algo_name] = saved_results
+                with open(filename_ratingcv_standards, 'w') as f:
+                    json.dump(saved_results, f)
+                    
+                standard_results[algo_name].append(saved_results)
+            standard_results_df = pd.DataFrame(standard_results[algo_name])
+            print(standard_results_df.mean())
 
     times['standards_loaded'] = time.time() - times['data_constructed']
 
@@ -174,6 +187,7 @@ def main(args):
                 users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
                 dataset=args.dataset)
         elif config['type'] == 'genre_strict':
+
             experimental_iterations = group_by_genre_strict(
                 users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
                 dataset=args.dataset)
@@ -194,7 +208,13 @@ def main(args):
                             continue
                     boycott_uid_set = set([row.user_id])
                     like_boycotters_uid_set = set([])
-                    
+                
+                # elif config['type'] == 'sample_users' and config['size'] == 0:
+                #     identifier = i
+                #     name = experimental_iteration['name']
+                #     boycott_uid_set = set([])
+                #     like_boycotters_uid_set = set([])
+
                 elif config['type'] in [
                     'sample_users',
                     'gender', 'age', 'power', 'state', 'genre',
@@ -204,7 +224,7 @@ def main(args):
                     identifier = i
                     name = experimental_iteration['name']
 
-                    possible_boycotters_df = experimental_iteration['df']
+                    possible_boycotters_df = experimental_iteration['df']                        
                     print(name)
                     print(possible_boycotters_df.head())
                     if args.userfrac != 1.0:
@@ -302,6 +322,8 @@ def main(args):
             args.ratingfrac,
             config['size'], args.num_samples, args.indices
         )
+        if args.movie_mean:
+            outname = outname.replace('results/', 'results/MOVIEMEAN_')
         err_df.to_csv(outname)
         # means = err_df.mean()
         # means.to_csv(outname.replace('err_df', 'means'))
@@ -324,6 +346,12 @@ def parse():
     parser.add_argument(
         '--compute_standards', action='store_true',
         help='Defaults to false. Pass --compute_standards if you want to compute standards (you really only need to do this once)')
+    parser.add_argument(
+        '--num_standards', default=1, type=int
+    )
+    parser.add_argument(
+        '--movie_mean', help='override everything and just use MovieMean and GlobalMean',
+        action='store_true')
     parser.add_argument('--mode', default='compute')
     parser.add_argument('--userfrac', type=float, default=1.0)
     parser.add_argument('--ratingfrac', type=float, default=1.0)
