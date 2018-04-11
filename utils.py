@@ -19,10 +19,10 @@ def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_
         dataset, type_,
         userfrac, ratingfrac
     )
-    if size and num_samples:
-        ret += '_sample_size-{}_num_samples-{}'.format(
-            size, num_samples
-        )
+    if size:
+        ret += '_sample_size-{}'.format(size)
+    if num_samples:
+        ret += '_num_samples-{}'.format(num_samples)
     if indices != 'all':
         ret += '_indices-{}-to-{}'.format(indices[0], indices[1])
     ret += '.csv'

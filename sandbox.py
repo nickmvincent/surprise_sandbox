@@ -167,6 +167,7 @@ def main(args):
     """.format(secs, hours)
     print(time_estimate)
     uid_to_error = {}
+    experimental_iterations = []
     for config in experiment_configs:
         if config['type'] == 'individual_users':
             experimental_iterations = list(users_df.iterrows())
@@ -174,27 +175,32 @@ def main(args):
             experimental_iterations = [{
                 'df': users_df.sample(config['size']),
                 'name': '{} user sample'.format(config['size'])
-            } for _ in range(args.num_samples)
-            ]
+            } for _ in range(args.num_samples)]
         elif config['type'] == 'gender':
-            experimental_iterations = group_by_gender(users_df)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_gender(users_df)
         elif config['type'] == 'age':
-            experimental_iterations = group_by_age(users_df)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_age(users_df)
         elif config['type'] == 'state':
-            experimental_iterations = group_by_state(users_df, dataset=args.dataset)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_state(users_df, dataset=args.dataset)
         elif config['type'] == 'genre':
-            experimental_iterations = group_by_genre(
-                users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
-                dataset=args.dataset)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_genre(
+                    users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
+                    dataset=args.dataset)
         elif config['type'] == 'genre_strict':
-
-            experimental_iterations = group_by_genre_strict(
-                users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
-                dataset=args.dataset)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_genre_strict(
+                    users_df=users_df, ratings_df=ratings_df, movies_df=movies_df,
+                    dataset=args.dataset)
         elif config['type'] == 'power':
-            experimental_iterations = group_by_power(users_df=users_df, ratings_df=ratings_df, dataset=args.dataset)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_power(users_df=users_df, ratings_df=ratings_df, dataset=args.dataset)
         elif config['type'] == 'occupation':
-            experimental_iterations = group_by_occupation(users_df)
+            for _ in range(args.num_samples):
+                experimental_iterations += group_by_occupation(users_df)
 
         for algo_name in algos:
             delayed_iteration_list = []
@@ -361,6 +367,9 @@ def parse():
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]
         if args.num_samples is None:
             args.num_samples = 1000
+    else:
+        if args.num_samples is None:
+            args.num_samples = 1
 
     if ',' in args.indices:
         args.indices = [int(x) for x in args.indices.split(',')]
