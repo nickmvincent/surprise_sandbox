@@ -1,0 +1,5 @@
+Run scripts
+Download from s3
+Download from local s3 dir to results/ dir
+Run process_all.py
+All done.
