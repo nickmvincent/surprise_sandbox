@@ -1,5 +1,6 @@
 results/
 standard_results/
+processed_results/
 *.pyc
 aws/custom_bootstrap.sh
 aws/launch_specification_custom.json
