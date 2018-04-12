@@ -28,6 +28,12 @@ def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_
     ret += '.csv'
     return ret
 
+def load_head_items(dataset):
+    with open('boycott_files/{}_top_five_percent_movies.csv'.format(dataset), 'r') as f:
+        head_items = [int(x) for x in f.read().split(',')]
+    return head_items
+
+
 def get_dfs(dataset):
     """
     Takes a dataset string and return that data in a dataframe!
@@ -125,4 +131,10 @@ if __name__ == '__main__':
     assert extract_from_filename(
         "dataset-ml-1m_type-sample_users_userfrac-1.0_ratingfrac-1.0_sample_size-1_num_samples-250_indices-251-to-500.csv",
         "indices-", None, '.csv') == '251-to-500'
+
+
+    assert load_head_items('ml-100k') == [
+        '50', '258', '100', '181', '294', '286', '288', '1', '300', '121', '174', '127', '56',
+        '7', '98', '237', '117', '172', '222', '204', '313', '405', '79', '210', '151', '173', '69', '748', '168', '269', '257', '195', '423', '9', '318', '276', '302', '22', '328', '96', '118', '15', '25', '183', '216', '176', '64', '234', '202', '191', '28', '89', '111', '275', '12', '742', '357', '82', '135', '289', '97', '238', '268', '546', '196', '333', '186', '70', '475', '153', '132', '228', '125', '144', '483', '194', '245', '323', '197', '185', '11', '282',
+'496', '568']
     print('Success')

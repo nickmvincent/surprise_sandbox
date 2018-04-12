@@ -1,7 +1,6 @@
 results/
 standard_results/
 processed_results/
-uid_sets/
 all_results.csv
 *.pyc
 aws/custom_bootstrap.sh

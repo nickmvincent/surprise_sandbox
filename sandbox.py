@@ -11,7 +11,7 @@ from collections import OrderedDict, defaultdict
 
 import pandas as pd
 import numpy as np
-from utils import get_dfs, concat_output_filename
+from utils import get_dfs, concat_output_filename, load_head_items
 from specs import ALGOS, ALGOS_FOR_STANDARDS, NUM_FOLDS
 from constants import MEASURES
 from prep_organized_boycotts import (
@@ -20,16 +20,23 @@ from prep_organized_boycotts import (
 )
 from joblib import Parallel, delayed
 
-from surprise.model_selection import cross_validate, cross_validate_custom
+from surprise.model_selection import cross_validate_custom
 from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMean
 from surprise.reader import Reader
 
 # long-term: massively abstract this code so it will work w/ non-recsys algorithsm
 
 
-def task(algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
+def task(
+    algo_name, algo, nonboycott, boycott, boycott_uid_set,
+    like_boycotters_uid_set, measures, cv, verbose, identifier,
+    num_ratings, num_users, num_movies, name, head_items):
     return {
-        'subset_results': cross_validate_custom(algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, n_jobs=1),
+        'subset_results': cross_validate_custom(
+            algo, nonboycott, boycott, boycott_uid_set,
+            like_boycotters_uid_set, measures, cv, n_jobs=1,
+            head_items=head_items
+        ),
         'num_ratings': num_ratings,
         'num_users': num_users,
         'num_movies': num_movies,
@@ -54,6 +61,7 @@ def main(args):
         }
     algos_for_standards = ALGOS_FOR_STANDARDS
     dfs = get_dfs(args.dataset)
+    head_items = load_head_items(args.dataset)
     times['dfs_loaded'] = time.time() - times['start']
     print('Got dataframes, took {} seconds'.format(times['dfs_loaded']))
 
@@ -80,6 +88,7 @@ def main(args):
             splitnames = measure.lower().split('_')
             metric_names += splitnames
             metric_names += [x + '_frac' for x in splitnames]
+            metric_names += ['tail' + x for x in splitnames]
         else:
             metric_names.append(measure.lower())
     
@@ -91,7 +100,9 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
-                results = cross_validate_custom(algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], MEASURES, NUM_FOLDS)
+                results = cross_validate_custom(
+                    algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
+                    reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items)
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
@@ -256,14 +267,15 @@ def main(args):
                 num_ratings =  len(all_non_boycott_ratings_df.index)
 
                 # make sure to save the set of boycott ids and like boycott ids
-                experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = boycott_uid_set
-                experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = like_boycotters_uid_set
+                experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
+                experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
                 delayed_iteration_list += [delayed(task)(
                     algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
                     False, identifier,
                     num_ratings,
                     num_users,
-                    num_movies, name
+                    num_movies, name,
+                    head_items
                 )]
 
             # data should be ~30 MB
@@ -296,7 +308,7 @@ def main(args):
             args.ratingfrac,
             config['size'], args.num_samples, args.indices
         )
-        uid_sets_outname = outname.replace('results/', 'uid_sets/uid_sets_')
+        uid_sets_outname = outname.replace('results/', 'standard_results/uid_sets_')
         pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)
         if args.movie_mean:
             outname = outname.replace('results/', 'results/MOVIEMEAN_')

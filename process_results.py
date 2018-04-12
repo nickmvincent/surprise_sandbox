@@ -16,7 +16,7 @@ import numpy as np
 from utils import concat_output_filename, extract_from_filename
 from plot import plot_all
 
-from constants import MEASURES, get_metric_names
+from constants import MEASURES, ALGO_NAMES, get_metric_names
 
 
 def main(args):
@@ -52,19 +52,26 @@ def main(args):
         err_df = err_df.set_index('Unnamed: 0')
         uid_to_metric = err_df.to_dict(orient='index')
         
-        for algo_name in algo_names:
-            filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
-                args.dataset, algo_name)
-            with open(filename_ratingcv_standards, 'r') as f:
+        for algo_name in ALGO_NAMES:
+            standards_filename = 'standard_results/{}_{}.json'.format(args.dataset, algo_name)
+            with open(standards_filename, 'r') as f:
                 standard_results = json.load(f)
+            print(standard_results)
             for uid, res in uid_to_metric.items():
                 if res['algo_name'] != algo_name:
                     continue
                 for metric in metric_names:
-                    standard_val = standard_results.get(metric)
-                    if standard_val is None:
-                        continue
                     for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
+                        standard_val_key = '{metric}_{group}__{outname}__{identifier}'.format(**{
+                            'metric': metric,
+                            'group': group,
+                            'outname': outname.replace('results/', ''),
+                            'identifier': uid[:4], # the first 4 characters of the uid are a 4 digit identifier #
+                        }) 
+                        standard_val = standard_results.get(standard_val_key)
+                        if standard_val is None:
+                            print(standard_val_key)
+                            continue
                         key = '{}_{}'.format(metric, group)
                         vals = res.get(key)
                         if vals:
