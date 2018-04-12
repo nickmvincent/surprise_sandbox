@@ -12,6 +12,8 @@ from collections import OrderedDict, defaultdict
 import pandas as pd
 import numpy as np
 from utils import get_dfs, concat_output_filename
+from specs import ALGOS, ALGOS_FOR_STANDARDS, NUM_FOLDS
+from constants import MEASURES
 from prep_organized_boycotts import (
     group_by_age, group_by_gender, group_by_genre,
     group_by_occupation, group_by_power, group_by_state, group_by_genre_strict
@@ -24,13 +26,6 @@ from surprise.reader import Reader
 
 # long-term: massively abstract this code so it will work w/ non-recsys algorithsm
 
-# Notes on default algo params:
-# KNN uses 40 max neighbors by default
-# min neighbors is 1, and if there's no neighbors then use global average!
-# default similarity is MSD
-# default user or item is USER-BASED but we override that.
-
-NUM_FOLDS = 5
 
 def task(algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, cv, verbose, identifier, num_ratings, num_users, num_movies, name):
     return {
@@ -51,33 +46,13 @@ def main(args):
     # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     times = OrderedDict()
     times['start'] = time.time()
-    algos = {
-        'SVD': SVD(),
-        # 'SVD50': SVD(n_factors=50),
-        # 'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
-        # 'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}),
-        # 'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': True, 'name': 'pearson'}),
-        # 'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
-        # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-        # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
-        'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-        # 'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
-        # 'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
-        # 'MovieMean': MovieMean(),
-    }
+    algos = ALGOS
     if args.movie_mean:
         algos = {
             'MovieMean': MovieMean(),
             'GlobalMean': GlobalMean(),
         }
-    algos_for_standards = {
-        # flag: uncomment when done
-        'SVD': SVD(),
-        'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-        # 'GuessThree': GuessThree(),
-        # 'GlobalMean': GlobalMean(),
-        # 'MovieMean': MovieMean(),
-    }
+    algos_for_standards = ALGOS_FOR_STANDARDS
     dfs = get_dfs(args.dataset)
     times['dfs_loaded'] = time.time() - times['start']
     print('Got dataframes, took {} seconds'.format(times['dfs_loaded']))
@@ -99,9 +74,8 @@ def main(args):
 
     # note to reader: why are precision, recall, and ndcg all stuffed together in one string?
     # this ensures they will be computed all at once. Evaluation code will split them up for presentation
-    measures = ['RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull']
     metric_names = []
-    for measure in measures:
+    for measure in MEASURES:
         if '_' in measure:
             splitnames = measure.lower().split('_')
             metric_names += splitnames
@@ -117,7 +91,7 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
-                results = cross_validate_custom(algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], measures, NUM_FOLDS)
+                results = cross_validate_custom(algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(), reader=Reader()), [], [], MEASURES, NUM_FOLDS)
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
@@ -202,6 +176,7 @@ def main(args):
             for _ in range(args.num_samples):
                 experimental_iterations += group_by_occupation(users_df)
 
+        experiment_identifier_to_uid_sets = defaultdict(lambda: defaultdict(list))
         for algo_name in algos:
             delayed_iteration_list = []
             for i, experimental_iteration in enumerate(experimental_iterations):
@@ -279,8 +254,12 @@ def main(args):
                 num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
                 num_movies = len(all_non_boycott_ratings_df.movie_id.value_counts())
                 num_ratings =  len(all_non_boycott_ratings_df.index)
+
+                # make sure to save the set of boycott ids and like boycott ids
+                experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = boycott_uid_set
+                experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = like_boycotters_uid_set
                 delayed_iteration_list += [delayed(task)(
-                    algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, measures, NUM_FOLDS,
+                    algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
                     False, identifier,
                     num_ratings,
                     num_users,
@@ -311,28 +290,17 @@ def main(args):
                             uid_to_error[uid].update({
                                 key: val,
                             })
-                            # in order to keep the pipeline simple, I think we should NOT calculate increase right here
-                            # it makes more sense to calculate all the increases in aggregate after th fact
-                            # this makes it simpler because then we can just use one set of standard results
-                            # as opposed to computing standard results every time (which may slightly different due to seeding)
-                            # try:
-                            #     uid_to_error[uid].update({
-                            #         'increase_from_baseline_{}'.format(key): val - standard_results[algo_name][metric],
-                            #     })
-                            # except KeyError:
-                            #     pass
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-
         outname = concat_output_filename(
             args.dataset, config['type'], args.userfrac,
             args.ratingfrac,
             config['size'], args.num_samples, args.indices
         )
+        uid_sets_outname = outname.replace('results/', 'uid_sets/uid_sets_')
+        pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)
         if args.movie_mean:
             outname = outname.replace('results/', 'results/MOVIEMEAN_')
         err_df.to_csv(outname)
-        # means = err_df.mean()
-        # means.to_csv(outname.replace('err_df', 'means'))
         print('Full runtime was: {} for {} runs'.format(time.time() - times['start'], num_runs))
 
 

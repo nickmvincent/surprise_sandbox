@@ -16,19 +16,11 @@ import numpy as np
 from utils import concat_output_filename, extract_from_filename
 from plot import plot_all
 
+from constants import MEASURES, get_metric_names
+
 
 def main(args):
-    algo_names = [
-        'SVD',
-        'KNNBaseline_item_msd',
-    ]
-    measures = ['RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull']
-    metric_names = []
-    for measure in measures:
-        if '_' in measure:
-            metric_names += measure.lower().split('_')
-        else:
-            metric_names.append(measure.lower())
+    metric_names = get_metric_names()
     standard_results = {}
     outnames = []
     if args.outname:
@@ -64,10 +56,12 @@ def main(args):
             filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
                 args.dataset, algo_name)
             with open(filename_ratingcv_standards, 'r') as f:
-                standard_results[algo_name] = json.load(f)
+                standard_results = json.load(f)
             for uid, res in uid_to_metric.items():
+                if res['algo_name'] != algo_name:
+                    continue
                 for metric in metric_names:
-                    standard_val = standard_results[algo_name].get(metric)
+                    standard_val = standard_results.get(metric)
                     if standard_val is None:
                         continue
                     for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
