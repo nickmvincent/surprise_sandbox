@@ -1,7 +1,7 @@
 """
 Control specs here that affect many scripts throughout the project
 """
-from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMean
+from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMean, KNNBasic
 
 # Notes on default algo params:
 # KNN uses 40 max neighbors by default
@@ -12,16 +12,13 @@ from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMea
 ALGOS = {
     'SVD': SVD(),
     # 'SVD50': SVD(n_factors=50),
-    # 'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
+    'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
     # 'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}),
     # 'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': True, 'name': 'pearson'}),
     # 'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
     # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
     # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
     'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-    # 'KNNBaseline_item_cosine': KNNBaseline(sim_options={'user_based': False, 'name': 'cosine'}),
-    # 'KNNBaseline_item_pearson': KNNBaseline(sim_options={'user_based': False, 'name': 'pearson'}),
-    # 'MovieMean': MovieMean(),
 }
 
 ALGOS_FOR_STANDARDS = {

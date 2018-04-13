@@ -5,9 +5,9 @@ Do not include other dependencies or imports here.
 Those should go in specs.py
 """
 
-
 ALGO_NAMES = [
     'SVD',
+    'KNNBasic_user_msd'    
     'KNNBaseline_item_msd',
 ]
 
