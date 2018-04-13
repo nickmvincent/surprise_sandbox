@@ -44,8 +44,8 @@ def main():
     jobs = []
     aws_jobs = []
     for user_count in user_counts:
-        job = "python sandbox.py --grouping sample --num_users {} --num_samples {} --indices {}".format(
-            user_count, NUM_SAMPLES, INDICES
+        job = "python sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {}".format(
+            int(user_count), int(NUM_SAMPLES), INDICES
         )
         aws_job = job.replace("python", "python3")
         jobs.append(job)

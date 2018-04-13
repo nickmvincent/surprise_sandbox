@@ -16,11 +16,15 @@ for file in files:
     print(file)
     os.system("python process_results.py --outname {}".format(file))
     # os.system("python process_results.py --outname dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0.csv")
-    df = pd.read_csv('processed_results/' + file)
-    if final_df is None:
-        final_df = df
-    else:
-        final_df = pd.concat([final_df, df])
+    try:
+        df = pd.read_csv('processed_results/' + file)
+        if final_df is None:
+            final_df = df
+        else:
+            final_df = pd.concat([final_df, df])
+    except FileNotFoundError:
+        print('File {} did not process'.format(file))
+
 
 cols = list(final_df.columns.values)
 for col in [

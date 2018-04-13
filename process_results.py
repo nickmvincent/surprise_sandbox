@@ -54,8 +54,14 @@ def main(args):
         
         for algo_name in ALGO_NAMES:
             standards_filename = 'standard_results/{}_{}.json'.format(args.dataset, algo_name)
-            with open(standards_filename, 'r') as f:
-                standard_results = json.load(f)
+            try:
+                with open(standards_filename, 'r') as f:
+                    standard_results = json.load(f)
+            except:
+                print('Could not load file {} for algo {}. Moving to next algorithm'.format(
+                    standards_filename, algo_name
+                ))
+                continue
             print(standard_results)
             for uid, res in uid_to_metric.items():
                 if res['algo_name'] != algo_name:
@@ -70,8 +76,9 @@ def main(args):
                         }) 
                         standard_val = standard_results.get(standard_val_key)
                         if standard_val is None:
-                            print(standard_val_key)
+                            print('Could not get standards with this key: {}'.format(standard_val_key))
                             continue
+                        standard_val = np.mean(standard_val)
                         key = '{}_{}'.format(metric, group)
                         vals = res.get(key)
                         if vals:

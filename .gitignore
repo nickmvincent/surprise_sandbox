@@ -2,7 +2,7 @@ results/
 
 processed_results/
 archived/
-all_results.csv
+all_results*
 *.pyc
 aws/custom_bootstrap.sh
 aws/launch_specification_custom.json

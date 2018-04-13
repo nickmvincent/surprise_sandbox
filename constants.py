@@ -19,7 +19,9 @@ def get_metric_names():
     metric_names = []
     for measure in MEASURES:
         if '_' in measure:
-            metric_names += measure.lower().split('_')
+            splitnames = measure.lower().split('_')
+            metric_names += splitnames
+            metric_names += ['tail' + x for x in splitnames]
         else:
             metric_names.append(measure.lower())
     return metric_names
