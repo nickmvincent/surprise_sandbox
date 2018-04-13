@@ -76,7 +76,7 @@ def main(args):
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml-1m')
-    parser.add_argument('--algo_name', default='ml-1m')
+    parser.add_argument('--algo_name')
     args = parser.parse_args()
     main(args)
 

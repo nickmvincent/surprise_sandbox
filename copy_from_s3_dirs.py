@@ -10,10 +10,13 @@ def recursive_search(directory):
         for file in files:
             if file.endswith('.csv'):
                 print(file)
-                shutil.copyfile(root + '/' + file, 'results/' + file)
-            if 'uid_sets' in file:
-                print(file)
-                shutil.copyfile(root + '/' + file, 'standard_results/' + file)
+                if 'uid_sets' in file:
+                    if not os.path.isfile('standard_results/' + file):
+                        shutil.copyfile(root + '/' + file, 'standard_results/' + file)
+                else:
+                    
+                    shutil.copyfile(root + '/' + file, 'results/' + file)
+                    
         for d in dirs:
             recursive_search(root + '/' + d)
 
