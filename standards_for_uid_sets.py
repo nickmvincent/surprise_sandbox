@@ -55,7 +55,11 @@ def main(args):
             like_boycotters_uid_sets[full_identifier] = like_boycotters_uid_set
 
     # now boycott_uid_sets and co. are filled up!
-    for algo_name in ALGOS:
+    if args.algo_name:
+        algo_names = [args.algo_name]
+    else:
+        algo_names = list(ALGOS.keys())
+    for algo_name in algos:
         res = cross_validate_many(
             ALGOS[algo_name], data,
             Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
@@ -72,6 +76,7 @@ def main(args):
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml-1m')
+    parser.add_argument('--algo_name', default='ml-1m')
     args = parser.parse_args()
     main(args)
 

@@ -11,10 +11,14 @@ def recursive_search(directory):
             if file.endswith('.csv'):
                 print(file)
                 shutil.copyfile(root + '/' + file, 'results/' + file)
+            if 'uid_sets' in file:
+                print(file)
+                shutil.copyfile(root + '/' + file, 'standard_results/' + file)
         for d in dirs:
             recursive_search(root + '/' + d)
 
 
 if __name__ == '__main__':
     # put your directory here...
-    recursive_search('C:/Users/Nick/Desktop/mys3/databoycott/round4')
+    recursive_search('C:/Users/Nick/Desktop/mys3/databoycott/round7')
+    recursive_search('C:/Users/Nick/Desktop/mys3/databoycott/round6')
