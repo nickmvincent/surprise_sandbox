@@ -28,8 +28,8 @@ def main(args):
         reader=Reader()
     )
 
-    pathto = "standard_results"
-    files = os.listdir(pathto)
+    args.pathto = "standard_results"
+    files = os.listdir(args.pathto)
 
     boycott_uid_sets = {}
     like_boycotters_uid_sets = {}
@@ -37,8 +37,11 @@ def main(args):
     for file in files:
         if 'uid_sets' not in file or '.csv' not in file:
             continue
+        if args.dataset not in file:
+            print('skip {} b/c dataset'.format(file))
+            continue
         print(file)
-        uid_sets_df = pd.read_csv(pathto + '/' + file, dtype=str)
+        uid_sets_df = pd.read_csv(args.pathto + '/' + file, dtype=str)
         for i, row in uid_sets_df.iterrows():
             identifier_num = row[0]
             try:
@@ -77,6 +80,7 @@ def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument('--algo_name')
+    parser.add_argument('--pathto', default='standard_results')
     args = parser.parse_args()
     main(args)
 
