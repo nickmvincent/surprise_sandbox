@@ -59,7 +59,7 @@ def main(args):
         algo_names = [args.algo_name]
     else:
         algo_names = list(ALGOS.keys())
-    for algo_name in algos:
+    for algo_name in algo_names:
         res = cross_validate_many(
             ALGOS[algo_name], data,
             Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
