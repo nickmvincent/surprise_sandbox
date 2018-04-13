@@ -28,7 +28,6 @@ def main(args):
         reader=Reader()
     )
 
-    args.pathto = "standard_results"
     files = os.listdir(args.pathto)
 
     boycott_uid_sets = {}
