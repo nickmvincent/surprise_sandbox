@@ -23,11 +23,12 @@ ALGOS = {
 
 ALGOS_FOR_STANDARDS = {
     # flag: uncomment when done
-    'SVD': SVD(),
-    'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-    'GuessThree': GuessThree(),
-    'GlobalMean': GlobalMean(),
-    'MovieMean': MovieMean(),
+    'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
+    #'SVD': SVD(),
+    #'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+    #'GuessThree': GuessThree(),
+    #'GlobalMean': GlobalMean(),
+    #'MovieMean': MovieMean(),
 }
 
 

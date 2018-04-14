@@ -71,7 +71,7 @@ def main(args):
         algo_names = list(ALGOS.keys())
     out = {}
     for algo_name in algo_names:
-        for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 250)):
+        for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 50)):
             print('On key batch {} of {} keys'.format(batch_num, len(boycott_uid_sets)))
             batch_b = {}
             batch_l = {}

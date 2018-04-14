@@ -53,7 +53,7 @@ Full runtime was: 6950.251708745956 for 150 runs
 
 Preliminary timing analysis of refactored standards calcs.
 
-1.4 second per data split.
+1.4 second per data split. (edit: 0.3 now.)
 
 So data seconds of data splitting = 1.4 * num_rows * num_folds
 num_rows = num_samples * num_algos
@@ -66,3 +66,11 @@ Ex: 300 samples * 2 algos * 5 folds * 1.4 =
 50 item eval batch takes 100 seconds. Doesn't appear to be threading properly.
 
 Each of 5 fits take about 45 seconds too. Plus however much is needed for evals (which should be parallelized)
+
+273.3401048183441 to eval a batch of 50?
+about 5 seconds per eval... and this is SVD... so that seems reasonable?
+
+
+# updated it
+1861 per crossfold per 100 rows
+(1 algo only!!!)
