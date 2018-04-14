@@ -16,6 +16,12 @@ from surprise import Dataset, Reader
 from surprise.model_selection import cross_validate_many
 
 
+def batch(iterable, batch_size=1):
+    """make batches for an iterable"""
+    num_items = len(iterable)
+    for ndx in range(0, num_items, batch_size):
+        yield iterable[ndx:min(ndx + batch_size, num_items)]
+
 
 def main(args):
     """
@@ -61,18 +67,30 @@ def main(args):
         algo_names = [args.algo_name]
     else:
         algo_names = list(ALGOS.keys())
+    out = {}
     for algo_name in algo_names:
-        res = cross_validate_many(
-            ALGOS[algo_name], data,
-            Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
-            boycott_uid_sets, like_boycotters_uid_sets, 
-            MEASURES, NUM_FOLDS, verbose=False
-        )
-        with open(
-            'standard_results/{}_{}.json'.format(
-                args.dataset, algo_name
-            ), 'w') as f:
-            json.dump(res, f)
+        for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 250)):
+            print('On key batch {} of {} keys'.format(batch, len(boycott_uid_sets)))
+            batch_b = {}
+            batch_l = {}
+            for key in key_batch:
+                batch_b[key] = boycott_uid_set[key]
+                batch_l[key] = boycott_uid_set[key]
+
+            res = cross_validate_many(
+                ALGOS[algo_name], data,
+                Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
+                batch_b, batch_l, 
+                MEASURES, NUM_FOLDS, verbose=False
+            )
+            out.update(res)
+            print('Finished one.')
+            with open(
+                '{}/{}_{}.json'.format(
+                    args.pathto, args.dataset, algo_name
+                ), 'w'
+            ) as f:
+                json.dump(out, f)
 
 
 def parse():

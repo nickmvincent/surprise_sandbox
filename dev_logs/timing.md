@@ -48,3 +48,15 @@ Full runtime was: 6950.251708745956 for 150 runs
 
 # 4/10
 11904.232759714127 for 250 runs
+
+# 4/13
+
+Preliminary timing analysis of refactored standards calcs.
+
+1.4 second per data split.
+
+So data seconds of data splitting = 1.4 * num_rows * num_folds
+num_rows = num_samples * num_algos
+
+Ex: 300 samples * 2 algos * 5 folds * 1.4 = 
+70 minutes
