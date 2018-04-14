@@ -87,7 +87,7 @@ def main(args):
             )
             out.update(res)
             with open(
-                'standard_result/{}_{}.json'.format(
+                'standard_results/{}_{}.json'.format(
                     args.dataset, algo_name
                 ), 'w'
             ) as f:
