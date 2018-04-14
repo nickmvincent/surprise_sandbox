@@ -122,6 +122,7 @@ def join(args):
                         print(log)
                         if algo_name not in log:
                             print('Skipping this dir b/c wrong log')
+                            input()
                             continue
                 except FileNotFoundError:
                     continue

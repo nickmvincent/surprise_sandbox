@@ -37,7 +37,6 @@ def main(args):
                     )
                     outnames.append(outname)
     for outname in outnames:
-
         userfrac = extract_from_filename(outname, 'userfrac-', 3)
         ratingfrac = extract_from_filename(outname, 'ratingfrac-', 3)
         experiment_type = extract_from_filename(outname, 'type-', None, '_userfrac')
@@ -50,7 +49,6 @@ def main(args):
             continue
         err_df = err_df.set_index('Unnamed: 0')
         uid_to_metric = err_df.to_dict(orient='index')
-        
 
         # this is dangerous. a lot of issues w/ accidental variable assignment
         for algo_name in ALGO_NAMES:
