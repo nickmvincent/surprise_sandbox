@@ -60,3 +60,9 @@ num_rows = num_samples * num_algos
 
 Ex: 300 samples * 2 algos * 5 folds * 1.4 = 
 70 minutes
+
+102 rows and 5 folds = 989 seconds.
+80 seconds per split??? Is it all from the assert..
+50 item eval batch takes 100 seconds. Doesn't appear to be threading properly.
+
+Each of 5 fits take about 45 seconds too. Plus however much is needed for evals (which should be parallelized)

@@ -5,6 +5,7 @@ import os
 import argparse
 import json
 from pprint import pprint
+import time
 
 import pandas as pd
 from joblib import delayed
@@ -27,6 +28,7 @@ def main(args):
     """
     driver function
     """
+    starttime = time.time()
     dfs = get_dfs(args.dataset)
     ratings_df = dfs['ratings']
     data = Dataset.load_from_df(
@@ -84,13 +86,13 @@ def main(args):
                 MEASURES, NUM_FOLDS, verbose=False
             )
             out.update(res)
-            print('Finished one.')
             with open(
-                '{}/{}_{}.json'.format(
-                    args.pathto, args.dataset, algo_name
+                'standards_results/{}_{}.json'.format(
+                    args.dataset, algo_name
                 ), 'w'
             ) as f:
                 json.dump(out, f)
+    print(time.time() - starttime)
 
 
 def parse():
