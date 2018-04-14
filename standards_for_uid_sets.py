@@ -70,12 +70,12 @@ def main(args):
     out = {}
     for algo_name in algo_names:
         for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 250)):
-            print('On key batch {} of {} keys'.format(batch, len(boycott_uid_sets)))
+            print('On key batch {} of {} keys'.format(batch_num, len(boycott_uid_sets)))
             batch_b = {}
             batch_l = {}
             for key in key_batch:
-                batch_b[key] = boycott_uid_set[key]
-                batch_l[key] = boycott_uid_set[key]
+                batch_b[key] = boycott_uid_sets[key]
+                batch_l[key] = boycott_uid_sets[key]
 
             res = cross_validate_many(
                 ALGOS[algo_name], data,
