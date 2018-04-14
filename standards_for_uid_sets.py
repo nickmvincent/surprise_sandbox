@@ -114,17 +114,29 @@ def join(args):
         merged = {}
         for root, dirs, _ in os.walk('misc_standards/'):
             print('root', root)
-            print('dirs', dirs)
             for d in dirs:
-                for _, _, files in os.walk(root +'/' + d):
+                print(d)
+                try:
+                    with open('{}/{}/log.txt'.format(root, d), 'r') as f:
+                        log = f.read()
+                        print(log)
+                        if algo_name not in log:
+                            print('Skipping this dir b/c wrong log')
+                            continue
+                except FileNotFoundError:
+                    continue
+                for root2, _, files in os.walk(root + '/' + d):
                     for file in files:
                         if file.endswith('.json'):
-                            print(file)
-                            with open(file, 'r') as f:
+                            if algo_name not in file:
+                                print('Skip {}'.format(file))
+                                continue
+                            with open(root2 + '/' + file, 'r') as f:
                                 data = json.load(f)
                                 merged.update(data)
+                            print('Success for {}'.format(file))                            
                         
-        with open('MERGED_{}_{}.json'.format(args.dataset, algo_name)) as f:
+        with open('MERGED_{}_{}.json'.format(args.dataset, algo_name), 'w') as f:
             json.dump(merged, f)
 
 

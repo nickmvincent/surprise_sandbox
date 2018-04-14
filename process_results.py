@@ -47,13 +47,14 @@ def main(args):
         try:
             err_df = pd.read_csv(outname)
         except FileNotFoundError:
-            print('skipping ' + outname)
             continue
         err_df = err_df.set_index('Unnamed: 0')
         uid_to_metric = err_df.to_dict(orient='index')
         
+
+        # this is dangerous. a lot of issues w/ accidental variable assignment
         for algo_name in ALGO_NAMES:
-            standards_filename = 'standard_results/{}_{}.json'.format(args.dataset, algo_name)
+            standards_filename = 'MERGED_{}_{}.json'.format(args.dataset, algo_name)
             try:
                 with open(standards_filename, 'r') as f:
                     standard_results = json.load(f)
@@ -61,8 +62,14 @@ def main(args):
                 print('Could not load file {} for algo {}. Moving to next algorithm'.format(
                     standards_filename, algo_name
                 ))
+                standard_results = {}
                 continue
-            print(standard_results)
+            vanilla_filename = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(args.dataset, algo_name)
+            try:
+                with open(vanilla_filename, 'r') as f:
+                    vanilla = json.load(f)
+            except:
+                vanilla = {}
             for uid, res in uid_to_metric.items():
                 if res['algo_name'] != algo_name:
                     continue
@@ -73,11 +80,18 @@ def main(args):
                             'group': group,
                             'outname': outname.replace('results/', ''),
                             'identifier': uid[:4], # the first 4 characters of the uid are a 4 digit identifier #
-                        }) 
+                        })
                         standard_val = standard_results.get(standard_val_key)
                         if standard_val is None:
-                            print('Could not get standards with this key: {}'.format(standard_val_key))
-                            continue
+                            print('Could not get standards with this key: {}, try vanilla'.format(standard_val_key))
+                            if 'sample_users' in outname:
+                                standard_val = vanilla.get(metric)
+                                if standard_val is None:
+                                    continue
+                                else:
+                                    print('Did load vanilla')
+                            else:
+                                continue
                         standard_val = np.mean(standard_val)
                         key = '{}_{}'.format(metric, group)
                         vals = res.get(key)
