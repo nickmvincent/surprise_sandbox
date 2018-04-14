@@ -77,13 +77,13 @@ def main(args):
             batch_l = {}
             for key in key_batch:
                 batch_b[key] = boycott_uid_sets[key]
-                batch_l[key] = boycott_uid_sets[key]
+                batch_l[key] = like_boycotters_uid_sets[key]
 
             res = cross_validate_many(
                 ALGOS[algo_name], data,
                 Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
                 batch_b, batch_l, 
-                MEASURES, NUM_FOLDS, verbose=False
+                MEASURES, NUM_FOLDS, verbose=True
             )
             out.update(res)
             with open(
@@ -95,13 +95,47 @@ def main(args):
     print(time.time() - starttime)
 
 
+def join(args):
+    """
+    Join together a bunch of standards results that were calculated separately!
+    """
+
+    if args.algo_name:
+        algo_names = [args.algo_name]
+    else:
+        algo_names = list(ALGOS.keys())
+    out = {}
+    for algo_name in algo_names:
+        merged = {}
+        for root, dirs, _ in os.walk('misc_standards/'):
+            print('root', root)
+            print('dirs', dirs)
+            for d in dirs:
+                for _, _, files in os.walk(root +'/' + d):
+                    for file in files:
+                        if file.endswith('.json'):
+                            print(file)
+                            with open(file, 'r') as f:
+                                data = json.load(f)
+                                merged.update(d)
+                        
+        with open('MERGED_{}_{}.json'.format(args.dataset, algo_name)) as f:
+            json.dump(merged, f)
+
+
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument('--algo_name')
     parser.add_argument('--pathto', default='standard_results')
+    parser.add_argument('--join', action='store_true')
+
     args = parser.parse_args()
-    main(args)
+
+    if args.join:
+        join(args)
+    else:
+        main(args)
 
 
 if __name__ == '__main__':
