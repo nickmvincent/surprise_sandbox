@@ -12,7 +12,7 @@ from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMea
 ALGOS = {
     'SVD': SVD(),
     # 'SVD50': SVD(n_factors=50),
-    'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
+    #'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
     # 'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}),
     # 'KNNBasic_user_pearson': KNNBasic(sim_options={'user_based': True, 'name': 'pearson'}),
     # 'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
@@ -23,12 +23,12 @@ ALGOS = {
 
 ALGOS_FOR_STANDARDS = {
     # flag: uncomment when done
-    'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
-    #'SVD': SVD(),
-    #'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+    #'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
+    'SVD': SVD(),
+    'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
     #'GuessThree': GuessThree(),
     #'GlobalMean': GlobalMean(),
-    #'MovieMean': MovieMean(),
+    'MovieMean': MovieMean(),
 }
 
 
