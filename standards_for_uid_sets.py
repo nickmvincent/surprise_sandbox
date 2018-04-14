@@ -83,7 +83,7 @@ def main(args):
                 ALGOS[algo_name], data,
                 Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
                 batch_b, batch_l, 
-                MEASURES, NUM_FOLDS, verbose=True
+                MEASURES, NUM_FOLDS, verbose=False
             )
             out.update(res)
             with open(
@@ -104,7 +104,6 @@ def join(args):
         algo_names = [args.algo_name]
     else:
         algo_names = list(ALGOS.keys())
-    out = {}
     for algo_name in algo_names:
         merged = {}
         for root, dirs, _ in os.walk('misc_standards/'):
@@ -117,7 +116,7 @@ def join(args):
                             print(file)
                             with open(file, 'r') as f:
                                 data = json.load(f)
-                                merged.update(d)
+                                merged.update(data)
                         
         with open('MERGED_{}_{}.json'.format(args.dataset, algo_name)) as f:
             json.dump(merged, f)
