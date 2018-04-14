@@ -47,16 +47,22 @@ def main(args):
         if args.dataset not in file:
             print('skip {} b/c dataset'.format(file))
             continue
+        if args.name_match and args.name_match not in file:
+            continue
         print(file)
         uid_sets_df = pd.read_csv(args.pathto + '/' + file, dtype=str)
         for i, row in uid_sets_df.iterrows():
             identifier_num = row[0]
             try:
-                boycott_uid_set = set(row['boycott_uid_set'].split(';'))
+                boycott_uid_set = set([
+                    int(x) for x in row['boycott_uid_set'].split(';')
+                ])
             except AttributeError:
                 boycott_uid_set = set([])
             try:
-                like_boycotters_uid_set = set(row['like_boycotters_uid_set'].split(';'))
+                like_boycotters_uid_set = set([
+                    int(x) for x in row['like_boycotters_uid_set'].split(';')
+                ])
             except AttributeError:
                 like_boycotters_uid_set = set([])
 
@@ -126,6 +132,7 @@ def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml-1m')
     parser.add_argument('--algo_name')
+    parser.add_argument('--name_match')
     parser.add_argument('--pathto', default='standard_results')
     parser.add_argument('--join', action='store_true')
 
