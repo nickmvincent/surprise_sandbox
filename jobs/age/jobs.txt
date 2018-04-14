@@ -1,0 +1,2 @@
+python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/age
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/age

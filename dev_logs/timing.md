@@ -74,3 +74,11 @@ about 5 seconds per eval... and this is SVD... so that seems reasonable?
 # updated it
 1861 per crossfold per 100 rows
 (1 algo only!!!)
+
+476.9139552116394 per crossfold w/ 100 rows
+(1 algo)
+
+
+725.6957314014435 seconds since last tic (doing crossfolds)
+180 rows
+1 algo

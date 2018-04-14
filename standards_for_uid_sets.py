@@ -71,7 +71,7 @@ def main(args):
         algo_names = list(ALGOS.keys())
     out = {}
     for algo_name in algo_names:
-        for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 50)):
+        for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 100)):
             print('On key batch {} of {} keys'.format(batch_num, len(boycott_uid_sets)))
             batch_b = {}
             batch_l = {}
@@ -87,7 +87,7 @@ def main(args):
             )
             out.update(res)
             with open(
-                'standards_results/{}_{}.json'.format(
+                'standards_result/{}_{}.json'.format(
                     args.dataset, algo_name
                 ), 'w'
             ) as f:
