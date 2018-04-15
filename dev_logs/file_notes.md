@@ -35,6 +35,9 @@ IMPORTANT:
 state standards are not in the misc_standards folder right now.
 populating misc_standards is still manual right now, so need to do this manually for the "final final" run
 
+
+10:46: still running: state experiments, standards for genre
+
 TODO:
 standards for sample experiments, just to check.
 re-reun 11-20 (had issues w/ tail metrics)
