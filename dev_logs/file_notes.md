@@ -48,3 +48,11 @@ MovieMean values for organized boycotts?
 
 Flag: tailndcg10 for occupation boycotts has some artifact.
 But we already knew that!
+
+
+## 4/15
+11:22: re-running full01 b/c of a user error
+running 11_20 org standards
+running standards for rand groups.
+
+State experiments seem to have failed silently so don't include them.
