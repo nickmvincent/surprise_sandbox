@@ -116,7 +116,11 @@ def main(args):
                 standard_results[algo_name].append(saved_results)
             standard_results_df = pd.DataFrame(standard_results[algo_name])
             print(standard_results_df.mean())
-            standard_results_df.mean().to_csv('{}_{}'.format(args.num_standards, filename_ratingcv_standards))
+            standard_results_df.mean().to_csv('{}'.format(
+                filename_ratingcv_standards).replace('.csv', '_{}.csv'.format(
+                    args.num_standards)
+                )
+            )
 
     times['standards_loaded'] = time.time() - times['data_constructed']
 
