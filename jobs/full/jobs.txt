@@ -1,12 +1,6 @@
-python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name SVD --pathto files_for_jobs/full
-python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full --name_match age
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full --name_match gender
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full --name_match genre_user
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full --name_match occupation
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full --name_match power
+python3 standards_for_uid_sets.py --algo_name KNNBaseline_item_msd --pathto files_for_jobs/full --name_match state
