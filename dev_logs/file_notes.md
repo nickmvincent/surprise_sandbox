@@ -39,8 +39,12 @@ populating misc_standards is still manual right now, so need to do this manually
 10:46: still running: state experiments, standards for genre
 
 TODO:
+calculate the AVERAGE vanilla #'s
 standards for sample experiments, just to check.
-re-reun 11-20 (had issues w/ tail metrics)
+re-reun standards for 11-20 (had issues w/ tail metrics)
 standards for 0.5 userfrac experiments indices 11-20 (1-10 are done and included)
 
 MovieMean values for organized boycotts?
+
+Flag: tailndcg10 for occupation boycotts has some artifact.
+But we already knew that!
