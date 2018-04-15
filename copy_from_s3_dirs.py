@@ -23,5 +23,5 @@ def recursive_search(directory):
 
 if __name__ == '__main__':
     # put your directory here...
-    recursive_search('C:/Users/Nick/Desktop/mys3/databoycott/org01')
+    recursive_search('C:/Users/Nick/Desktop/mys3/databoycott/full02')
     #recursive_search('C:/Users/Nick/Desktop/mys3/databoycott/round6')

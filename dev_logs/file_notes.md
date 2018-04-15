@@ -31,7 +31,13 @@ Was duplicated though, so each results folder has the same json file w/ standard
 full02 - this has standards calculation for all KNNBaseline full experiment (no genre_strict though)
 
 
+IMPORTANT:
+state standards are not in the misc_standards folder right now.
+populating misc_standards is still manual right now, so need to do this manually for the "final final" run
+
 TODO:
 standards for sample experiments, just to check.
 re-reun 11-20 (had issues w/ tail metrics)
 standards for 0.5 userfrac experiments indices 11-20 (1-10 are done and included)
+
+MovieMean values for organized boycotts?
