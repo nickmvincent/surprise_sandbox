@@ -30,6 +30,7 @@ def main(args):
     """
     starttime = time.time()
     dfs = get_dfs(args.dataset)
+    head_items = load_head_items(args.dataset)
     ratings_df = dfs['ratings']
     data = Dataset.load_from_df(
         ratings_df[['user_id', 'movie_id', 'rating']],
@@ -89,7 +90,7 @@ def main(args):
                 ALGOS[algo_name], data,
                 Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
                 batch_b, batch_l, 
-                MEASURES, NUM_FOLDS, verbose=False
+                MEASURES, NUM_FOLDS, verbose=False, head_items=head_items,
             )
             out.update(res)
             with open(
@@ -122,7 +123,6 @@ def join(args):
                         print(log)
                         if algo_name not in log:
                             print('Skipping this dir b/c wrong log')
-                            input()
                             continue
                 except FileNotFoundError:
                     continue
