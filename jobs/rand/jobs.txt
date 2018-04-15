@@ -1,3 +1,0 @@
-python3 sandbox.py --grouping sample --sample_sizes 4832 --num_samples 250 --indices 1,250
-python3 sandbox.py --grouping sample --sample_sizes 5436 --num_samples 250 --indices 1,250
-python3 sandbox.py --grouping sample --sample_sizes 5980 --num_samples 250 --indices 1,250
