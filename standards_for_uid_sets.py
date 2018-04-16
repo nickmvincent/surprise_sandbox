@@ -106,7 +106,8 @@ def join(args):
     """
     Join together a bunch of standards results that were calculated separately!
     """
-
+    successes = 0
+    sources = []
     if args.algo_name:
         algo_names = [args.algo_name]
     else:
@@ -114,31 +115,35 @@ def join(args):
     for algo_name in algo_names:
         merged = {}
         for root, dirs, _ in os.walk('misc_standards/'):
-            print('root', root)
-            for d in dirs:
-                print(d)
+            #print(dirs)
+            for d1 in dirs:
+                #print('d1', d1)      
                 try:
-                    with open('{}/{}/log.txt'.format(root, d), 'r') as f:
+                    logf = '{}/{}/log.txt'.format(root, d1)
+                    with open(logf, 'r') as f:
                         log = f.read()
-                        print(log)
+                        # print(log)
                         if algo_name not in log:
-                            print('Skipping this dir b/c wrong log')
+                            #print('Skipping this dir b/c wrong log')
                             continue
                 except FileNotFoundError:
                     continue
-                for root2, _, files in os.walk(root + '/' + d):
+                for root2, _, files in os.walk(root + '/' + d1):
                     for file in files:
                         if file.endswith('.json'):
                             if algo_name not in file:
-                                print('Skip {}'.format(file))
+                                # print('Skip {}'.format(file))
                                 continue
                             with open(root2 + '/' + file, 'r') as f:
                                 data = json.load(f)
                                 merged.update(data)
-                            print('Success for {}'.format(file))                            
+                            print('Success for {}'.format(file))  
+                            successes += 1                        
+                            sources.append(file)  
                         
         with open('MERGED_{}_{}.json'.format(args.dataset, algo_name), 'w') as f:
             json.dump(merged, f)
+        print(successes)
 
 
 def parse():

@@ -9,13 +9,20 @@ import pandas as pd
 
 # os.system("python process_results.py --grouping gender --userfracs 0.5,1 --ratingfracs 0.5,1")
 
-files = os.listdir("results")
+d = "results"
+files = os.listdir(d)
 
 final_df = None
+
+outnames = []
 for file in files:
-    print(file)
-    os.system("python process_results.py --outname {}".format(file))
+    outnames.append(d + "/" + file)
+    #os.system("python process_results.py --outname {}".format(file))
     # os.system("python process_results.py --outname dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0.csv")
+os.system("python process_results.py --outname {}".format(','.join(outnames)))
+
+
+for file in files:
     try:
         df = pd.read_csv('processed_results/' + file)
         if final_df is None:
