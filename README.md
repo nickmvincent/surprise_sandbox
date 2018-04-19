@@ -5,6 +5,9 @@ Requires Surprise to be installed to actually train and evaluate recommenders.
 Requires Jupyter, Pandas, numpy, seaborn, scipy, and matplotlib to explore results.
 Recommended approach is to just install latest Anaconda distribution.
 
+# Benchmarks
+See benchmark_comparisons.csv and http://surpriselib.com/.
+
 # Inspecting Processed Data
 This dump comes with processed results collected into `all_results.csv`
 Therefore, if you load visualize-v02.py

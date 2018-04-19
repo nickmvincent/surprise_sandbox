@@ -1,0 +1,6 @@
+﻿Paper with MovieLens 1M results,Link,Notes,RMSE,NDCG@10 with User Testing,NDCG@5 with User Testing,NDCG full
+Ours,-,-,0.873,0.79,0.78,0.91
+Lawrence and Urtasun,https://dl.acm.org/citation.cfm?id=1553452,-,0.874,-,-,-
+Alan Said and Alejandro Bellogín,https://dl.acm.org/citation.cfm?id=2645746,LensKit Results (100% coverage of users and categories),0.879,0.66,-,-
+Xu et al.,https://dl.acm.org/citation.cfm?id=2507185,Removed all users < 30 ratings.,,0.76,,0.896
+Huang et al.,https://dl.acm.org/citation.cfm?id=2767693,-,-,-,0.81,-
