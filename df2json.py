@@ -1,9 +1,8 @@
 import pandas as pd
 import json
 
-# C:\Users\Nick\Documents\GitHub\recsys\surprise_tests\standard_results\
 # fn = 'standard_results/ml-1m_ratingcv_standards_for_SVD_10.csv'
-fn = 'standard_results/ml-1m_ratingcv_standards_for_KNNBaseline_item_msd_10.csv'
+fn = 'standard_results/ml-1m_ratingcv_standards_for_KNNBasic_item_msd.json'
 df = pd.read_csv(fn, header=None)
 
 print(df)
