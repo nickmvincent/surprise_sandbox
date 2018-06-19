@@ -39,7 +39,12 @@ def get_dfs(dataset):
     """
     Takes a dataset string and return that data in a dataframe!
     """
+    test_slice = False
     print(dataset)
+    if 'test_' in dataset:
+        dataset = dataset.replace('test_', '')
+        print(dataset)
+        test_slice = True
     ratings_path = BUILTIN_DATASETS[dataset].path
     print('Path to ratings file is: {}'.format(ratings_path))
     if not os.path.isfile(ratings_path):
@@ -53,11 +58,14 @@ def get_dfs(dataset):
         movies_path = ratings_path.replace('ratings.', 'movies.')
         dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
     elif dataset == 'ml-20m':
-        users_path = ratings_path.replace('ratings.', 'users.')
-        movies_path = ratings_path.replace('ratings.', 'movies.')
-        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+        # there is no user path
+        movies_path = ratings_path.replace('ratings.', 'movies.') # .../movies.csv
+        dfs = movielens_20m_to_df(ratings_path, movies_path)
     else:
         raise Exception("Unknown dataset: " + dataset)
+    
+    if test_slice:
+        dfs['ratings'] = dfs['ratings'].sample(1000)
     return dfs
 
 def movielens_to_df(ratings_file, users_file, movies_file):
@@ -111,6 +119,29 @@ def movielens_1m_to_df(ratings_file, users_file, movies_file):
     }
 
 
+def movielens_20m_to_df(ratings_file, movies_file):
+    """
+    This function takes a movielens dataset and returns three dataframes
+    Specifically it was written with the 100k dataset.
+    """
+    ratings_names = ['user_id', 'movie_id', 'rating', 'unix_timestamp']
+    ratings_delim = ','
+
+    movies_names = [ 'movie_id', 'movie_title', 'genres']
+    movies_delim = ','
+    encoding = 'utf-8'
+    engine = 'python'
+
+    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding, engine=engine)
+    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding, engine=engine)
+
+    return {
+        'ratings': ratings_df,
+        'users': None,
+        'movies': movies_df,
+    }
+
+
 def extract_from_filename(text, comes_after, length=None, ends_at=None):
     """
     dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0
@@ -129,6 +160,9 @@ def extract_from_filename(text, comes_after, length=None, ends_at=None):
 if __name__ == '__main__':
     print('Testing...')
     assert extract_from_filename("dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0", "userfrac-", 3) == '1.0'
+    assert extract_from_filename("dataset-test_ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0", "userfrac-", 3) == '1.0'
+    assert extract_from_filename(
+        "dataset-test_ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0", "dataset-", None, '_type') == 'test_ml-1m'
     assert extract_from_filename("dataset-ml-1m_type-gender_userfrac-1.0_ratingfrac-1.0", "ratingfrac-", 3) == '1.0'
     assert extract_from_filename(
         "dataset-ml-1m_type-sample_users_userfrac-1.0_ratingfrac-1.0_sample_size-1_num_samples-250_indices-251-to-500.csv",
@@ -137,9 +171,7 @@ if __name__ == '__main__':
         "dataset-ml-1m_type-sample_users_userfrac-1.0_ratingfrac-1.0_sample_size-1_num_samples-250_indices-251-to-500.csv",
         "indices-", None, '.csv') == '251-to-500'
 
-
-    assert load_head_items('ml-100k') == [
-        '50', '258', '100', '181', '294', '286', '288', '1', '300', '121', '174', '127', '56',
-        '7', '98', '237', '117', '172', '222', '204', '313', '405', '79', '210', '151', '173', '69', '748', '168', '269', '257', '195', '423', '9', '318', '276', '302', '22', '328', '96', '118', '15', '25', '183', '216', '176', '64', '234', '202', '191', '28', '89', '111', '275', '12', '742', '357', '82', '135', '289', '97', '238', '268', '546', '196', '333', '186', '70', '475', '153', '132', '228', '125', '144', '483', '194', '245', '323', '197', '185', '11', '282',
-'496', '568']
+    assert set(load_head_items('ml-100k')) == set([
+        1, 258, 257, 132, 7, 135, 9, 11, 12, 269, 268, 15, 144, 275, 276, 405, 22, 151, 25, 153, 282, 28, 286, 288, 289, 546, 294, 423, 168, 300, 172, 174, 173, 302, 176, 50, 181, 183, 56, 313, 186, 185, 568, 318, 191, 64, 194, 195, 196, 69, 70, 323, 328, 197, 202, 204, 333, 79, 210, 82, 216, 89, 475, 222, 96, 97, 98, 483, 100, 357, 742, 228, 234, 748, 237, 238, 111, 496, 117, 118, 245, 121, 125, 127
+    ])
     print('Success')

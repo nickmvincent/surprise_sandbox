@@ -29,14 +29,10 @@ def main(args):
 
 def parse():
     """
-    Parse args and handles list splitting
-
-    Example:
-    python process_results --sample_sizes 4,5,6,7 --num_samples 100
-    python process_results --grouping gender --userfracs 0.5,1 --ratingfracs 0.5,1
+    Parse args and run.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default='ml-1m')
+    parser.add_argument('--dataset', default='ml-1m', help='which dataset to use')
     args = parser.parse_args()
     main(args)
 

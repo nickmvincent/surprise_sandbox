@@ -327,6 +327,8 @@ def parse():
 
     Example: 
     python sandbox.py --grouping state
+
+    python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--indices', default='all')
@@ -338,10 +340,11 @@ def parse():
         '--compute_standards', action='store_true',
         help='Defaults to false. Pass --compute_standards if you want to compute standards (you really only need to do this once)')
     parser.add_argument(
-        '--num_standards', default=1, type=int
+        '--num_standards', default=1, type=int,
+        help='number of times to replicate standards calculation (to account for random fold shuffling)'
     )
     parser.add_argument(
-        '--movie_mean', help='override everything and just use MovieMean and GlobalMean',
+        '--movie_mean', help='Defaults to False. If True, override everything and just use MovieMean and GlobalMean',
         action='store_true')
     parser.add_argument('--mode', default='compute')
     parser.add_argument('--userfrac', type=float, default=1.0)
