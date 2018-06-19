@@ -3,6 +3,10 @@ Process results
 
 Currently this just means computing metric increases,
 in both additive units and percent units.
+
+The reason this isn't non-trivial is because there are a lot of different experiments
+and it is important to match the experimental results (i.e. some boycott) to
+the standard results (i.e. performance from the perspective of the would-be boycotters in the no boycott condition)
 """
 
 

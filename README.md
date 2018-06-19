@@ -1,7 +1,6 @@
 # Surprise Sandbox
-
-Able to run a variety of recsys tests using Surprise.
-Requires Surprise to be installed to actually train and evaluate recommenders.
+Able to run a variety of recsys tests using Surprise (ADD LINK HERE)
+Requires our forked version of Surprise to be installed to actually train and evaluate recommenders.
 Requires Jupyter, Pandas, numpy, seaborn, scipy, and matplotlib to explore results.
 Recommended approach is to just install latest Anaconda distribution.
 
@@ -25,6 +24,8 @@ This is a quick way to compare various metrics, look at only at certain experime
 
 Get files in places with your choice of:
 cli, finder app, aws cli, etc
+
+Be sure to install the forked version of surprise.
 
 Organize all the "standards" (i.e. the results used for comparison with boycotts) into a single directory.
 Here I've used misc_standards, and, and hard-coded that directory in `standards_for_uid_sets.py`

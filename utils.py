@@ -28,6 +28,7 @@ def concat_output_filename(dataset, type_, userfrac, ratingfrac, size=None, num_
     ret += '.csv'
     return ret
 
+
 def load_head_items(dataset):
     with open('boycott_files/{}_top_five_percent_movies.csv'.format(dataset), 'r') as f:
         head_items = [int(x) for x in f.read().split(',')]
@@ -48,6 +49,10 @@ def get_dfs(dataset):
         movies_path = ratings_path.replace('.data', '.item')
         dfs = movielens_to_df(ratings_path, users_path, movies_path)
     elif dataset == 'ml-1m':
+        users_path = ratings_path.replace('ratings.', 'users.')
+        movies_path = ratings_path.replace('ratings.', 'movies.')
+        dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
+    elif dataset == 'ml-20m':
         users_path = ratings_path.replace('ratings.', 'users.')
         movies_path = ratings_path.replace('ratings.', 'movies.')
         dfs = movielens_1m_to_df(ratings_path, users_path, movies_path)
