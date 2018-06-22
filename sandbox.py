@@ -8,6 +8,7 @@ import argparse
 import json
 import time
 from collections import OrderedDict, defaultdict
+import os
 
 import pandas as pd
 import numpy as np
@@ -30,12 +31,12 @@ from surprise.reader import Reader
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
-    num_ratings, num_users, num_movies, name, head_items):
+    num_ratings, num_users, num_movies, name, head_items, predictions_path):
     return {
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
             like_boycotters_uid_set, measures, cv, n_jobs=1,
-            head_items=head_items
+            head_items=head_items, predictions_path=predictions_path
         ),
         'num_ratings': num_ratings,
         'num_users': num_users,
@@ -64,6 +65,7 @@ def main(args):
     head_items = load_head_items(args.dataset)
     times['dfs_loaded'] = time.time() - times['start']
     print('Got dataframes, took {} seconds'.format(times['dfs_loaded']))
+    print('Total examples: {}'.format(len(dfs['ratings'].index)))
 
     ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     if args.mode == 'info':
@@ -100,9 +102,12 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
+                predictions_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+
                 results = cross_validate_custom(
                     algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
-                    reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items)
+                    reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items,
+                    predictions_path=predictions_path)
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
@@ -140,6 +145,8 @@ def main(args):
         'gender', 'age', 'power', 'state', 'genre', 'genre_strict', 'occupation', 
     ]:
         experiment_configs += [{'type': args.grouping, 'size': None}]
+    else:
+        experiment_configs = []
 
     num_configs = len(experiment_configs)
     if args.sample_sizes:
@@ -332,7 +339,7 @@ def parse():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--indices', default='all')
-    parser.add_argument('--grouping', default='individual_users')
+    parser.add_argument('--grouping')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')

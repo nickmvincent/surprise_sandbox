@@ -40,10 +40,8 @@ def get_dfs(dataset):
     Takes a dataset string and return that data in a dataframe!
     """
     test_slice = False
-    print(dataset)
     if 'test_' in dataset:
         dataset = dataset.replace('test_', '')
-        print(dataset)
         test_slice = True
     ratings_path = BUILTIN_DATASETS[dataset].path
     print('Path to ratings file is: {}'.format(ratings_path))
@@ -64,8 +62,9 @@ def get_dfs(dataset):
     else:
         raise Exception("Unknown dataset: " + dataset)
     
+    print('loaded now slicing maybe')
     if test_slice:
-        dfs['ratings'] = dfs['ratings'].sample(1000)
+        dfs['ratings'] = dfs['ratings'].sample(100)
     return dfs
 
 def movielens_to_df(ratings_file, users_file, movies_file):
