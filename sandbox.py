@@ -31,12 +31,12 @@ from surprise.reader import Reader
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
-    num_ratings, num_users, num_movies, name, head_items, predictions_path):
+    num_ratings, num_users, num_movies, name, head_items, save_path):
     return {
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
             like_boycotters_uid_set, measures, cv, n_jobs=1,
-            head_items=head_items, predictions_path=predictions_path
+            head_items=head_items, save_path=save_path
         ),
         'num_ratings': num_ratings,
         'num_users': num_users,
@@ -102,12 +102,12 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
-                predictions_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+                save_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
 
                 results = cross_validate_custom(
                     algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
                     reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items,
-                    predictions_path=predictions_path)
+                    save_path=save_path)
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
@@ -287,7 +287,7 @@ def main(args):
                     num_ratings,
                     num_users,
                     num_movies, name,
-                    head_items
+                    head_items, save_path=None
                 )]
 
             # data should be ~30 MB

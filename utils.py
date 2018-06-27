@@ -62,7 +62,6 @@ def get_dfs(dataset):
     else:
         raise Exception("Unknown dataset: " + dataset)
     
-    print('loaded now slicing maybe')
     if test_slice:
         dfs['ratings'] = dfs['ratings'].sample(100)
     return dfs
