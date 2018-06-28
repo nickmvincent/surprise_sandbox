@@ -132,10 +132,15 @@ def movielens_20m_to_df(ratings_file, movies_file):
 
     ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding, engine=engine)
     movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding, engine=engine)
+    all_users = list(set(ratings_df.user_id))
+    users_df = pd.DataFrame()
+    users_df['user_id'] = all_users
+    print(users_df.head())
+
 
     return {
         'ratings': ratings_df,
-        'users': None,
+        'users': users_df,
         'movies': movies_df,
     }
 

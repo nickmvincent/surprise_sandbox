@@ -9,6 +9,7 @@ import json
 import time
 from collections import OrderedDict, defaultdict
 import os
+import datetime
 
 import pandas as pd
 import numpy as np
@@ -166,6 +167,11 @@ def main(args):
     uid_to_error = {}
     experimental_iterations = []
     for config in experiment_configs:
+        outname = concat_output_filename(
+            args.dataset, config['type'], args.userfrac,
+            args.ratingfrac,
+            config['size'], args.num_samples, args.indices
+        )
         if config['type'] == 'individual_users':
             experimental_iterations = list(users_df.iterrows())
         elif config['type'] == 'sample_users':
@@ -281,13 +287,15 @@ def main(args):
                 # make sure to save the set of boycott ids and like boycott ids
                 experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
                 experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
+                save_path = outname.replace('results/', '/predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
+                save_path = os.getcwd() + save_path
                 delayed_iteration_list += [delayed(task)(
                     algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
                     False, identifier,
                     num_ratings,
                     num_users,
                     num_movies, name,
-                    head_items, save_path=None
+                    head_items, save_path=save_path,
                 )]
 
             # data should be ~30 MB
@@ -315,11 +323,7 @@ def main(args):
                                 key: val,
                             })
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = concat_output_filename(
-            args.dataset, config['type'], args.userfrac,
-            args.ratingfrac,
-            config['size'], args.num_samples, args.indices
-        )
+        
         uid_sets_outname = outname.replace('results/', 'standard_results/uid_sets_')
         pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)
         if args.movie_mean:
@@ -335,7 +339,8 @@ def parse():
     Example: 
     python sandbox.py --grouping state
 
-    python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m
+    python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards
+    python sandbox.py --grouping sample --sample_sizes 1 --num_samples 10 --dataset ml-20m --indices 1,10
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--indices', default='all')
@@ -357,6 +362,24 @@ def parse():
     parser.add_argument('--userfrac', type=float, default=1.0)
     parser.add_argument('--ratingfrac', type=float, default=1.0)
     args = parser.parse_args()
+
+    # make dirs as needed
+    for directory in [
+        'logs',
+        'results',
+        'standard_results',
+        'processed_results',
+        'predictions',
+        'predictions/standards',
+        'predictions/boycotts',
+    ]:
+        if not os.path.exists(directory):
+            print('Missing directory {}, going to create it.'.format(directory))
+            os.makedirs(directory)
+
+    with open('logs/{}.txt'.format(datetime.date.today()), 'a') as f:
+        msg = '{}\n{}\n\n'.format(str(datetime.datetime.now()), str(args))
+        f.write(msg)
 
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]

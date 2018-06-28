@@ -4,6 +4,17 @@ Requires our forked version of Surprise to be installed to actually train and ev
 Requires Jupyter, Pandas, numpy, seaborn, scipy, and matplotlib to explore results.
 Recommended approach is to just install latest Anaconda distribution.
 
+# Directory Setup
+There are some directories required which are not tracked by git (because they contain a lot of large files that are generated throughout the experiment pipeline).
+
+/predictions
+  /standards
+  /boycotts
+
+/results
+/processed_results
+/standard_results
+
 # Benchmarks
 See benchmark_comparisons.csv and http://surpriselib.com/.
 

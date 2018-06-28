@@ -13,3 +13,4 @@ all_results*
 aws/custom_bootstrap.sh
 aws/launch_specification_custom.json
 misc_saved_scripts.txt
+logs/
