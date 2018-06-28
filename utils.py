@@ -130,13 +130,12 @@ def movielens_20m_to_df(ratings_file, movies_file):
     encoding = 'utf-8'
     engine = 'python'
 
-    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, encoding=encoding, engine=engine)
-    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, encoding=encoding, engine=engine)
+    ratings_df = pd.read_csv(ratings_file, sep=ratings_delim, names=ratings_names, header=0, encoding=encoding, engine=engine)
+    movies_df = pd.read_csv(movies_file, sep=movies_delim, names=movies_names, header=0, encoding=encoding, engine=engine)
     all_users = list(set(ratings_df.user_id))
     users_df = pd.DataFrame()
     users_df['user_id'] = all_users
-    print(users_df.head())
-
+    print(ratings_df.head())
 
     return {
         'ratings': ratings_df,
