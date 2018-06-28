@@ -70,9 +70,9 @@ def main(args):
 
     ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     if args.mode == 'info':
-        print(ratings_df.memory_usage())
-        print(users_df.memory_usage())
-        print(movies_df.memory_usage())
+        print(ratings_df.memory_usage(index=True))
+        print(users_df.memory_usage(index=True))
+        print(movies_df.memory_usage(index=True))
 
         print(ratings_df.info())
         print(users_df.info())
@@ -176,7 +176,7 @@ def main(args):
             experimental_iterations = list(users_df.iterrows())
         elif config['type'] == 'sample_users':
             experimental_iterations = [{
-                'df': users_df.sample(config['size']),
+                'df': users_df.sample(config['size']), # copies user_df
                 'name': '{} user sample'.format(config['size'])
             } for _ in range(args.num_samples)]
         elif config['type'] == 'gender':
@@ -245,7 +245,7 @@ def main(args):
                     like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
                     like_boycotters_uid_set = set(like_boycotters_df.user_id)
 
-                non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)]
+                non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)] # makes a df copy
                 boycott_ratings_df = None
                 boycott_user_lingering_ratings_df = None
                 for uid in boycott_uid_set:
@@ -263,8 +263,6 @@ def main(args):
                         boycott_user_lingering_ratings_df = lingering_ratings_for_user
                     else:
                         boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
-                # print(boycott_ratings_df.head())
-                # print(boycott_user_lingering_ratings_df.head())
                 print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
                     len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
                 ))
@@ -274,11 +272,11 @@ def main(args):
                 nonboycott = Dataset.load_from_df(
                     all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
                     reader=Reader()
-                )
+                ) # makes a copy
                 boycott = Dataset.load_from_df(
                     boycott_ratings_df[['user_id', 'movie_id', 'rating']],
                     reader=Reader()
-                )
+                ) # makes a copy
                 identifier = str(identifier).zfill(4)
                 num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
                 num_movies = len(all_non_boycott_ratings_df.movie_id.value_counts())
@@ -299,6 +297,7 @@ def main(args):
                 )]
 
             # data should be ~30 MB
+            print('About to run Parallel()')
             out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
             for d in out_dicts:
                 res = d['subset_results']

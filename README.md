@@ -34,7 +34,7 @@ This is a quick way to compare various metrics, look at only at certain experime
 # Experiment Pipeline
 
 Get files in places with your choice of:
-cli, finder app, aws cli, etc
+cli, finder/explorer app, aws cli, etc
 
 Be sure to install the forked version of surprise.
 

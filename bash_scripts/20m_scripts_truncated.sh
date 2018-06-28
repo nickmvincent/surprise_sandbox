@@ -1,1 +1,1 @@
-python sandbox.py --grouping sample --sample_sizes 1 --num_samples 250 --indices 1,250 --dataset ml_20m
+python sandbox.py --grouping sample --sample_sizes 1 --num_samples 100 --indices 1,100 --dataset ml-20m

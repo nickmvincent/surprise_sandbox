@@ -64,6 +64,9 @@ def get_dfs(dataset):
     
     if test_slice:
         dfs['ratings'] = dfs['ratings'].sample(100)
+    # print('Got dfs.\nDataframe sizes are\nratings:{}\nusers:{}\nmovies:{}'.format(
+    #     dfs['ratings'].memory_usage(), dfs['users'].memory_usage(), dfs['movies'].memory_usage()
+    # ))
     return dfs
 
 def movielens_to_df(ratings_file, users_file, movies_file):
