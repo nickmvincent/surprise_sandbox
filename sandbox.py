@@ -8,6 +8,8 @@ import argparse
 import json
 import time
 from collections import OrderedDict, defaultdict
+import os
+import datetime
 
 import pandas as pd
 import numpy as np
@@ -30,12 +32,12 @@ from surprise.reader import Reader
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
-    num_ratings, num_users, num_movies, name, head_items):
+    num_ratings, num_users, num_movies, name, head_items, save_path):
     return {
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
             like_boycotters_uid_set, measures, cv, n_jobs=1,
-            head_items=head_items
+            head_items=head_items, save_path=save_path
         ),
         'num_ratings': num_ratings,
         'num_users': num_users,
@@ -64,6 +66,7 @@ def main(args):
     head_items = load_head_items(args.dataset)
     times['dfs_loaded'] = time.time() - times['start']
     print('Got dataframes, took {} seconds'.format(times['dfs_loaded']))
+    print('Total examples: {}'.format(len(dfs['ratings'].index)))
 
     ratings_df, users_df, movies_df = dfs['ratings'], dfs['users'], dfs['movies']
     if args.mode == 'info':
@@ -100,9 +103,12 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
+                save_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+
                 results = cross_validate_custom(
                     algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
-                    reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items)
+                    reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items,
+                    save_path=save_path)
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
@@ -140,6 +146,8 @@ def main(args):
         'gender', 'age', 'power', 'state', 'genre', 'genre_strict', 'occupation', 
     ]:
         experiment_configs += [{'type': args.grouping, 'size': None}]
+    else:
+        experiment_configs = []
 
     num_configs = len(experiment_configs)
     if args.sample_sizes:
@@ -159,6 +167,11 @@ def main(args):
     uid_to_error = {}
     experimental_iterations = []
     for config in experiment_configs:
+        outname = concat_output_filename(
+            args.dataset, config['type'], args.userfrac,
+            args.ratingfrac,
+            config['size'], args.num_samples, args.indices
+        )
         if config['type'] == 'individual_users':
             experimental_iterations = list(users_df.iterrows())
         elif config['type'] == 'sample_users':
@@ -274,13 +287,15 @@ def main(args):
                 # make sure to save the set of boycott ids and like boycott ids
                 experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
                 experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
+                save_path = outname.replace('results/', '/predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
+                save_path = os.getcwd() + save_path
                 delayed_iteration_list += [delayed(task)(
                     algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
                     False, identifier,
                     num_ratings,
                     num_users,
                     num_movies, name,
-                    head_items
+                    head_items, save_path=save_path,
                 )]
 
             # data should be ~30 MB
@@ -308,11 +323,7 @@ def main(args):
                                 key: val,
                             })
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        outname = concat_output_filename(
-            args.dataset, config['type'], args.userfrac,
-            args.ratingfrac,
-            config['size'], args.num_samples, args.indices
-        )
+        
         uid_sets_outname = outname.replace('results/', 'standard_results/uid_sets_')
         pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)
         if args.movie_mean:
@@ -327,10 +338,13 @@ def parse():
 
     Example: 
     python sandbox.py --grouping state
+
+    python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards
+    python sandbox.py --grouping sample --sample_sizes 1 --num_samples 10 --dataset ml-20m --indices 1,10
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--indices', default='all')
-    parser.add_argument('--grouping', default='individual_users')
+    parser.add_argument('--grouping')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
     parser.add_argument('--dataset', default='ml-1m')
@@ -338,15 +352,34 @@ def parse():
         '--compute_standards', action='store_true',
         help='Defaults to false. Pass --compute_standards if you want to compute standards (you really only need to do this once)')
     parser.add_argument(
-        '--num_standards', default=1, type=int
+        '--num_standards', default=1, type=int,
+        help='number of times to replicate standards calculation (to account for random fold shuffling)'
     )
     parser.add_argument(
-        '--movie_mean', help='override everything and just use MovieMean and GlobalMean',
+        '--movie_mean', help='Defaults to False. If True, override everything and just use MovieMean and GlobalMean',
         action='store_true')
     parser.add_argument('--mode', default='compute')
     parser.add_argument('--userfrac', type=float, default=1.0)
     parser.add_argument('--ratingfrac', type=float, default=1.0)
     args = parser.parse_args()
+
+    # make dirs as needed
+    for directory in [
+        'logs',
+        'results',
+        'standard_results',
+        'processed_results',
+        'predictions',
+        'predictions/standards',
+        'predictions/boycotts',
+    ]:
+        if not os.path.exists(directory):
+            print('Missing directory {}, going to create it.'.format(directory))
+            os.makedirs(directory)
+
+    with open('logs/{}.txt'.format(datetime.date.today()), 'a') as f:
+        msg = '{}\n{}\n\n'.format(str(datetime.datetime.now()), str(args))
+        f.write(msg)
 
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]

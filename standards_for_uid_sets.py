@@ -1,5 +1,5 @@
 """
-Computes baselines
+Computes standards for comparison (i.e. what are the results without any boycott going on)
 """
 import os
 import argparse
@@ -46,7 +46,7 @@ def main(args):
         if 'uid_sets' not in file or '.csv' not in file:
             continue
         if args.dataset not in file:
-            print('skip {} b/c dataset'.format(file))
+            #print('skip {} b/c dataset'.format(file))
             continue
         if args.name_match and args.name_match not in file:
             continue
@@ -78,6 +78,7 @@ def main(args):
         algo_names = list(ALGOS.keys())
     out = {}
     for algo_name in algo_names:
+        # why do we batch this
         for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 100)):
             print('On key batch {} of {} keys'.format(batch_num, len(boycott_uid_sets)))
             batch_b = {}
@@ -86,11 +87,13 @@ def main(args):
                 batch_b[key] = boycott_uid_sets[key]
                 batch_l[key] = like_boycotters_uid_sets[key]
 
+            load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
             res = cross_validate_many(
                 ALGOS[algo_name], data,
                 Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
                 batch_b, batch_l, 
                 MEASURES, NUM_FOLDS, verbose=False, head_items=head_items,
+                load_path=load_path
             )
             out.update(res)
             with open(
@@ -106,7 +109,8 @@ def join(args):
     """
     Join together a bunch of standards results that were calculated separately!
     """
-
+    successes = 0
+    sources = []
     if args.algo_name:
         algo_names = [args.algo_name]
     else:
@@ -114,40 +118,50 @@ def join(args):
     for algo_name in algo_names:
         merged = {}
         for root, dirs, _ in os.walk('misc_standards/'):
-            print('root', root)
-            for d in dirs:
-                print(d)
+            #print(dirs)
+            for d1 in dirs:
+                #print('d1', d1)      
                 try:
-                    with open('{}/{}/log.txt'.format(root, d), 'r') as f:
+                    logf = '{}/{}/log.txt'.format(root, d1)
+                    with open(logf, 'r') as f:
                         log = f.read()
-                        print(log)
+                        # print(log)
                         if algo_name not in log:
-                            print('Skipping this dir b/c wrong log')
+                            #print('Skipping this dir b/c wrong log')
                             continue
                 except FileNotFoundError:
                     continue
-                for root2, _, files in os.walk(root + '/' + d):
+                for root2, _, files in os.walk(root + '/' + d1):
                     for file in files:
                         if file.endswith('.json'):
                             if algo_name not in file:
-                                print('Skip {}'.format(file))
+                                # print('Skip {}'.format(file))
                                 continue
                             with open(root2 + '/' + file, 'r') as f:
                                 data = json.load(f)
                                 merged.update(data)
-                            print('Success for {}'.format(file))                            
+                            print('Success for {}'.format(file))  
+                            successes += 1                        
+                            sources.append(file)  
                         
         with open('MERGED_{}_{}.json'.format(args.dataset, algo_name), 'w') as f:
             json.dump(merged, f)
+        print(successes)
 
 
 def parse():
+    """
+    Examples
+
+    python standards_for_uid_sets.py --dataset test_ml-1m --algo_name SVD --name_match sample --pathto standard_results
+    """
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default='ml-1m')
-    parser.add_argument('--algo_name')
-    parser.add_argument('--name_match')
-    parser.add_argument('--pathto', default='standard_results')
-    parser.add_argument('--join', action='store_true')
+    parser.add_argument('--dataset', default='ml-1m', help="which dataset to use")
+    parser.add_argument('--algo_name', help="which rec algo to use")
+    parser.add_argument('--name_match', help="provide a string here and the script will only look at filenames that match the given string.")
+    parser.add_argument('--pathto', default='standard_results', help="Where are the uid_sets files?")
+    parser.add_argument('--join', action='store_true', help="If true, just merge together standard results that have already been computed into one convenient json file. If false actually compute standards.")
 
     args = parser.parse_args()
 

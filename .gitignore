@@ -1,10 +1,10 @@
 results/
-
+predictions/
 misc_standards/
 rand/
 
 MERGED_*
-
+*.svg
 
 processed_results/
 archived/
@@ -13,3 +13,4 @@ all_results*
 aws/custom_bootstrap.sh
 aws/launch_specification_custom.json
 misc_saved_scripts.txt
+logs/
