@@ -10,6 +10,7 @@ import time
 from collections import OrderedDict, defaultdict
 import os
 import datetime
+import sys
 
 import pandas as pd
 import numpy as np
@@ -263,11 +264,15 @@ def main(args):
                         boycott_user_lingering_ratings_df = lingering_ratings_for_user
                     else:
                         boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
-                print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
+                print('Iteration: {}'.format(i))
+                print('  Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
                     len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
                 ))
                 all_non_boycott_ratings_df = pd.concat(
                     [non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
+
+                print('  non_boycott_user_ratings_df.info()', non_boycott_user_ratings_df.info())
+                print('  all_non_boycott_ratings_df.info()', all_non_boycott_ratings_df.info())
 
                 nonboycott = Dataset.load_from_df(
                     all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
@@ -277,6 +282,8 @@ def main(args):
                     boycott_ratings_df[['user_id', 'movie_id', 'rating']],
                     reader=Reader()
                 ) # makes a copy
+                print('  nonboycott Dataset obj: {}\n  boycott Dataset obj:{}'.format(sys.getsizeof(nonboycott), sys.getsizeof(boycott)))
+
                 identifier = str(identifier).zfill(4)
                 num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
                 num_movies = len(all_non_boycott_ratings_df.movie_id.value_counts())

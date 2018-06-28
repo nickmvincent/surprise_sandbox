@@ -1,5 +1,6 @@
 """
 ML-1M has 6040 users.
+ml-20m has 138493 users.
 
 This very simple script takes a set of percentages (e.g. 0.1%) and outputs how many users that corresponds to.
 """
@@ -7,7 +8,11 @@ NUM_SAMPLES = 250
 INDICES = '1,250'
 
 def main():
-    num_users = 6040
+    dataset = 'ml-20m'
+    if dataset == 'ml-20m':
+        num_users = 138493
+    else:
+        num_users = 6040
 
     # percents = [
     #     0.01, 0.05, 0.1, 0.5, 1, 5, 10, 50
@@ -44,17 +49,17 @@ def main():
     jobs = []
     aws_jobs = []
     for user_count in user_counts:
-        job = "python sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {}".format(
-            int(user_count), int(NUM_SAMPLES), INDICES
+        job = "python sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {}".format(
+            int(user_count), int(NUM_SAMPLES), INDICES, dataset
         )
         aws_job = job.replace("python", "python3")
         jobs.append(job)
         aws_jobs.append(aws_job)
     
-    with open("autogen_jobs.sh", "w") as outfile:
+    with open("bash_scripts/{}_autogen_jobs.sh".format(dataset), "w") as outfile:
         outfile.write('\n'.join(jobs))
 
-    with open("autogen_jobs.txt", "w", newline='\n') as outfile:
+    with open("bash_scripts/{}_autogen_jobs.bat".format(dataset), "w", newline='\n') as outfile:
         outfile.write('\n'.join(aws_jobs))
 
 
