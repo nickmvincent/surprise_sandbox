@@ -63,7 +63,7 @@ def get_dfs(dataset):
         raise Exception("Unknown dataset: " + dataset)
     
     if test_slice:
-        dfs['ratings'] = dfs['ratings'].sample(100)
+        dfs['ratings'] = dfs['ratings'].sample(100, random_state=0)
     # print('Got dfs.\nDataframe sizes are\nratings:{}\nusers:{}\nmovies:{}'.format(
     #     dfs['ratings'].memory_usage(), dfs['users'].memory_usage(), dfs['movies'].memory_usage()
     # ))

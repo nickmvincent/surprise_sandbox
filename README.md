@@ -1,19 +1,25 @@
 # Surprise Sandbox
-Able to run a variety of recsys tests using Surprise (ADD LINK HERE)
-Requires our forked version of Surprise to be installed to actually train and evaluate recommenders.
+Able to run a variety of recsys tests using a fork of [Surprise](http://surpriselib.com/). The fork lives [here](www.google.com).
 Requires Jupyter, Pandas, numpy, seaborn, scipy, and matplotlib to explore results.
 Recommended approach is to just install latest Anaconda distribution.
 
 # Directory Setup
 There are some directories required which are not tracked by git (because they contain a lot of large files that are generated throughout the experiment pipeline).
 
-/predictions
+/predictions - predictions go here (user, movie, predicted rating, real rating) for each algo/boycott instance/fold. To use saving and loading of predictions, you need to set a constant random seed for shuffle base cross folds (currently set as random_state=0, so if you don't change anything it will work).
+Subdirs of /predictions:
   /standards
   /boycotts
 
-/results
-/processed_results
-/standard_results
+/results - raw results, e.g. "this algorithm had an RMSE of 0.9 under some boycott conditions"
+/processed_results - computed additive and percent differences, e.g. "this algorithms had a 5% decrease in NDCG10 compared to no-boycott"
+/standard_results - standard, no-boycott results here.
+
+These will be populated when you run sandbox.py
+
+After a run of sandbox.py, you'll get prediction files in /predictions, performance measure results in /results, a list of which users participated in each simulated boycott in /standard_results/uid_sets_*, and the standard, no-boycott results for each algorithm (specified in specs.py) in /standard_results.
+
+
 
 # Benchmarks
 See benchmark_comparisons.csv and http://surpriselib.com/.
@@ -50,3 +56,6 @@ Do the processing (i.e. match up columns and do substraction)
 Re-run visualization and/or statistics
 `jupyter notebook`
 Select "visualize-v02"
+
+# Output Files
+Currently, the experiement produce outputs that are written directly into files (as opposed to storing results in a database).

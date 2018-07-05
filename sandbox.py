@@ -12,6 +12,8 @@ import os
 import datetime
 import sys
 
+import psutil
+
 import pandas as pd
 import numpy as np
 from utils import get_dfs, concat_output_filename, load_head_items
@@ -53,7 +55,6 @@ def main(args):
     """
     Run the sandbox experiments
     """
-    # TODO: support FLOAT ratings for ml-20m... only supports int right now!
     times = OrderedDict()
     times['start'] = time.time()
     algos = ALGOS
@@ -142,7 +143,8 @@ def main(args):
                 } for sample_size in args.sample_sizes]
         else:
             raise ValueError(
-                'When using grouping="sample", you must provide a set of sample sizes')
+                'When using grouping="sample", you must provide a set of sample sizes'
+            )
     elif args.grouping in [
         'gender', 'age', 'power', 'state', 'genre', 'genre_strict', 'occupation', 
     ]:
@@ -150,23 +152,10 @@ def main(args):
     else:
         experiment_configs = []
 
-    num_configs = len(experiment_configs)
-    if args.sample_sizes:
-        num_runs = num_configs * args.num_samples
-        print('{} total train/tests will be run because you chose {} sample_sizes and number of samples of {}'.format(
-            num_runs, num_configs, args.num_samples
-        ))
-    else:
-        print('{} total train/tests will be will be run'.format(num_configs))
-        num_runs = num_configs
-    secs = 47 * num_runs
-    hours = secs / 3600
-    time_estimate = """
-        At a rate of 47 seconds per run, this should take: {} seconds ({} hours)
-    """.format(secs, hours)
-    print(time_estimate)
+
     uid_to_error = {}
     experimental_iterations = []
+    seed_base = args.indices[0]
     for config in experiment_configs:
         outname = concat_output_filename(
             args.dataset, config['type'], args.userfrac,
@@ -177,9 +166,9 @@ def main(args):
             experimental_iterations = list(users_df.iterrows())
         elif config['type'] == 'sample_users':
             experimental_iterations = [{
-                'df': users_df.sample(config['size']), # copies user_df
+                'df': users_df.sample(config['size'], random_state=seed_base+index), # copies user_df
                 'name': '{} user sample'.format(config['size'])
-            } for _ in range(args.num_samples)]
+            } for index in range(args.num_samples)]
         elif config['type'] == 'gender':
             for _ in range(args.num_samples):
                 experimental_iterations += group_by_gender(users_df)
@@ -239,7 +228,7 @@ def main(args):
                     print(name)
                     print(possible_boycotters_df.head())
                     if args.userfrac != 1.0:
-                        boycotters_df = possible_boycotters_df.sample(frac=args.userfrac)
+                        boycotters_df = possible_boycotters_df.sample(frac=args.userfrac, random_state=(seed_base+i)*2)
                     else:
                         boycotters_df = possible_boycotters_df
                     boycott_uid_set = set(boycotters_df.user_id)
@@ -252,7 +241,7 @@ def main(args):
                 for uid in boycott_uid_set:
                     ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
                     if args.ratingfrac != 1.0:
-                        boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac)
+                        boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac, random_state=(seed_base+i)*3)
                     else:
                         boycott_ratings_for_user = ratings_belonging_to_user
                     lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
@@ -265,14 +254,13 @@ def main(args):
                     else:
                         boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
                 print('Iteration: {}'.format(i))
-                print('  Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
+                print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
                     len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
                 ))
                 all_non_boycott_ratings_df = pd.concat(
                     [non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
 
-                print('  non_boycott_user_ratings_df.info()', non_boycott_user_ratings_df.info())
-                print('  all_non_boycott_ratings_df.info()', all_non_boycott_ratings_df.info())
+                print('Created dataframes', psutil.virtual_memory())
 
                 nonboycott = Dataset.load_from_df(
                     all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
@@ -282,7 +270,8 @@ def main(args):
                     boycott_ratings_df[['user_id', 'movie_id', 'rating']],
                     reader=Reader()
                 ) # makes a copy
-                print('  nonboycott Dataset obj: {}\n  boycott Dataset obj:{}'.format(sys.getsizeof(nonboycott), sys.getsizeof(boycott)))
+                # why are the Dataset objects taking up 4GB when the dataframe is only 760 MB???
+                print('Created Dataset objects:', psutil.virtual_memory())
 
                 identifier = str(identifier).zfill(4)
                 num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
@@ -330,12 +319,12 @@ def main(args):
                             })
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
         
-        uid_sets_outname = outname.replace('results/', 'standard_results/uid_sets_')
+        uid_sets_outname = outname.replace('results/', 'uid_sets/uid_sets_')
         pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)
         if args.movie_mean:
             outname = outname.replace('results/', 'results/MOVIEMEAN_')
         err_df.to_csv(outname)
-        print('Full runtime was: {} for {} runs'.format(time.time() - times['start'], num_runs))
+        print('Full runtime was: {} for {} configsn'.format(time.time() - times['start'], len(experimental_iterations)))
 
 
 def parse():
@@ -349,7 +338,7 @@ def parse():
     python sandbox.py --grouping sample --sample_sizes 1 --num_samples 10 --dataset ml-20m --indices 1,10
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--indices', default='all')
+    parser.add_argument('--indices', help='either a comma separate pair of indices counting from 1 like 1,10. Can also be the string "all"')
     parser.add_argument('--grouping')
     parser.add_argument('--sample_sizes')
     parser.add_argument('--num_samples', type=int)
@@ -357,6 +346,9 @@ def parse():
     parser.add_argument(
         '--compute_standards', action='store_true',
         help='Defaults to false. Pass --compute_standards if you want to compute standards (you really only need to do this once)')
+    parser.add_argument(
+        '--load_predictions', action='store_true',
+        help="Pass this argument if you want to try and load predictions. NOT CURRENTLY SUPPORTED.")
     parser.add_argument(
         '--num_standards', default=1, type=int,
         help='number of times to replicate standards calculation (to account for random fold shuffling)'
@@ -369,6 +361,22 @@ def parse():
     parser.add_argument('--ratingfrac', type=float, default=1.0)
     args = parser.parse_args()
 
+    # check for errors in cli args
+    if args.indices is None:
+        raise ValueError("Please provide indices for this run. This will be used to help organize output files and determine seeds for PRNG.")
+    if ',' in args.indices:
+        args.indices = [int(x) for x in args.indices.split(',')]
+
+
+    if args.sample_sizes:
+        indices_coverage = args.indices[1] - args.indices[0] + 1
+        if indices_coverage != args.num_samples:
+            raise ValueError(
+                'Indices cover {} boycott configs, but you selected {} samples. Please provide indices that match the number of samples selected'.format(
+                    indices_coverage, args.num_samples,
+                )
+            )
+
     # make dirs as needed
     for directory in [
         'logs',
@@ -378,6 +386,7 @@ def parse():
         'predictions',
         'predictions/standards',
         'predictions/boycotts',
+        'uid_sets'
     ]:
         if not os.path.exists(directory):
             print('Missing directory {}, going to create it.'.format(directory))
@@ -395,9 +404,7 @@ def parse():
         if args.num_samples is None:
             args.num_samples = 1
 
-    if ',' in args.indices:
-        args.indices = [int(x) for x in args.indices.split(',')]
-
+    
     main(args)
 
 
