@@ -324,7 +324,7 @@ def main(args):
         if args.movie_mean:
             outname = outname.replace('results/', 'results/MOVIEMEAN_')
         err_df.to_csv(outname)
-        print('Full runtime was: {} for {} configsn'.format(time.time() - times['start'], len(experimental_iterations)))
+        print('Full runtime was: {} for {} experimental iterations'.format(time.time() - times['start'], len(experimental_iterations)))
 
 
 def parse():

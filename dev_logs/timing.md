@@ -82,3 +82,15 @@ about 5 seconds per eval... and this is SVD... so that seems reasonable?
 725.6957314014435 seconds since last tic (doing crossfolds)
 180 rows
 1 algo
+
+# 7/6/2018 running ML-20m
+Full runtime was: 7067.178636074066 for 1 runs
+
+
+# 7/8
+`python sandbox.py --grouping sample --sample_sizes 14 --num_samples 5 --indices 1,5 --dataset ml-20m`
+Full runtime was: 9482.831318616867 for 5 runs
+
+`python sandbox.py --grouping sample --sample_sizes 69 --num_samples 10 --indices 1,10 --dataset ml-20m`
+Full runtime was: 10857.623568058014 for 10 runs
+

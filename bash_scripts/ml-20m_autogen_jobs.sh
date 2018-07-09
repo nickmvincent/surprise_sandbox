@@ -1,4 +1,4 @@
-python sandbox.py --grouping sample --sample_sizes 14 --num_samples 250 --indices 1,250 --dataset ml-20m
+python sandbox.py --grouping sample --sample_sizes 14 --num_samples 25 --indices 1,25 --dataset ml-20m
 python sandbox.py --grouping sample --sample_sizes 69 --num_samples 250 --indices 1,250 --dataset ml-20m
 python sandbox.py --grouping sample --sample_sizes 138 --num_samples 250 --indices 1,250 --dataset ml-20m
 python sandbox.py --grouping sample --sample_sizes 692 --num_samples 250 --indices 1,250 --dataset ml-20m
