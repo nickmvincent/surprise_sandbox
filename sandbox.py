@@ -292,10 +292,10 @@ def main(args):
                     head_items, save_path=save_path,
                 )]
 
-            # data should be ~30 MB
             print('About to run Parallel()')
-            out_dicts = Parallel(n_jobs=-1)(tuple(delayed_iteration_list))
+            out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in delayed_iteration_list))
             for d in out_dicts:
+                print(d)
                 res = d['subset_results']
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
@@ -317,7 +317,9 @@ def main(args):
                             uid_to_error[uid].update({
                                 key: val,
                             })
+        print('before err df', time.time())
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
+        print('after err df', time.time())
         
         uid_sets_outname = outname.replace('results/', 'uid_sets/uid_sets_')
         pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)

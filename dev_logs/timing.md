@@ -94,3 +94,11 @@ Full runtime was: 9482.831318616867 for 5 runs
 `python sandbox.py --grouping sample --sample_sizes 69 --num_samples 10 --indices 1,10 --dataset ml-20m`
 Full runtime was: 10857.623568058014 for 10 runs
 
+
+# 7/11
+`python sandbox.py --grouping sample --sample_sizes 138 --num_samples 5 --indices 1,5 --dataset ml-20m`
+Full runtime was: 9410.30608868599 for 5 experimental iterations
+
+
+`python sandbox.py --grouping sample --sample_sizes 692 --num_samples 10 --indices 1,10 --dataset ml-20m`
+Full runtime was: 11257.717018604279 for 10 experimental iterations
