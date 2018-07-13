@@ -18,7 +18,7 @@ ALGOS = {
     # 'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
     # 'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
     # 'KNNBasic_item_pearson': KNNBasic(sim_options={'user_based': False, 'name': 'pearson'}),
-    'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
+    #'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
 }
 
 ALGOS_FOR_STANDARDS = {

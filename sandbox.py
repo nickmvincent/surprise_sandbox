@@ -31,7 +31,6 @@ from surprise.reader import Reader
 
 # long-term: massively abstract this code so it will work w/ non-recsys algorithsm
 
-
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
@@ -55,6 +54,7 @@ def main(args):
     """
     Run the sandbox experiments
     """
+    out_prefix = 'out/' if args.send_to_out else ""
     times = OrderedDict()
     times['start'] = time.time()
     algos = ALGOS
@@ -100,12 +100,12 @@ def main(args):
     if args.compute_standards:
         standard_results = defaultdict(list)
         for algo_name in algos_for_standards:
-            for _ in range(args.num_standards):        
-                filename_ratingcv_standards = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
+            for _ in range(args.num_standards):
+                filename_ratingcv_standards = out_prefix + 'standard_results/{}_ratingcv_standards_for_{}.json'.format(
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
-                save_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+                save_path = os.getcwd() + '/' + out_prefix + 'predictions/standards/{}_{}_'.format(args.dataset, algo_name)
 
                 results = cross_validate_custom(
                     algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
@@ -124,8 +124,8 @@ def main(args):
                 standard_results[algo_name].append(saved_results)
             standard_results_df = pd.DataFrame(standard_results[algo_name])
             print(standard_results_df.mean())
-            standard_results_df.mean().to_csv('{}'.format(
-                filename_ratingcv_standards).replace('.csv', '_{}.csv'.format(
+            standard_results_df.mean().to_csv('{}{}'.format(
+                out_prefix, filename_ratingcv_standards).replace('.csv', '_{}.csv'.format(
                     args.num_standards)
                 )
             )
@@ -157,7 +157,7 @@ def main(args):
     experimental_iterations = []
     seed_base = args.indices[0]
     for config in experiment_configs:
-        outname = concat_output_filename(
+        outname = out_prefix + concat_output_filename(
             args.dataset, config['type'], args.userfrac,
             args.ratingfrac,
             config['size'], args.num_samples, args.indices
@@ -281,8 +281,8 @@ def main(args):
                 # make sure to save the set of boycott ids and like boycott ids
                 experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
                 experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
-                save_path = outname.replace('results/', '/predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
-                save_path = os.getcwd() + save_path
+                save_path = outname.replace('results/', 'predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
+                save_path = os.getcwd() + '/' + save_path
                 delayed_iteration_list += [delayed(task)(
                     algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
                     False, identifier,
@@ -295,7 +295,7 @@ def main(args):
             print('About to run Parallel()')
             out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in delayed_iteration_list))
             for d in out_dicts:
-                print(d)
+                #print(d)
                 res = d['subset_results']
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
@@ -333,7 +333,7 @@ def parse():
     """
     Parse args and handles list splitting
 
-    Example: 
+    Example:
     python sandbox.py --grouping state
 
     python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards
@@ -358,6 +358,9 @@ def parse():
     parser.add_argument(
         '--movie_mean', help='Defaults to False. If True, override everything and just use MovieMean and GlobalMean',
         action='store_true')
+    parser.add_argument(
+        '--send_to_out', help='Save all the outputs to a copy of the filesystem in the "/out" directory. The purpose is to make it easier to copy results to AWS s3 and merge results from spot instances',
+        action='store_true')
     parser.add_argument('--mode', default='compute')
     parser.add_argument('--userfrac', type=float, default=1.0)
     parser.add_argument('--ratingfrac', type=float, default=1.0)
@@ -380,7 +383,7 @@ def parse():
             )
 
     # make dirs as needed
-    for directory in [
+    for name in [
         'logs',
         'results',
         'standard_results',
@@ -390,6 +393,10 @@ def parse():
         'predictions/boycotts',
         'uid_sets'
     ]:
+        if args.send_to_out:
+            directory = 'out/' + name
+        else:
+            directory = name
         if not os.path.exists(directory):
             print('Missing directory {}, going to create it.'.format(directory))
             os.makedirs(directory)
