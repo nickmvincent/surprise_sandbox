@@ -209,12 +209,6 @@ def main(args):
                     boycott_uid_set = set([row.user_id])
                     like_boycotters_uid_set = set([])
                 
-                # elif config['type'] == 'sample_users' and config['size'] == 0:
-                #     identifier = i
-                #     name = experimental_iteration['name']
-                #     boycott_uid_set = set([])
-                #     like_boycotters_uid_set = set([])
-
                 elif config['type'] in [
                     'sample_users',
                     'gender', 'age', 'power', 'state', 'genre',
@@ -317,10 +311,7 @@ def main(args):
                             uid_to_error[uid].update({
                                 key: val,
                             })
-        print('before err df', time.time())
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
-        print('after err df', time.time())
-        
         uid_sets_outname = outname.replace('results/', 'uid_sets/uid_sets_')
         pd.DataFrame.from_dict(experiment_identifier_to_uid_sets, orient='index').to_csv(uid_sets_outname)
         if args.movie_mean:
