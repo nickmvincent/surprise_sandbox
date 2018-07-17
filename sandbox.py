@@ -417,9 +417,13 @@ def parse():
         if not os.path.exists(directory):
             print('Missing directory {}, going to create it.'.format(directory))
             os.makedirs(directory)
-
-    with open('logs/{}.txt'.format(datetime.date.today()), 'a') as f:
-        msg = '{}\n{}\n\n'.format(str(datetime.datetime.now()), str(args))
+    logname = 'logs/{}.txt'.format(datetime.date.today())
+    if args.send_to_out:
+        logname = 'out/' + logname
+    
+    starttime = datetime.datetime.now()
+    with open(logname, 'a') as f:
+        msg = '{}\n{}\n\n'.format(str(starttime), str(args))
         f.write(msg)
 
     if args.sample_sizes:
@@ -432,6 +436,12 @@ def parse():
 
     
     main(args)
+    endtime = datetime.datetime.now()
+    with open(logname, 'a') as f:
+        msg = 'Finished at time {}\nTotal runtime was {}\n'.format(
+            str(endtime), endtime - starttime
+        )
+        f.write(msg)
 
 
 if __name__ == '__main__':
