@@ -11,6 +11,7 @@ from collections import OrderedDict, defaultdict
 import os
 import datetime
 import sys
+from pprint import pprint
 
 import psutil
 
@@ -48,6 +49,107 @@ def task(
         'algo_name': algo_name,
         'identifier': identifier
     }
+
+
+def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, seed_base, outname, algo_name, algo, head_items):
+    """
+    To simulate a boycott, we need to figure out which ratings are being held out
+    For large datasets and large boycotts (e.g. 50% of ML-20M) this is very slow
+    So we need to parallelize it
+
+    That's the purpose of this function
+
+    """
+    if config['type'] == 'individual_users':
+        row = experimental_iteration[1]
+        identifier = row.user_id
+        name = 'individual'
+        if args.indices != 'all':
+            if identifier < args.indices[0] or identifier > args.indices[1]:
+                return
+        boycott_uid_set = set([row.user_id])
+        like_boycotters_uid_set = set([])
+    
+    elif config['type'] in [
+        'sample_users',
+        'gender', 'age', 'power', 'state', 'genre',
+        'genre_strict',
+        'occupation',
+    ]:
+        identifier = i
+        name = experimental_iteration['name']
+
+        possible_boycotters_df = experimental_iteration['df']                        
+        print(name)
+        print(possible_boycotters_df.head())
+        if args.userfrac != 1.0:
+            boycotters_df = possible_boycotters_df.sample(frac=args.userfrac, random_state=(seed_base+i)*2)
+        else:
+            boycotters_df = possible_boycotters_df
+        boycott_uid_set = set(boycotters_df.user_id)
+        like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
+        like_boycotters_uid_set = set(like_boycotters_df.user_id)
+
+    non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)] # makes a df copy
+    boycott_ratings_df = None
+    boycott_user_lingering_ratings_df = None
+    for uid in boycott_uid_set:
+        ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
+        if args.ratingfrac != 1.0:
+            boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac, random_state=(seed_base+i)*3)
+        else:
+            boycott_ratings_for_user = ratings_belonging_to_user
+        lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
+        if boycott_ratings_df is None:
+            boycott_ratings_df = boycott_ratings_for_user
+        else:
+            boycott_ratings_df = pd.concat([boycott_ratings_df, boycott_ratings_for_user])
+        if boycott_user_lingering_ratings_df is None:
+            boycott_user_lingering_ratings_df = lingering_ratings_for_user
+        else:
+            boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
+    print('Iteration: {}'.format(i))
+    print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
+        len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
+    ))
+    all_non_boycott_ratings_df = pd.concat(
+        [non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
+
+    print('Created dataframes', psutil.virtual_memory())
+
+    nonboycott = Dataset.load_from_df(
+        all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
+        reader=Reader()
+    ) # makes a copy
+    boycott = Dataset.load_from_df(
+        boycott_ratings_df[['user_id', 'movie_id', 'rating']],
+        reader=Reader()
+    ) # makes a copy
+    # why are the Dataset objects taking up 4GB when the dataframe is only 760 MB???
+    print('Created Dataset objects:', psutil.virtual_memory())
+
+    identifier = str(identifier).zfill(4)
+    num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
+    num_movies = len(all_non_boycott_ratings_df.movie_id.value_counts())
+    num_ratings =  len(all_non_boycott_ratings_df.index)
+
+    # make sure to save the set of boycott ids and like boycott ids
+    experiment_identifier_to_uid_sets = {
+        identifier: {}
+    }
+    experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
+    experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
+    save_path = outname.replace('results/', 'predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
+    save_path = os.getcwd() + '/' + save_path
+    return delayed(task)(
+        algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
+        False, identifier,
+        num_ratings,
+        num_users,
+        num_movies, name,
+        head_items, save_path=save_path,
+    ), experiment_identifier_to_uid_sets
+    
 
 
 def main(args):
@@ -195,99 +297,23 @@ def main(args):
             for _ in range(args.num_samples):
                 experimental_iterations += group_by_occupation(users_df)
 
-        experiment_identifier_to_uid_sets = defaultdict(lambda: defaultdict(list))
+        experiment_identifier_to_uid_sets = {}
         for algo_name in algos:
-            delayed_iteration_list = []
-            for i, experimental_iteration in enumerate(experimental_iterations):
-                if config['type'] == 'individual_users':
-                    row = experimental_iteration[1]
-                    identifier = row.user_id
-                    name = 'individual'
-                    if args.indices != 'all':
-                        if identifier < args.indices[0] or identifier > args.indices[1]:
-                            continue
-                    boycott_uid_set = set([row.user_id])
-                    like_boycotters_uid_set = set([])
-                
-                elif config['type'] in [
-                    'sample_users',
-                    'gender', 'age', 'power', 'state', 'genre',
-                    'genre_strict',
-                    'occupation',
-                ]:
-                    identifier = i
-                    name = experimental_iteration['name']
-
-                    possible_boycotters_df = experimental_iteration['df']                        
-                    print(name)
-                    print(possible_boycotters_df.head())
-                    if args.userfrac != 1.0:
-                        boycotters_df = possible_boycotters_df.sample(frac=args.userfrac, random_state=(seed_base+i)*2)
-                    else:
-                        boycotters_df = possible_boycotters_df
-                    boycott_uid_set = set(boycotters_df.user_id)
-                    like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
-                    like_boycotters_uid_set = set(like_boycotters_df.user_id)
-
-                non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)] # makes a df copy
-                boycott_ratings_df = None
-                boycott_user_lingering_ratings_df = None
-                for uid in boycott_uid_set:
-                    ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
-                    if args.ratingfrac != 1.0:
-                        boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac, random_state=(seed_base+i)*3)
-                    else:
-                        boycott_ratings_for_user = ratings_belonging_to_user
-                    lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
-                    if boycott_ratings_df is None:
-                        boycott_ratings_df = boycott_ratings_for_user
-                    else:
-                        boycott_ratings_df = pd.concat([boycott_ratings_df, boycott_ratings_for_user])
-                    if boycott_user_lingering_ratings_df is None:
-                        boycott_user_lingering_ratings_df = lingering_ratings_for_user
-                    else:
-                        boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
-                print('Iteration: {}'.format(i))
-                print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
-                    len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
-                ))
-                all_non_boycott_ratings_df = pd.concat(
-                    [non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
-
-                print('Created dataframes', psutil.virtual_memory())
-
-                nonboycott = Dataset.load_from_df(
-                    all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
-                    reader=Reader()
-                ) # makes a copy
-                boycott = Dataset.load_from_df(
-                    boycott_ratings_df[['user_id', 'movie_id', 'rating']],
-                    reader=Reader()
-                ) # makes a copy
-                # why are the Dataset objects taking up 4GB when the dataframe is only 760 MB???
-                print('Created Dataset objects:', psutil.virtual_memory())
-
-                identifier = str(identifier).zfill(4)
-                num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
-                num_movies = len(all_non_boycott_ratings_df.movie_id.value_counts())
-                num_ratings =  len(all_non_boycott_ratings_df.index)
-
-                # make sure to save the set of boycott ids and like boycott ids
-                experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
-                experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
-                save_path = outname.replace('results/', 'predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
-                save_path = os.getcwd() + '/' + save_path
-                delayed_iteration_list += [delayed(task)(
-                    algo_name, algos[algo_name], nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
-                    False, identifier,
-                    num_ratings,
-                    num_users,
-                    num_movies, name,
-                    head_items, save_path=save_path,
-                )]
-
+            prep_boycott_tasks = (
+                delayed(prepare_boycott_task)(
+                    i, experimental_iteration, args, config,
+                    ratings_df, seed_base,
+                    outname, algo_name, algos[algo_name], head_items
+                ) for i, experimental_iteration in enumerate(experimental_iterations)
+            )
+            simulate_boycott_tasks = []
+            out = Parallel(n_jobs=-1, verbose=5)((x for x in prep_boycott_tasks))
+            
+            for task, d in out:
+                simulate_boycott_tasks.append(task)
+                experiment_identifier_to_uid_sets.update(d)
             print('About to run Parallel()')
-            out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in delayed_iteration_list))
+            out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in simulate_boycott_tasks))
             for d in out_dicts:
                 #print(d)
                 res = d['subset_results']
@@ -327,7 +353,7 @@ def parse():
     Example:
     python sandbox.py --grouping state
 
-    python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards
+    python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards --indices 1,2
     python sandbox.py --grouping sample --sample_sizes 1 --num_samples 10 --dataset ml-20m --indices 1,10
     """
     parser = argparse.ArgumentParser()
