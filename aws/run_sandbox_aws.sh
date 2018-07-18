@@ -14,7 +14,7 @@ set -x
 s3_job_dir="$1"
 worker_id="$2"
 num_workers="$3"
-dirs="results standard_results"
+dirs="out"
 
 for d in $dirs; do
     [ -d "$d" ] || mkdir -p "$d"

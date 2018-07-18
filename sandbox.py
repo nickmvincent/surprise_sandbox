@@ -216,9 +216,9 @@ def main(args):
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
-                    frac_key = metric + '_frac_all'
-                    if frac_key in results:
-                        saved_results[frac_key] = np.mean(results[frac_key])
+                    # frac_key = metric + '_frac_all'
+                    # if frac_key in results:
+                    #     saved_results[frac_key] = np.mean(results[frac_key])
 
                 with open(filename_ratingcv_standards, 'w') as f:
                     json.dump(saved_results, f)
@@ -231,8 +231,6 @@ def main(args):
                     args.num_standards)
                 )
             )
-
-    times['standards_loaded'] = time.time() - times['data_constructed']
 
     experiment_configs = []
     if args.grouping == 'individual_users':
@@ -258,6 +256,9 @@ def main(args):
     uid_to_error = {}
     experimental_iterations = []
     seed_base = args.indices[0]
+    print(seed_base)
+    print(seed_base + 5)
+    input()
     for config in experiment_configs:
         outname = out_prefix + concat_output_filename(
             args.dataset, config['type'], args.userfrac,

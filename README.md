@@ -15,7 +15,7 @@ Subdirs of /predictions:
 /processed_results - computed additive and percent differences, e.g. "this algorithms had a 5% decrease in NDCG10 compared to no-boycott"
 /standard_results - standard, no-boycott results here.
 
-These will be populated when you run sandbox.py
+These will be created when you run sandbox.py
 
 After a run of sandbox.py, you'll get prediction files in /predictions, performance measure results in /results, a list of which users participated in each simulated boycott in /standard_results/uid_sets_*, and the standard, no-boycott results for each algorithm (specified in specs.py) in /standard_results.
 

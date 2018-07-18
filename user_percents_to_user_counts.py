@@ -52,14 +52,16 @@ def main():
         job = "python sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {}".format(
             int(user_count), int(NUM_SAMPLES), INDICES, dataset
         )
-        aws_job = job.replace("python", "python3")
+        aws_job = "python3 sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {} --send_to_out".format(
+            int(user_count), int(NUM_SAMPLES), INDICES, dataset
+        )
         jobs.append(job)
         aws_jobs.append(aws_job)
     
     with open("bash_scripts/{}_autogen_jobs.sh".format(dataset), "w") as outfile:
         outfile.write('\n'.join(jobs))
 
-    with open("bash_scripts/{}_autogen_jobs.bat".format(dataset), "w", newline='\n') as outfile:
+    with open("bash_scripts/{}_autogen_jobs.sh".format(dataset), "w", newline='\n') as outfile:
         outfile.write('\n'.join(aws_jobs))
 
 

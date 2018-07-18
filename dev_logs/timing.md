@@ -112,3 +112,6 @@ Full runtime was: 34552.31586265564 for 10 experimental iterations
 dataset-ml-20m_type-sample_users_userfrac-1.0_ratingfrac-1.0_sample_size-55397_num_samples-10_indices-1-to-10.csv
 Full runtime was: 115453.24959731102 for 10 experimental iterations
 
+14
+Full runtime was: 10423.584015130997 for 10 experimental iterations
+

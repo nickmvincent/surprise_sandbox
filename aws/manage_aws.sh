@@ -30,7 +30,7 @@ for worker_id in $(seq 0 $((num_workers - 1))); do
     sed -i "s/USER_DATA/${userdata}/g" ./aws/launch_specification_custom.json
 
     aws ec2 request-spot-instances \
-        --valid-until "2018-05-06T02:52:51.000Z" \
+        --valid-until "2018-08-06T02:52:51.000Z" \
         --instance-interruption-behavior terminate \
         --type one-time \
         --instance-count 1 \

@@ -1,5 +1,7 @@
 """
 Computes standards for comparison (i.e. what are the results without any boycott going on)
+
+Also has functionality to merge many standards into one json file for convenience (see the `merge` argument)
 """
 import os
 import argparse
@@ -26,7 +28,13 @@ def batch(iterable, batch_size=1):
 
 def main(args):
     """
-    driver function
+    Calculate standards
+
+    Configuration requqired for this function:
+      you must have uid_sets files in the directory specified by the pathto argument
+      uid_sets files are CSV files with:
+        an iteration number (index) in one column, a list of boycott uids in 2nd column, and a list of like-boycott uids in a 3rd column
+        uid lists are stored as strings delimited by semi-colon (;)
     """
     starttime = time.time()
     dfs = get_dfs(args.dataset)
@@ -78,7 +86,7 @@ def main(args):
         algo_names = list(ALGOS.keys())
     out = {}
     for algo_name in algo_names:
-        # why do we batch this
+        # why do we batch this - otherwise we could run out of memory if doing many experiment with one script run
         for batch_num, key_batch in enumerate(batch(list(boycott_uid_sets.keys()), 100)):
             print('On key batch {} of {} keys'.format(batch_num, len(boycott_uid_sets)))
             batch_b = {}
@@ -87,6 +95,9 @@ def main(args):
                 batch_b[key] = boycott_uid_sets[key]
                 batch_l[key] = like_boycotters_uid_sets[key]
 
+            # ideally we don't need to re-train the algorithm... we have the actual predictions saved for each rating within each crossfold!
+            # if for some reason this was lost (or wasn't saved, e.g. using the pre-July 2018 version of this code) we can re-train
+            # will take much longer
             load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
             res = cross_validate_many(
                 ALGOS[algo_name], data,
@@ -108,6 +119,9 @@ def main(args):
 def join(args):
     """
     Join together a bunch of standards results that were calculated separately!
+
+    They will go into a json file prepended with MERGE
+    Don't commit this file to git, it will be very large...
     """
     successes = 0
     sources = []
@@ -118,14 +132,15 @@ def join(args):
     for algo_name in algo_names:
         merged = {}
         for root, dirs, _ in os.walk('misc_standards/'):
-            #print(dirs)
             for d1 in dirs:
-                #print('d1', d1)      
+                # this is a bit hacky
+                # we're using the log.txt file (generated when we run on AWS spot instances)
+                # to figure out which algo name was run
+                # if some experiments were not run on AWS, you will need to make a log.txt file manually!
                 try:
                     logf = '{}/{}/log.txt'.format(root, d1)
                     with open(logf, 'r') as f:
                         log = f.read()
-                        # print(log)
                         if algo_name not in log:
                             #print('Skipping this dir b/c wrong log')
                             continue
@@ -154,13 +169,14 @@ def parse():
     Examples
 
     python standards_for_uid_sets.py --dataset test_ml-1m --algo_name SVD --name_match sample --pathto standard_results
+    python standards_for_uid_sets.py --dataset ml-20m --algo_name SVD --name_match sample_size-14_num_samples-10 --pathto uid_sets
     """
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml-1m', help="which dataset to use")
     parser.add_argument('--algo_name', help="which rec algo to use")
     parser.add_argument('--name_match', help="provide a string here and the script will only look at filenames that match the given string.")
-    parser.add_argument('--pathto', default='standard_results', help="Where are the uid_sets files?")
+    parser.add_argument('--pathto', default='uid_sets', help="Where are the uid_sets files?")
     parser.add_argument('--join', action='store_true', help="If true, just merge together standard results that have already been computed into one convenient json file. If false actually compute standards.")
 
     args = parser.parse_args()
