@@ -141,13 +141,13 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
     experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
     save_path = outname.replace('results/', 'predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
     save_path = os.getcwd() + '/' + save_path
-    return delayed(task)(
+    return (
         algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
         False, identifier,
         num_ratings,
         num_users,
         num_movies, name,
-        head_items, save_path=save_path,
+        head_items, save_path
     ), experiment_identifier_to_uid_sets
     
 
@@ -307,8 +307,8 @@ def main(args):
             simulate_boycott_tasks = []
             out = Parallel(n_jobs=-1, verbose=5)((x for x in prep_boycott_tasks))
             
-            for task, d in out:
-                simulate_boycott_tasks.append(task)
+            for task_args, d in out:
+                simulate_boycott_tasks.append(delayed(task)(*task_args))
                 experiment_identifier_to_uid_sets.update(d)
             print('About to run Parallel()')
             out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in simulate_boycott_tasks))
