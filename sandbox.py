@@ -256,9 +256,6 @@ def main(args):
     uid_to_error = {}
     experimental_iterations = []
     seed_base = args.indices[0]
-    print(seed_base)
-    print(seed_base + 5)
-    input()
     for config in experiment_configs:
         outname = out_prefix + concat_output_filename(
             args.dataset, config['type'], args.userfrac,
