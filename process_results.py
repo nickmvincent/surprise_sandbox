@@ -20,8 +20,15 @@ import numpy as np
 from utils import concat_output_filename, extract_from_filename
 from plot import plot_all
 
-from constants import MEASURES, ALGO_NAMES, get_metric_names
+from constants import MEASURES, get_metric_names
 
+
+
+ALGO_NAMES = [
+    'SVD',
+    #'KNNBasic_user_msd'    
+    'KNNBaseline_item_msd',
+]
 
 def main(args):
     metric_names = get_metric_names()

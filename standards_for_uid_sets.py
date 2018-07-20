@@ -7,6 +7,7 @@ import os
 import argparse
 import json
 from pprint import pprint
+import datetime as datetime
 import time
 
 import pandas as pd
@@ -111,9 +112,10 @@ def main(args):
                 load_path=load_path
             )
             out.update(res)
+            dtstr = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             with open(
-                'standard_results/{}_{}.json'.format(
-                    args.dataset, algo_name
+                'standard_results/{}_{}_{}.json'.format(
+                    args.dataset, algo_name, dtstr
                 ), 'w'
             ) as f:
                 json.dump(out, f)
@@ -186,7 +188,7 @@ def parse():
     parser.add_argument('--pathto', default='uid_sets', help="Where are the uid_sets files?")
     parser.add_argument('--join', action='store_true', help="If true, just merge together standard results that have already been computed into one convenient json file. If false actually compute standards.")
     parser.add_argument(
-        '--load_path', help='where to load predictions from'
+        '--load_path', help='where to load predictions from. If argument is not provided, tries to look in ./predictions/standards/'
     )
 
     args = parser.parse_args()
