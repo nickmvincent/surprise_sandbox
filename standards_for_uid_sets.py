@@ -99,7 +99,10 @@ def main(args):
             # ideally we don't need to re-train the algorithm... we have the actual predictions saved for each rating within each crossfold!
             # if for some reason this was lost (or wasn't saved, e.g. using the pre-July 2018 version of this code) we can re-train
             # will take much longer
-            load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+            if args.load_path is None:
+                load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+            else:
+                load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
             res = cross_validate_many(
                 ALGOS[algo_name], data,
                 Dataset.load_from_df(pd.DataFrame(), reader=Reader()),
@@ -182,6 +185,9 @@ def parse():
     parser.add_argument('--name_match', help="provide a string here and the script will only look at filenames that match the given string.")
     parser.add_argument('--pathto', default='uid_sets', help="Where are the uid_sets files?")
     parser.add_argument('--join', action='store_true', help="If true, just merge together standard results that have already been computed into one convenient json file. If false actually compute standards.")
+    parser.add_argument(
+        '--load_path', help='where to load predictions from'
+    )
 
     args = parser.parse_args()
 

@@ -139,8 +139,13 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
     }
     experiment_identifier_to_uid_sets[identifier]['boycott_uid_set'] = ';'.join(str(x) for x in boycott_uid_set)
     experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
+
     save_path = outname.replace('results/', 'predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
-    save_path = os.getcwd() + '/' + save_path
+    if args.save_path is None:
+        save_path = os.getcwd() + '/' + save_path
+    else:
+        save_path = args.save_path + '/' + save_path
+
     return (
         algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
         False, identifier,
@@ -207,7 +212,10 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
-                save_path = os.getcwd() + '/' + out_prefix + 'predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+                if args.save_path is None:
+                    save_path = os.getcwd() + '/' + out_prefix + 'predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+                else:
+                    save_path = args.save_path
 
                 results = cross_validate_custom(
                     algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
@@ -377,6 +385,10 @@ def parse():
     parser.add_argument(
         '--send_to_out', help='Save all the outputs to a copy of the filesystem in the "/out" directory. The purpose is to make it easier to copy results to AWS s3 and merge results from spot instances',
         action='store_true')
+    parser.add_argument(
+        '--save_path', help='where to save predictions'
+    )
+
     parser.add_argument('--mode', default='compute')
     parser.add_argument('--userfrac', type=float, default=1.0)
     parser.add_argument('--ratingfrac', type=float, default=1.0)

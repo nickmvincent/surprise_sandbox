@@ -61,7 +61,7 @@ def main():
     with open("bash_scripts/{}_autogen_jobs.sh".format(dataset), "w") as outfile:
         outfile.write('\n'.join(jobs))
 
-    with open("bash_scripts/{}_autogen_jobs.sh".format(dataset), "w", newline='\n') as outfile:
+    with open("bash_scripts/{}_autogen_aws_jobs.sh".format(dataset), "w", newline='\n') as outfile:
         outfile.write('\n'.join(aws_jobs))
 
 
