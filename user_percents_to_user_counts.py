@@ -4,8 +4,8 @@ ml-20m has 138493 users.
 
 This very simple script takes a set of percentages (e.g. 0.1%) and outputs how many users that corresponds to.
 """
-NUM_SAMPLES = 10
-INDICES = '1,10'
+NUM_SAMPLES = 20
+INDICES = '1,20'
 
 def main():
     dataset = 'ml-20m'

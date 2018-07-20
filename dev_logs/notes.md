@@ -16,3 +16,7 @@ However, the organization of files is still quite confusing and there's a lot of
 ## Things to double check
 One important bit of code to double-check is that the boycott and like-boycott testing is implemented correctly.
 i.e. make sure the like-boycott users are actually properly included in the training
+
+
+# 7/19
+Switched to using SVD with random state 0 to make it even more reproducible

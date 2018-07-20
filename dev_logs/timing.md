@@ -114,4 +114,8 @@ Full runtime was: 115453.24959731102 for 10 experimental iterations
 
 14
 Full runtime was: 10423.584015130997 for 10 experimental iterations
+# 7/18
+
+69246
+Full runtime was: 27860.01888036728 for 10 experimental iterations
 

@@ -305,7 +305,7 @@ def main(args):
                 ) for i, experimental_iteration in enumerate(experimental_iterations)
             )
             simulate_boycott_tasks = []
-            out = Parallel(n_jobs=-1, verbose=5)((x for x in prep_boycott_tasks))
+            out = Parallel(n_jobs=-1, verbose=5, max_nbytes=None)((x for x in prep_boycott_tasks))
             
             for task_args, d in out:
                 simulate_boycott_tasks.append(delayed(task)(*task_args))
@@ -353,6 +353,7 @@ def parse():
 
     python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards --indices 1,2
     python sandbox.py --grouping sample --sample_sizes 1 --num_samples 10 --dataset ml-20m --indices 1,10
+    python sandbox.py --grouping sample --sample_sizes 2 --num_samples 2 --dataset ml-100k --indices 1,2
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--indices', help='either a comma separate pair of indices counting from 1 like 1,10. Can also be the string "all"')

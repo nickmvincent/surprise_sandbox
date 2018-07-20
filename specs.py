@@ -10,7 +10,7 @@ from surprise import SVD, Dataset, KNNBaseline, GuessThree, GlobalMean, MovieMea
 # default user or item is USER-BASED but we override that.
 
 ALGOS = {
-    'SVD': SVD(),
+    'SVD': SVD(random_state=0),
     # 'SVD50': SVD(n_factors=50),
     #'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
     # 'KNNBasic_user_cosine': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}),
@@ -24,7 +24,7 @@ ALGOS = {
 ALGOS_FOR_STANDARDS = {
     # flag: uncomment when done
     'KNNBasic_user_msd': KNNBasic(sim_options={'user_based': True}),
-    'SVD': SVD(),
+    'SVD': SVD(random_state=0),
     'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
     'GuessThree': GuessThree(),
     'GlobalMean': GlobalMean(),
