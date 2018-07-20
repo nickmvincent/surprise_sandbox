@@ -175,7 +175,7 @@ def parse():
     Examples
 
     python standards_for_uid_sets.py --dataset test_ml-1m --algo_name SVD --name_match sample --pathto standard_results
-    python standards_for_uid_sets.py --dataset ml-20m --algo_name SVD --name_match sample_size-14_num_samples-10 --pathto uid_sets
+    python standards_for_uid_sets.py --dataset ml-20m --algo_name SVD --name_match sample_size-14_num_samples-20
 
     python standards_for_uid_sets.py --name_match sample_size-2_num_samples-2 --dataset ml-100k --algo_name SVD
 

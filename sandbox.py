@@ -115,7 +115,7 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
     all_non_boycott_ratings_df = pd.concat(
         [non_boycott_user_ratings_df, boycott_user_lingering_ratings_df])
 
-    print('Created dataframes', psutil.virtual_memory())
+    print('Created dataframes', psutil.virtual_memory().used / (1024**3))
 
     nonboycott = Dataset.load_from_df(
         all_non_boycott_ratings_df[['user_id', 'movie_id', 'rating']],
@@ -126,7 +126,8 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
         reader=Reader()
     ) # makes a copy
     # why are the Dataset objects taking up 4GB when the dataframe is only 760 MB???
-    print('Created Dataset objects:', psutil.virtual_memory())
+    print('nonboycott.raw_ratings size', sys.getsizeof(nonboycott.raw_ratings))
+    print('Created dataset objects', psutil.virtual_memory().used / (1024**3))
 
     identifier = str(identifier).zfill(4)
     num_users = len(all_non_boycott_ratings_df.user_id.value_counts())
@@ -318,7 +319,7 @@ def main(args):
             for task_args, d in out:
                 simulate_boycott_tasks.append(delayed(task)(*task_args))
                 experiment_identifier_to_uid_sets.update(d)
-            print('About to run Parallel()')
+            print('About to run Parallel() with {} tasks'.format(len(simulate_boycott_tasks)))
             out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in simulate_boycott_tasks))
             for d in out_dicts:
                 #print(d)

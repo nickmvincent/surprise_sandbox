@@ -20,3 +20,7 @@ i.e. make sure the like-boycott users are actually properly included in the trai
 
 # 7/19
 Switched to using SVD with random state 0 to make it even more reproducible
+
+# 7/20
+Need to use joblib=0.11
+https://github.com/joblib/joblib/issues/721
