@@ -361,7 +361,7 @@ def parse():
     python sandbox.py --grouping state
 
     python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards --indices 1,2
-    python sandbox.py --grouping sample --sample_sizes 1 --num_samples 10 --dataset ml-20m --indices 1,10
+    python sandbox.py --grouping sample --sample_sizes 14 --num_samples 5 --indices 1,5 --dataset ml-20m
     python sandbox.py --grouping sample --sample_sizes 2 --num_samples 2 --dataset ml-100k --indices 1,2
     """
     parser = argparse.ArgumentParser()

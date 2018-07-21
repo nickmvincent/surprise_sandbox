@@ -16,8 +16,9 @@ def main():
         # with imperfect (automatic) garbage collection we see 20 samples taking up to 95 GB
         # verify this please
         configs = (
-            (20, '1,20'), # num_samples, indices
-            (20, '21,40'), # num_samples, indices
+            (15, '1,15'), # num_samples, indices
+            (15, '16,30'), # num_samples, indices
+            (15, '31,45'), # num_samples, indices
         )
     else:
         num_users = 6040
