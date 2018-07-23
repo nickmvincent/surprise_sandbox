@@ -48,8 +48,6 @@ echo "[default]" >.aws/config
 git clone https://github.com/nickmvincent/surprise_sandbox.git
 cd surprise_sandbox
 
-./aws/run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
-
 mkdir predictions
 cd predictions
 mkdir standards
@@ -58,5 +56,9 @@ cd standards
 parent=$(dirname -- "$s3_job_dir")
 final="${parent}/predictions/standards"
 aws s3 cp ${final} . --recursive
+
+
+./aws/run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
+
 
 /sbin/halt

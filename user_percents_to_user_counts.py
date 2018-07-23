@@ -48,7 +48,7 @@ def main():
             job = "python sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {}".format(
                 int(user_count), int(num_samples), indices, dataset
             )
-            aws_job = "python3 sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {} --send_to_out".format(
+            aws_job = "python3 sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {} --send_to_out --save_path False".format(
                 int(user_count), int(num_samples), indices, dataset
             )
             jobs.append(job)
