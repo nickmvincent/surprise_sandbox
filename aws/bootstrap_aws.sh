@@ -55,7 +55,7 @@ cd predictions
 mkdir standards
 cd standards
 
-parent=$(dirname -- "$x")
+parent=$(dirname -- "$s3_job_dir")
 final="${parent}/predictions/standards"
 aws s3 cp ${final} . --recursive
 
