@@ -119,3 +119,9 @@ Full runtime was: 10423.584015130997 for 10 experimental iterations
 69246
 Full runtime was: 27860.01888036728 for 10 experimental iterations
 
+# 7/23
+5 iterations WITH saving standards.
+Full runtime was: 11206.055165052414 for 5 experimental iterations
+
+standards_for_uid_sets with loading, for 20 iterations of 14userboycott
+4589.1469349861145

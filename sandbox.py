@@ -152,7 +152,7 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
 
     if args.load_path == 'False':
         load_path = None
-    if args.load_path is None:
+    elif args.load_path is None:
         load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
     else:
         load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
