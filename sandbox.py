@@ -246,7 +246,7 @@ def main(args):
                 standard_results[algo_name].append(saved_results)
             standard_results_df = pd.DataFrame(standard_results[algo_name])
             print(standard_results_df.mean())
-            standard_results_df.mean().to_csv('{}{}'.format(
+            standard_results_df.mean().to_csv('{}'.format(
                 filename_ratingcv_standards).replace('.csv', '_{}.csv'.format(
                     args.num_standards)
                 )
