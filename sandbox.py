@@ -224,7 +224,7 @@ def main(args):
                 print('Computing standard results for {}'.format(algo_name))
                 if args.save_path is False:
                     save_path = None
-                if args.save_path is None:
+                elif args.save_path is None:
                     save_path = os.getcwd() + '/' + out_prefix + 'predictions/standards/{}_{}_'.format(args.dataset, algo_name)
                 else:
                     save_path = args.save_path
