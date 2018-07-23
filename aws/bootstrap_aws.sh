@@ -50,4 +50,13 @@ cd surprise_sandbox
 
 ./aws/run_sandbox_aws.sh "${s3_job_dir}" "${worker_id}" "${num_workers}"
 
+mkdir predictions
+cd predictions
+mkdir standards
+cd standards
+
+parent=$(dirname -- "$x")
+final="${parent}/predictions/standards"
+aws s3 cp ${final} . --recursive
+
 /sbin/halt

@@ -176,6 +176,7 @@ def parse():
 
     python standards_for_uid_sets.py --dataset test_ml-1m --algo_name SVD --name_match sample --pathto standard_results
     python standards_for_uid_sets.py --dataset ml-20m --algo_name SVD --name_match sample_size-14_num_samples-20
+    python standards_for_uid_sets.py --dataset ml-100k --algo_name SVD
 
     python standards_for_uid_sets.py --name_match sample_size-2_num_samples-2 --dataset ml-100k --algo_name SVD
 
@@ -188,7 +189,7 @@ def parse():
     parser.add_argument('--pathto', default='uid_sets', help="Where are the uid_sets files?")
     parser.add_argument('--join', action='store_true', help="If true, just merge together standard results that have already been computed into one convenient json file. If false actually compute standards.")
     parser.add_argument(
-        '--load_path', help='where to load predictions from. If argument is not provided, tries to look in ./predictions/standards/'
+        '--load_path', help='where to load predictions from.'
     )
 
     args = parser.parse_args()

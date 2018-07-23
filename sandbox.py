@@ -35,12 +35,12 @@ from surprise.reader import Reader
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
-    num_ratings, num_users, num_movies, name, head_items, save_path):
+    num_ratings, num_users, num_movies, name, head_items, save_path, load_path):
     return {
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
             like_boycotters_uid_set, measures, cv, n_jobs=1,
-            head_items=head_items, save_path=save_path
+            head_items=head_items, save_path=save_path, load_path=load_path
         ),
         'num_ratings': num_ratings,
         'num_users': num_users,
@@ -142,18 +142,27 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
     experiment_identifier_to_uid_sets[identifier]['like_boycotters_uid_set'] = ';'.join(str(x) for x in like_boycotters_uid_set)
 
     save_path = outname.replace('results/', 'predictions/boycotts/{}__'.format(identifier)).replace('.csv', '_')
-    if args.save_path is None:
+    if args.save_path == 'False':
+        print('Since you passed --save_path False, predictions will NOT BE SAVED')
+        save_path = None
+    elif args.save_path is None:
         save_path = os.getcwd() + '/' + save_path
     else:
         save_path = args.save_path + '/' + save_path
 
+    if args.load_path == 'False':
+        load_path = None
+    if args.load_path is None:
+        load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
+    else:
+        load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
     return (
         algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
         False, identifier,
         num_ratings,
         num_users,
         num_movies, name,
-        head_items, save_path
+        head_items, save_path, load_path
     ), experiment_identifier_to_uid_sets
     
 
@@ -213,6 +222,8 @@ def main(args):
                     args.dataset, algo_name)
 
                 print('Computing standard results for {}'.format(algo_name))
+                if args.save_path is False:
+                    save_path = None
                 if args.save_path is None:
                     save_path = os.getcwd() + '/' + out_prefix + 'predictions/standards/{}_{}_'.format(args.dataset, algo_name)
                 else:
@@ -322,7 +333,7 @@ def main(args):
             print('About to run Parallel() with {} tasks'.format(len(simulate_boycott_tasks)))
             out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in simulate_boycott_tasks))
             for d in out_dicts:
-                #print(d)
+                print('d', d)
                 res = d['subset_results']
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
@@ -343,6 +354,13 @@ def main(args):
                             val = np.mean(res[key])
                             uid_to_error[uid].update({
                                 key: val,
+                            })
+                        standards_key = 'standards_' + key
+                        standards_vals = res.get(standards_key)
+                        if standards_vals:
+                            standards_val = np.mean(res[standards_key])
+                            uid_to_error[uid].update({
+                                standards_key: standards_val,
                             })
         err_df = pd.DataFrame.from_dict(uid_to_error, orient='index')
         uid_sets_outname = outname.replace('results/', 'uid_sets/uid_sets_')
@@ -388,6 +406,9 @@ def parse():
         action='store_true')
     parser.add_argument(
         '--save_path', help='where to save predictions'
+    )
+    parser.add_argument(
+        '--load_path', help='where to load standards predictions'
     )
 
     parser.add_argument('--mode', default='compute')
