@@ -6,6 +6,7 @@ rand/
 misc_results/
 standard_results/
 uid_sets/
+tmp.json
 
 MERGED_*
 *.svg

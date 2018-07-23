@@ -100,7 +100,9 @@ def main(args):
             # ideally we don't need to re-train the algorithm... we have the actual predictions saved for each rating within each crossfold!
             # if for some reason this was lost (or wasn't saved, e.g. using the pre-July 2018 version of this code) we can re-train
             # will take much longer
-            if args.load_path is None:
+            if args.load_path == 'False':
+                load_path = None
+            elif args.load_path is None:
                 load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
             else:
                 load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
