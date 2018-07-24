@@ -33,3 +33,11 @@ as long as you avoid memory error joblib 0.12 works, and it actually seems to be
 Got a successful ml-20m AWS run
 using 5 iterations with a m5.12xlarge
 Took just over 2 hours. I did NOT save predictions for this run.
+
+
+Dataset object is still taking way too much memory (or so it seems)
+Consider this...
+`Created dataframes 13.771659851074219
+nonboycott.raw_ratings size 639977840
+Created dataset objects 18.98782730102539`
+

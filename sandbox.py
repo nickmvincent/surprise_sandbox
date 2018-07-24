@@ -333,7 +333,6 @@ def main(args):
             print('About to run Parallel() with {} tasks'.format(len(simulate_boycott_tasks)))
             out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in simulate_boycott_tasks))
             for d in out_dicts:
-                print('d', d)
                 res = d['subset_results']
                 algo_name = d['algo_name']
                 uid = str(d['identifier']) + '_' + d['algo_name']
