@@ -7,6 +7,7 @@ This very simple script takes a set of percentages (e.g. 0.1%) and outputs how m
 import os
 
 
+
 def main():
     dataset = 'ml-20m'
     if dataset == 'ml-20m':
@@ -16,9 +17,9 @@ def main():
         # with imperfect (automatic) garbage collection we see 20 samples taking up to 95 GB
         # verify this please
         configs = (
-            (15, '1,15'), # num_samples, indices
-            (15, '16,30'), # num_samples, indices
-            (15, '31,45'), # num_samples, indices
+            (7, '1,7'), # num_samples, indices
+            (7, '8,14'), # num_samples, indices
+            (7, '15,21'), # num_samples, indices
         )
     else:
         num_users = 6040

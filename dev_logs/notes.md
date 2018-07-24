@@ -10,7 +10,8 @@ Right now that standard values are _not computed efficiently_ because we don't s
 The whole data processing pipeline for the CSCW submission was quite manual.
 It requires that a human specify carefully all the experiments, but then also make sure that the "no boycott standard results" are specified as well, and specified properly. There is room for human error here, e.g. if you forget an experiment it might not show up in the final results. Luckily we can check for this human error by inspecting the final results and looking for missing data points.
 
-However, the organization of files is still quite confusing and there's a lot of potential confusing redundancy in the files, mainly due to the fact that each AWS spot instance is a full clone of the project directory. For example, this means that the directories with standard results (currently in `rand_standards`) each have a copy of every `uid_sets` doc, even those these are unused. Future versions should clean out this redundant data to make human error harder.
+However, the organization of files is still quite confusing and there's a lot of potential confusing redundancy in the files, mainly due to the fact that each AWS spot instance is a full clone of the p
+roject directory. For example, this means that the directories with standard results (currently in `rand_standards`) each have a copy of every `uid_sets` doc, even those these are unused. Future versions should clean out this redundant data to make human error harder.
 
 
 ## Things to double check
@@ -24,3 +25,11 @@ Switched to using SVD with random state 0 to make it even more reproducible
 # 7/20
 Need to use joblib=0.11
 https://github.com/joblib/joblib/issues/721
+
+NOT TRUE
+as long as you avoid memory error joblib 0.12 works, and it actually seems to be slightly better in terms of memory usage
+
+# 7/23
+Got a successful ml-20m AWS run
+using 5 iterations with a m5.12xlarge
+Took just over 2 hours. I did NOT save predictions for this run.
