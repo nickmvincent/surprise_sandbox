@@ -12,15 +12,19 @@ def main():
     dataset = 'ml-20m'
     if dataset == 'ml-20m':
         num_users = 138493
+        batchsize = 10
+        batches = 5
         # why batches of twenty?
         # for ml-20m each dataset takes about 4GB and must be copied 
         # with imperfect (automatic) garbage collection we see 20 samples taking up to 95 GB
         # verify this please
-        configs = (
-            (7, '1,7'), # num_samples, indices
-            (7, '8,14'), # num_samples, indices
-            (7, '15,21'), # num_samples, indices
-        )
+        configs = []
+        for i in range(batches):
+            start = 1 + (i * batchsize)
+            end = batchsize + (i * batchsize)
+            configs.append(
+                (batchsize, '{},{}'.format(start, end)), # num_samples, indices
+            )
     else:
         num_users = 6040
 
