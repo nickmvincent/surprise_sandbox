@@ -90,24 +90,40 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
         like_boycotters_df = possible_boycotters_df.drop(boycotters_df.index)
         like_boycotters_uid_set = set(like_boycotters_df.user_id)
 
-    non_boycott_user_ratings_df = ratings_df[~ratings_df.user_id.isin(boycott_uid_set)] # makes a df copy
+    tic = time.time()
+
+    mask_boycott_ratings = ratings_df.user_id.isin(boycott_uid_set)
+    non_boycott_user_ratings_df = ratings_df[~mask_boycott_ratings] # makes a df copy
+    print('isin time: {}'.format(time.time() - tic))
+
     boycott_ratings_df = None
     boycott_user_lingering_ratings_df = None
-    for uid in boycott_uid_set:
-        ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
-        if args.ratingfrac != 1.0:
-            boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac, random_state=(seed_base+i)*3)
-        else:
-            boycott_ratings_for_user = ratings_belonging_to_user
-        lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
-        if boycott_ratings_df is None:
-            boycott_ratings_df = boycott_ratings_for_user
-        else:
-            boycott_ratings_df = pd.concat([boycott_ratings_df, boycott_ratings_for_user])
-        if boycott_user_lingering_ratings_df is None:
-            boycott_user_lingering_ratings_df = lingering_ratings_for_user
-        else:
-            boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
+    tic = time.time()
+
+    # BAD (slow) CODE warning: this part is pretty slow when simulating large boycotts for large datasets (e.g. 90% of ML-20M)
+    # room for improvement
+    if args.ratingfrac == 1.0: # skip this complicated stuff!
+        boycott_ratings_df = ratings_df[mask_boycott_ratings]
+        # copy the df but drop all rows
+        boycott_user_lingering_ratings_df = boycott_ratings_df.drop(boycott_ratings_df.index)
+    else:
+        for uid in boycott_uid_set:
+            ratings_belonging_to_user = ratings_df[ratings_df.user_id == uid]
+            if args.ratingfrac != 1.0:
+                boycott_ratings_for_user = ratings_belonging_to_user.sample(frac=args.ratingfrac, random_state=(seed_base+i)*3)
+            else:
+                boycott_ratings_for_user = ratings_belonging_to_user
+            lingering_ratings_for_user = ratings_belonging_to_user.drop(boycott_ratings_for_user.index)
+            if boycott_ratings_df is None:
+                boycott_ratings_df = boycott_ratings_for_user
+            else:
+                boycott_ratings_df = pd.concat([boycott_ratings_df, boycott_ratings_for_user])
+            if boycott_user_lingering_ratings_df is None:
+                boycott_user_lingering_ratings_df = lingering_ratings_for_user
+            else:
+                boycott_user_lingering_ratings_df = pd.concat([boycott_user_lingering_ratings_df, lingering_ratings_for_user])
+    print('going through each uid time: {}'.format(time.time() - tic))
+    
     print('Iteration: {}'.format(i))
     print('Boycott ratings: {}, Lingering Ratings from Boycott Users: {}'.format(
         len(boycott_ratings_df.index), len(boycott_user_lingering_ratings_df.index)
@@ -327,7 +343,7 @@ def main(args):
             simulate_boycott_tasks = []
             tic = time.time()
             out = Parallel(n_jobs=-1, verbose=5, max_nbytes=None)((x for x in prep_boycott_tasks))
-            
+            return
             for task_args, d in out:
                 simulate_boycott_tasks.append(delayed(task)(*task_args))
                 experiment_identifier_to_uid_sets.update(d)

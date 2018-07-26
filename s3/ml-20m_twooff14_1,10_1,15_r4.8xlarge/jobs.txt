@@ -1,2 +1,2 @@
 python3 sandbox.py --grouping sample --sample_sizes 14 --num_samples 10 --indices 1,10 --dataset ml-20m --send_to_out --save_path False
-python3 sandbox.py --grouping sample --sample_sizes 69 --num_samples 10 --indices 1,10 --dataset ml-20m --send_to_out --save_path False
+python3 sandbox.py --grouping sample --sample_sizes 14 --num_samples 15 --indices 1,15 --dataset ml-20m --send_to_out --save_path False
