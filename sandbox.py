@@ -325,11 +325,13 @@ def main(args):
                 ) for i, experimental_iteration in enumerate(experimental_iterations)
             )
             simulate_boycott_tasks = []
+            tic = time.time()
             out = Parallel(n_jobs=-1, verbose=5, max_nbytes=None)((x for x in prep_boycott_tasks))
             
             for task_args, d in out:
                 simulate_boycott_tasks.append(delayed(task)(*task_args))
                 experiment_identifier_to_uid_sets.update(d)
+            print('parallelized prep_boycott_task took {} seconds'.format(time.time() - tic))
             print('About to run Parallel() with {} tasks'.format(len(simulate_boycott_tasks)))
             out_dicts = Parallel(n_jobs=-1, verbose=5)((x for x in simulate_boycott_tasks))
             for d in out_dicts:
