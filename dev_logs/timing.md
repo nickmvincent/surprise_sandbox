@@ -125,3 +125,8 @@ Full runtime was: 11206.055165052414 for 5 experimental iterations
 
 standards_for_uid_sets with loading, for 20 iterations of 14userboycott
 4589.1469349861145
+
+# 7/26
+python3 sandbox.py --grouping sample --sample_sizes 69246 --num_samples 5 --indices 1,5 --dataset ml-20m --send_to_out --save_path False
+25788.656913995743
+7.1 hr! (4 hr for prep boycott)
