@@ -23,11 +23,10 @@ from plot import plot_all
 from constants import MEASURES, get_metric_names
 
 
-
 ALGO_NAMES = [
     'SVD',
     #'KNNBasic_user_msd'    
-    'KNNBaseline_item_msd',
+    #'KNNBaseline_item_msd',
 ]
 
 def main(args):
@@ -50,7 +49,6 @@ def main(args):
                     )
                     outnames.append(outname)
     for outname in outnames:
-        print('...')
         print(outname)
         try:
             userfrac = extract_from_filename(outname, 'userfrac-', 3)
@@ -70,46 +68,53 @@ def main(args):
 
         # this is dangerous. a lot of issues w/ accidental variable assignment
         for algo_name in ALGO_NAMES:
-            standards_filename = 'MERGED_{}_{}.json'.format(args.dataset, algo_name)
-            if algo_to_st.get(algo_name) is None:
-                try:
-                    with open(standards_filename, 'r') as f:
-                        algo_to_st[algo_name] = json.load(f)
-                except:
-                    print('Could not load file {} for algo {}. Moving to next algorithm'.format(
-                        standards_filename, algo_name
-                    ))
-                    continue
-                vanilla_filename = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(args.dataset, algo_name)
-                try:
-                    with open(vanilla_filename, 'r') as f:
-                        algo_to_van[algo_name] = json.load(f)
-                except:
-                    print('no vanilla')
-                    algo_to_van[algo_name] = {}
+            if args.load_standards_from_json:
+                standards_filename = 'MERGED_{}_{}.json'.format(args.dataset, algo_name)
+                if algo_to_st.get(algo_name) is None:
+                    try:
+                        with open(standards_filename, 'r') as f:
+                            algo_to_st[algo_name] = json.load(f)
+                    except:
+                        print('Could not load file {} for algo {}. Moving to next algorithm'.format(
+                            standards_filename, algo_name
+                        ))
+                        continue
+                    vanilla_filename = 'standard_results/{}_ratingcv_standards_for_{}.json'.format(args.dataset, algo_name)
+                    try:
+                        with open(vanilla_filename, 'r') as f:
+                            algo_to_van[algo_name] = json.load(f)
+                    except:
+                        print('no vanilla')
+                        algo_to_van[algo_name] = {}
             for uid, res in uid_to_metric.items():
                 if res['algo_name'] != algo_name:
                     continue
                 for metric in metric_names:
                     for group in ['all', 'non-boycott', 'boycott', 'like-boycott', 'all-like-boycott']:
-                        standard_val_key = '{metric}_{group}__{outname}__{identifier}'.format(**{
-                            'metric': metric,
-                            'group': group,
-                            'outname': outname.replace('results/', ''),
-                            'identifier': uid[:4], # the first 4 characters of the uid are a 4 digit identifier #
-                        })
-                        standard_val = algo_to_st[algo_name].get(standard_val_key)
-                        if standard_val is None:
-                            print('No standard val for {}'.format(
-                                outname
-                            ))
-                        vanilla_val = algo_to_van[algo_name].get(metric)
-                        if vanilla_val is None:
-                            continue
-                        
-                        vanilla_val = np.mean(vanilla_val)
-
                         key = '{}_{}'.format(metric, group)
+                        if args.load_standards_from_json:
+                            standard_val_key = '{metric}_{group}__{outname}__{identifier}'.format(**{
+                                'metric': metric,
+                                'group': group,
+                                'outname': outname.replace('results/', ''),
+                                'identifier': uid[:4], # the first 4 characters of the uid are a 4 digit identifier #
+                            })
+                            standard_val = algo_to_st[algo_name].get(standard_val_key)
+                        else:
+                            standard_key = 'standards_' + key
+                            standard_val = res.get(standard_key)
+                        
+                        if standard_val is None:
+                            # print('No standard val for key {} in file {}'.format(
+                            #     standard_key, outname
+                            # ))
+                            pass
+                        # vanilla_val = algo_to_van[algo_name].get(metric)
+                        # if vanilla_val is None:
+                        #     continue
+                        
+                        # vanilla_val = np.mean(vanilla_val)
+
                         vals = res.get(key)
                         if vals:
                             meanval = np.mean(vals)
@@ -129,10 +134,10 @@ def main(args):
                                 uid_to_metric[uid][per_inc_key] = per_inc_computed
 
 
-                            add_inc_vanilla = meanval - vanilla_val
-                            per_inc_vanilla = 100 * (meanval - vanilla_val) / vanilla_val
-                            uid_to_metric[uid]['vanilla' + new_add_inc_key] = add_inc_vanilla
-                            uid_to_metric[uid]['vanilla' + per_inc_key] = per_inc_vanilla
+                            # add_inc_vanilla = meanval - vanilla_val
+                            # per_inc_vanilla = 100 * (meanval - vanilla_val) / vanilla_val
+                            # uid_to_metric[uid]['vanilla' + new_add_inc_key] = add_inc_vanilla
+                            # uid_to_metric[uid]['vanilla' + per_inc_key] = per_inc_vanilla
                             uid_to_metric[uid]['userfrac'] = userfrac
                             uid_to_metric[uid]['ratingfrac'] = ratingfrac
                             uid_to_metric[uid]['type'] = experiment_type
@@ -166,6 +171,7 @@ def parse():
     parser.add_argument('--userfracs')
     parser.add_argument('--ratingfracs')
     parser.add_argument('--outnames')
+    parser.add_argument('--load_standards_from_json')
     args = parser.parse_args()
     if args.sample_sizes:
         args.sample_sizes = [int(x) for x in args.sample_sizes.split(',')]

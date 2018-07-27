@@ -245,10 +245,17 @@ def main(args):
                 else:
                     save_path = args.save_path
 
-                results = cross_validate_custom(
-                    algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
-                    reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items,
-                    save_path=save_path)
+                if 'KNN' in algo_name and args.dataset == 'ml-20m':
+                    # running this in parallel runs out of memory with KNN
+                    results = cross_validate_custom(
+                        algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
+                        reader=Reader()), [], [], MEASURES, NUM_FOLDS, n_jobs=1, head_items=head_items,
+                        save_path=save_path)
+                else:
+                    results = cross_validate_custom(
+                        algos_for_standards[algo_name], data, Dataset.load_from_df(pd.DataFrame(),
+                        reader=Reader()), [], [], MEASURES, NUM_FOLDS, head_items=head_items,
+                        save_path=save_path)
                 saved_results = {}
                 for metric in metric_names:
                     saved_results[metric] = np.mean(results[metric + '_all'])
