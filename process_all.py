@@ -24,6 +24,7 @@ def main():
         if not os.path.exists(path):
             print('Missing directory {}, going to create it.'.format(path))
             os.makedirs(path)
+
     final_df = None
     outnames = []
 
@@ -42,7 +43,8 @@ def main():
         outnames.append(d + "/results/" + file)
     os.system("python process_results.py --outname {}".format(','.join(outnames)))
 
-    for filepath in files:
+    for file in files:
+        print(file)
         try:
             df = pd.read_csv(d + '/processed_results/' + file)
             if final_df is None:

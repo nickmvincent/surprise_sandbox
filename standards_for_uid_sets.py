@@ -180,7 +180,7 @@ def parse():
     python standards_for_uid_sets.py --dataset ml-20m --algo_name SVD --name_match sample_size-14_num_samples-20
     python standards_for_uid_sets.py --dataset ml-100k --algo_name SVD
 
-    python standards_for_uid_sets.py --name_match sample_size-2_num_samples-2 --dataset ml-100k --algo_name SVD
+    python standards_for_uid_sets.py --name_match sample_size-1_num_samples-1 --dataset ml-100k --algo_name SVD
 
     """
 

@@ -35,12 +35,12 @@ from surprise.reader import Reader
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
-    num_ratings, num_users, num_movies, name, head_items, save_path, load_path):
+    num_ratings, num_users, num_movies, name, head_items, save_path, load_path, data):
     return {
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
             like_boycotters_uid_set, measures, cv, n_jobs=1,
-            head_items=head_items, save_path=save_path, load_path=load_path
+            head_items=head_items, save_path=save_path, load_path=load_path, data=data
         ),
         'num_ratings': num_ratings,
         'num_users': num_users,
@@ -51,7 +51,7 @@ def task(
     }
 
 
-def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, seed_base, outname, algo_name, algo, head_items):
+def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, seed_base, outname, algo_name, algo, head_items, data):
     """
     To simulate a boycott, we need to figure out which ratings are being held out
     For large datasets and large boycotts (e.g. 50% of ML-20M) this is very slow
@@ -178,7 +178,7 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
         num_ratings,
         num_users,
         num_movies, name,
-        head_items, save_path, load_path
+        head_items, save_path, load_path, data
     ), experiment_identifier_to_uid_sets
     
 
@@ -270,7 +270,7 @@ def main(args):
             standard_results_df = pd.DataFrame(standard_results[algo_name])
             print(standard_results_df.mean())
             standard_results_df.mean().to_csv('{}'.format(
-                filename_ratingcv_standards).replace('.csv', '_{}.csv'.format(
+                filename_ratingcv_standards).replace('.json', '_{}.csv'.format(
                     args.num_standards)
                 )
             )
@@ -344,7 +344,7 @@ def main(args):
                 delayed(prepare_boycott_task)(
                     i, experimental_iteration, args, config,
                     ratings_df, seed_base,
-                    outname, algo_name, algos[algo_name], head_items
+                    outname, algo_name, algos[algo_name], head_items, data
                 ) for i, experimental_iteration in enumerate(experimental_iterations)
             )
             simulate_boycott_tasks = []
