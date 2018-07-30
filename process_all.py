@@ -2,6 +2,9 @@
 This is just a convenience script
 that runs process_results with a bunch
 of saved params.
+
+
+This script does not have command line arguments, you need to edit the variables manually before running.
 """
 
 
@@ -16,7 +19,7 @@ from shutil import copyfile
 
 
 def main():
-    d = "ml-20m_collected"
+    d = "ml-1m_collected"
     for subdir in [
         "results", "processed_results",
     ]:
@@ -29,11 +32,11 @@ def main():
     outnames = []
 
     for root_dir in [
-        's3/ml-20m_autogen_aws_1,10/',
-        's3/ml-20m_autogen_aws_11,20/',
-        's3/ml-20m_autogen_aws_21,30/',
-        's3/ml-20m_autogen_aws_31,40/',
-        's3/ml-20m_autogen_aws_41,50/',
+        's3/ml-1m_autogen_aws_1,10/',
+        # 's3/ml-20m_autogen_aws_11,20/',
+        # 's3/ml-20m_autogen_aws_21,30/',
+        # 's3/ml-20m_autogen_aws_31,40/',
+        # 's3/ml-20m_autogen_aws_41,50/',
     ]:
         files = glob.iglob(root_dir + '*/out/results/*.csv')
         for filepath in files:
@@ -77,4 +80,5 @@ def main():
     # now you're ready to visualize and the interpret the results!
 
 if __name__ == '__main__':
+    print("This script does not have command line arguments, you need to edit the variables manually before running.")
     main()

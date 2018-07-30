@@ -6,8 +6,6 @@ This very simple script takes a set of percentages (e.g. 0.1%) and outputs how m
 """
 import os
 
-
-
 def main():
     dataset = 'ml-1m'
     if dataset == 'ml-20m':
@@ -22,7 +20,7 @@ def main():
     elif dataset == 'ml-1m':
         num_users = 6040
         batchsize = 10
-        batches = 2
+        batches = 5
 
     configs = []
     for i in range(batches):
@@ -53,6 +51,7 @@ def main():
     for num_samples, indices in configs:
         jobs = []
         aws_jobs = []
+        grouped_jobs = []
         for user_count in user_counts:
             job = "python sandbox.py --grouping sample --sample_sizes {} --num_samples {} --indices {} --dataset {}".format(
                 int(user_count), int(num_samples), indices, dataset
@@ -62,6 +61,17 @@ def main():
             )
             jobs.append(job)
             aws_jobs.append(aws_job)
+
+        if dataset == 'ml-1m':
+            groupings = [
+                'gender', 'state', 'power', 'age', 'occupation', 'genre'
+            ]
+            for grouping in groupings:
+                job = "python3 sandbox.py --grouping {} --num_samples {} --userfrac 0.5 --ratingfrac 1.0 --indices {} --dataset {} --send_to_out --save_path False".format(
+                    grouping, int(num_samples), indices, dataset
+                )
+                grouped_jobs.append(job)
+            
         
         with open("bash_scripts/{}_autogen_jobs_{}.sh".format(dataset, indices), "w", newline='\n') as outfile:
             outfile.write('\n'.join(jobs))
@@ -71,6 +81,12 @@ def main():
             os.makedirs(s3_dir)
         with open(s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
             outfile.write('\n'.join(aws_jobs))
+
+        grouped_s3_dir = 's3/{}_autogen_aws_{}_grouped'.format(dataset, indices, grouping)
+        if not os.path.exists(grouped_s3_dir):
+            os.makedirs(grouped_s3_dir) 
+        with open(grouped_s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
+            outfile.write('\n'.join(grouped_jobs))
 
 
 main()
