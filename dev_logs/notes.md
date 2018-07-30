@@ -41,3 +41,8 @@ Consider this...
 nonboycott.raw_ratings size 639977840
 Created dataset objects 18.98782730102539`
 
+
+# 7/29
+AWS notes
+for running 10 samples at once for ml-20m, r4.8xlarge works 100% of the time so far (i.e. never any memory error).
+for ml-1m, trying out m5.4xlarge with 10 samples at once.

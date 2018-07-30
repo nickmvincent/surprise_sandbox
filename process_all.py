@@ -28,23 +28,32 @@ def main():
     final_df = None
     outnames = []
 
-    root_dir = 's3/ml-20m_autogen_aws_1,10/'
-    files = glob.iglob(root_dir + '*/out/results/*.csv')
-    for filepath in files:
-        print(filepath)
-        filename = os.path.basename(filepath)
-        print('filename', filename)
-        copyfile(filepath, d + '/results/{}'.format(filename))
+    for root_dir in [
+        's3/ml-20m_autogen_aws_1,10/',
+        's3/ml-20m_autogen_aws_11,20/',
+        's3/ml-20m_autogen_aws_21,30/',
+        's3/ml-20m_autogen_aws_31,40/',
+        's3/ml-20m_autogen_aws_41,50/',
+    ]:
+        files = glob.iglob(root_dir + '*/out/results/*.csv')
+        for filepath in files:
+            filename = os.path.basename(filepath)
+            #print('filename', filename)
+            copyfile(filepath, d + '/results/{}'.format(filename))
 
     
     files = os.listdir(d + '/results')
 
-    for file in files:
-        outnames.append(d + "/results/" + file)
-    os.system("python process_results.py --outname {}".format(','.join(outnames)))
 
     for file in files:
-        print(file)
+        # weird pattern - why? Doing all the files at once is too long...
+        outnames = []
+        outnames.append(d + "/results/" + file)
+        call = "python process_results.py --outname {}".format(','.join(outnames))
+        print(call)
+        os.system(call)
+
+    for file in files:
         try:
             df = pd.read_csv(d + '/processed_results/' + file)
             if final_df is None:

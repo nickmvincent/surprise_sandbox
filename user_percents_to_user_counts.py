@@ -9,7 +9,7 @@ import os
 
 
 def main():
-    dataset = 'ml-20m'
+    dataset = 'ml-1m'
     if dataset == 'ml-20m':
         num_users = 138493
         batchsize = 10
@@ -18,15 +18,19 @@ def main():
         # for ml-20m each dataset takes about 4GB and must be copied 
         # with imperfect (automatic) garbage collection we see 20 samples taking up to 95 GB
         # verify this please
-        configs = []
-        for i in range(batches):
-            start = 1 + (i * batchsize)
-            end = batchsize + (i * batchsize)
-            configs.append(
-                (batchsize, '{},{}'.format(start, end)), # num_samples, indices
-            )
-    else:
+
+    elif dataset == 'ml-1m':
         num_users = 6040
+        batchsize = 10
+        batches = 2
+
+    configs = []
+    for i in range(batches):
+        start = 1 + (i * batchsize)
+        end = batchsize + (i * batchsize)
+        configs.append(
+            (batchsize, '{},{}'.format(start, end)), # num_samples, indices
+        )
 
     percents = [
         0.01, 0.05,
