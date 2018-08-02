@@ -32,12 +32,12 @@ def main():
     outnames = []
 
     for root_dir in [
-        's3/ml-1m_autogen_aws_1,250',
+        's3/ml-1m_autogen_aws_1,250/',
         's3/ml-1m_autogen_aws_1,10_grouped/',
-        's3/ml-20m_autogen_aws_11,20_grouped/',
-        's3/ml-20m_autogen_aws_21,30_grouped/',
-        's3/ml-20m_autogen_aws_31,40_grouped/',
-        's3/ml-20m_autogen_aws_41,50_grouped/',
+        's3/ml-1m_autogen_aws_11,20_grouped/',
+        's3/ml-1m_autogen_aws_21,30_grouped/',
+        's3/ml-1m_autogen_aws_31,40_grouped/',
+        's3/ml-1m_autogen_aws_41,50_grouped/',
     ]:
         files = glob.iglob(root_dir + '*/out/results/*.csv')
         for filepath in files:
