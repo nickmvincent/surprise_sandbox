@@ -85,7 +85,7 @@ def group_by_occupation(users_df):
         19:  "unemployed",
         20:  "writer",
     }
-    print(users_df.occupation)
+    #print(users_df.occupation)
     for occ_key, occ in num_to_occ.items():
         ret.append({
             'df': users_df[users_df.occupation == occ_key],
