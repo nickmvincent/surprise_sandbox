@@ -7,11 +7,11 @@ This very simple script takes a set of percentages (e.g. 0.1%) and outputs how m
 import os
 
 def main():
-    dataset = 'ml-1m'
+    dataset = 'ml-20m'
     if dataset == 'ml-20m':
         num_users = 138493
-        batchsize = 10
-        batches = 5
+        batchsize = 50
+        batches = 1
         # why batches of twenty?
         # for ml-20m each dataset takes about 4GB and must be copied 
         # with imperfect (automatic) garbage collection we see 20 samples taking up to 95 GB
@@ -19,8 +19,8 @@ def main():
 
     elif dataset == 'ml-1m':
         num_users = 6040
-        batchsize = 10
-        batches = 5
+        batchsize = 50
+        batches = 1
 
     configs = []
     for i in range(batches):
@@ -37,6 +37,8 @@ def main():
         10, 20, 30, 40, 50, 60, 70, 80, 90,
         99,
     ]
+    # temp
+    percents = [10, 30, 50, 70]
 
     user_counts = []
     for percent in percents:
@@ -76,17 +78,17 @@ def main():
         with open("bash_scripts/{}_autogen_jobs_{}.sh".format(dataset, indices), "w", newline='\n') as outfile:
             outfile.write('\n'.join(jobs))
 
-        s3_dir = 's3/{}_autogen_aws_{}'.format(dataset, indices)
-        if not os.path.exists(s3_dir):
-            os.makedirs(s3_dir)
-        with open(s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
-            outfile.write('\n'.join(aws_jobs))
+        # s3_dir = 's3/{}_autogen_aws_{}'.format(dataset, indices)
+        # if not os.path.exists(s3_dir):
+        #     os.makedirs(s3_dir)
+        # with open(s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
+        #     outfile.write('\n'.join(aws_jobs))
 
-        grouped_s3_dir = 's3/{}_autogen_aws_{}_grouped'.format(dataset, indices, grouping)
-        if not os.path.exists(grouped_s3_dir):
-            os.makedirs(grouped_s3_dir) 
-        with open(grouped_s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
-            outfile.write('\n'.join(grouped_jobs))
+        # grouped_s3_dir = 's3/{}_autogen_aws_{}_grouped'.format(dataset, indices, grouping)
+        # if not os.path.exists(grouped_s3_dir):
+        #     os.makedirs(grouped_s3_dir) 
+        # with open(grouped_s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
+        #     outfile.write('\n'.join(grouped_jobs))
 
 
 main()
