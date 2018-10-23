@@ -10,7 +10,7 @@ def main():
     dataset = 'ml-20m'
     if dataset == 'ml-20m':
         num_users = 138493
-        batchsize = 50
+        batchsize = 10
         batches = 1
         # why batches of twenty?
         # for ml-20m each dataset takes about 4GB and must be copied 
@@ -19,7 +19,7 @@ def main():
 
     elif dataset == 'ml-1m':
         num_users = 6040
-        batchsize = 50
+        batchsize = 10
         batches = 1
 
     configs = []
@@ -38,7 +38,7 @@ def main():
         99,
     ]
     # temp
-    percents = [10, 30, 50, 70]
+    percents = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]
 
     user_counts = []
     for percent in percents:
