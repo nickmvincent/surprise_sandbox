@@ -6,7 +6,7 @@ Those should go in specs.py
 """
 
 MEASURES = [
-    'RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull_hits'
+    'RMSE', 'MAE', 'prec10t4_prec5t4_rec10t4_rec5t4_ndcg10_ndcg5_ndcgfull_hits_normhits'
 ]
 
 def get_metric_names():
