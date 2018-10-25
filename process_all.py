@@ -19,7 +19,7 @@ from shutil import copyfile
 
 
 def main():
-    d = "ml-1m_collected"
+    d = "ml-20m_collected"
     for subdir in [
         "results", "processed_results",
     ]:

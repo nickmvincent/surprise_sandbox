@@ -7,7 +7,7 @@ This very simple script takes a set of percentages (e.g. 0.1%) and outputs how m
 import os
 
 def main():
-    dataset = 'ml-20m'
+    dataset = 'ml-1m'
     if dataset == 'ml-20m':
         num_users = 138493
         batchsize = 10
@@ -19,7 +19,7 @@ def main():
 
     elif dataset == 'ml-1m':
         num_users = 6040
-        batchsize = 10
+        batchsize = 20
         batches = 1
 
     configs = []
