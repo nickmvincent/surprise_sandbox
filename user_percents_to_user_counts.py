@@ -20,10 +20,14 @@ def main():
     elif dataset == 'ml-1m':
         num_users = 6040
 <<<<<<< HEAD
+<<<<<<< HEAD
         batchsize = 25
 =======
         batchsize = 10
 >>>>>>> 23bf4e50df3960930c0ba21e83c9579320ce4b57
+=======
+        batchsize = 25
+>>>>>>> 32dda6240ba9e222f4fe57d43c26f8ccdf867772
         batches = 1
 
     configs = []
