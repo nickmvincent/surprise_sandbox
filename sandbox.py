@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 from utils import get_dfs, concat_output_filename, load_head_items
 from specs import ALGOS, ALGOS_FOR_STANDARDS, NUM_FOLDS
-from constants import MEASURES
+from constants import MEASURES, get_metric_names
 from prep_organized_boycotts import (
     group_by_age, group_by_gender, group_by_genre,
     group_by_occupation, group_by_power, group_by_state, group_by_genre_strict
@@ -229,7 +229,7 @@ def main(args):
             metric_names += ['tail' + x for x in splitnames]
         else:
             metric_names.append(measure.lower())
-    
+    metric_names = get_metric_names()
     if args.compute_standards:
         standard_results = defaultdict(list)
         for algo_name in algos_for_standards:

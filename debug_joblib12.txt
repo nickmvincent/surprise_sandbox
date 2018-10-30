@@ -1,0 +1,146 @@
+Path to ratings file is: /home/nvl0834/.surprise_data/ml-20m/ml-20m/ratings.csv
+   user_id  movie_id  rating  unix_timestamp
+0        1         2     3.5      1112486027
+1        1        29     3.5      1112484676
+2        1        32     3.5      1112484819
+3        1        47     3.5      1112484727
+4        1        50     3.5      1112484580
+Got dataframes, took 94.24857759475708 seconds
+Total examples: 20000263
+14 user sample
+        user_id
+21019     21020
+94568     94569
+125932   125933
+117461   117462
+56609     56610
+Iteration: 3
+Boycott ratings: 1858, Lingering Ratings from Boycott Users: 0
+Created dataframes 28.53241729736328
+nonboycott.raw_ratings size 639949072
+Created dataset objects 49.20887756347656
+14 user sample
+        user_id
+121472   121473
+60148     60149
+50714     50715
+81737     81738
+76123     76124
+Iteration: 2
+Boycott ratings: 1940, Lingering Ratings from Boycott Users: 0
+Created dataframes 23.131336212158203
+nonboycott.raw_ratings size 639946448
+Created dataset objects 50.402862548828125
+14 user sample
+        user_id
+44182     44183
+133422   133423
+83327     83328
+56873     56874
+62505     62506
+Iteration: 0
+Boycott ratings: 959, Lingering Ratings from Boycott Users: 0
+Created dataframes 15.0648193359375
+nonboycott.raw_ratings size 639977840
+Created dataset objects 52.219547271728516
+14 user sample
+        user_id
+62879     62880
+11618     11619
+104533   104534
+10187     10188
+82982     82983
+Iteration: 4
+Boycott ratings: 1644, Lingering Ratings from Boycott Users: 0
+Created dataframes 32.968135833740234
+nonboycott.raw_ratings size 639955920
+Created dataset objects 48.74818420410156
+14 user sample
+        user_id
+68765     68766
+26085     26086
+138200   138201
+80931     80932
+129926   129927
+Iteration: 1
+Boycott ratings: 3138, Lingering Ratings from Boycott Users: 0
+Created dataframes 19.331836700439453
+nonboycott.raw_ratings size 639908112
+Created dataset objects 48.419376373291016
+About to run Parallel() with 5 tasks
+Do everything in series. On Iteration 0
+About to run fit and score
+56.70976638793945
+Do everything in series. On Iteration 1
+About to run fit and score
+64.71458053588867
+Do everything in series. On Iteration 2
+About to run fit and score
+66.57534790039062
+Do everything in series. On Iteration 3
+About to run fit and score
+69.4471321105957
+Do everything in series. On Iteration 4
+About to run fit and score
+68.32475662231445
+Do everything in series. On Iteration 0
+About to run fit and score
+55.021236419677734
+Do everything in series. On Iteration 1
+About to run fit and score
+65.84957504272461
+Do everything in series. On Iteration 2
+About to run fit and score
+69.15166091918945
+Do everything in series. On Iteration 3
+About to run fit and score
+68.03938293457031
+Do everything in series. On Iteration 4
+About to run fit and score
+68.43097305297852
+Do everything in series. On Iteration 0
+About to run fit and score
+55.737796783447266
+Do everything in series. On Iteration 1
+About to run fit and score
+63.16897964477539
+Do everything in series. On Iteration 2
+About to run fit and score
+65.12691497802734
+Do everything in series. On Iteration 3
+About to run fit and score
+64.50135040283203
+Do everything in series. On Iteration 4
+About to run fit and score
+66.89742660522461
+Do everything in series. On Iteration 0
+About to run fit and score
+57.82650375366211
+Do everything in series. On Iteration 1
+About to run fit and score
+63.37870788574219
+Do everything in series. On Iteration 2
+About to run fit and score
+64.58951950073242
+Do everything in series. On Iteration 3
+About to run fit and score
+64.50068283081055
+Do everything in series. On Iteration 4
+About to run fit and score
+65.78173065185547
+Full runtime was: 9140.096190690994 for 5 experimental iterations
+Do everything in series. On Iteration 0
+About to run fit and score
+58.679569244384766
+Do everything in series. On Iteration 1
+About to run fit and score
+64.38133239746094
+Do everything in series. On Iteration 2
+About to run fit and score
+68.51531600952148
+Do everything in series. On Iteration 3
+About to run fit and score
+64.85022354125977
+Do everything in series. On Iteration 4
+About to run fit and score
+29.650108337402344

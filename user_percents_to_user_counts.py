@@ -10,8 +10,8 @@ def main():
     dataset = 'ml-1m'
     if dataset == 'ml-20m':
         num_users = 138493
-        batchsize = 10
-        batches = 1
+        batchsize = 25
+        batches = 2
         # why batches of twenty?
         # for ml-20m each dataset takes about 4GB and must be copied 
         # with imperfect (automatic) garbage collection we see 20 samples taking up to 95 GB
@@ -19,7 +19,7 @@ def main():
 
     elif dataset == 'ml-1m':
         num_users = 6040
-        batchsize = 20
+        batchsize = 25
         batches = 1
 
     configs = []
@@ -38,7 +38,7 @@ def main():
         99,
     ]
     # temp
-    percents = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+    percents = [99.5, 99.6, 99.7, 99.8, 99.9]
 
     user_counts = []
     for percent in percents:
