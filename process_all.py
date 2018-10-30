@@ -19,7 +19,7 @@ from shutil import copyfile
 
 
 def main():
-    d = "ml-20m_collected"
+    d = "ml-1m_collected_10_28"
     for subdir in [
         "results", "processed_results",
     ]:
@@ -32,7 +32,14 @@ def main():
     outnames = []
 
     for root_dir in [
-        's3/ml-1m_autogen_aws_1,250/',
+        # 's3/ml-20m_autogen_aws_1,10/',
+        # 's3/ml-20m_autogen_aws_11,20/',
+        # 's3/ml-20m_autogen_aws_21,30/',
+        # 's3/ml-20m_autogen_aws_31,40/',
+        # 's3/ml-20m_autogen_aws_41,50/',
+
+        # 's3/ml-1m_autogen_aws_1,250/',
+        # 1,250 was re-run on butter, not aws.
         's3/ml-1m_autogen_aws_1,10_grouped/',
         's3/ml-1m_autogen_aws_11,20_grouped/',
         's3/ml-1m_autogen_aws_21,30_grouped/',
@@ -63,7 +70,7 @@ def main():
             if final_df is None:
                 final_df = df
             else:
-                final_df = pd.concat([final_df, df])
+                final_df = pd.concat([final_df, df], sort=True)
         except FileNotFoundError:
             print('File {} did not process'.format(file))
 
