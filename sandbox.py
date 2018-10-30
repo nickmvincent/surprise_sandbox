@@ -41,7 +41,7 @@ def task(
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
             like_boycotters_uid_set, measures, cv, n_jobs=1,
-            head_items=head_items, save_path=save_path, load_path=load_path, data=data
+            head_items=head_items, save_path=save_path, load_path=load_path, load_boycotts_path=load_boycotts_path, data=data
         ),
         'num_ratings': num_ratings,
         'num_users': num_users,
@@ -174,7 +174,7 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
     else:
         load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
 
-    args.load_boycotts_path = save_path
+    load_boycotts_path = save_path
     if args.load_boycotts_path:
         load_boycotts_path = os.getcwd() + '/' + save_path
     return (
