@@ -35,7 +35,8 @@ from surprise.reader import Reader
 def task(
     algo_name, algo, nonboycott, boycott, boycott_uid_set,
     like_boycotters_uid_set, measures, cv, verbose, identifier,
-    num_ratings, num_users, num_movies, name, head_items, save_path, load_path, data):
+    num_ratings, num_users, num_movies, name, head_items, save_path, load_path,
+    load_boycotts_path, data):
     return {
         'subset_results': cross_validate_custom(
             algo, nonboycott, boycott, boycott_uid_set,
@@ -172,13 +173,17 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
         load_path = os.getcwd() + '/predictions/standards/{}_{}_'.format(args.dataset, algo_name)
     else:
         load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
+
+    args.load_boycotts_path = save_path
+    if args.load_boycotts_path:
+        load_boycotts_path = os.getcwd() + '/' + save_path
     return (
         algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
         False, identifier,
         num_ratings,
         num_users,
         num_movies, name,
-        head_items, save_path, load_path, data
+        head_items, save_path, load_path, load_boycotts_path, data
     ), experiment_identifier_to_uid_sets
     
 
@@ -401,6 +406,9 @@ def parse():
     Example:
     python sandbox.py --grouping state
 
+    python sandbox.py --grouping sample --sample_sizes 1 --num_samples 1 --dataset ml-1m --indices 0,0
+
+    python sandbox.py --grouping sample --sample_sizes 1 --num_samples 1 --dataset ml-1m --compute_standards --indices 0,0
     python sandbox.py --grouping sample --sample_sizes 3 --num_samples 2 --dataset test_ml-1m --compute_standards --indices 1,2
     python sandbox.py --grouping sample --sample_sizes 3 --num_samples 250 --indices 251,500 --dataset ml-1m
     python sandbox.py --grouping sample --sample_sizes 2 --num_samples 2 --dataset ml-100k --indices 1,2
@@ -432,6 +440,9 @@ def parse():
     )
     parser.add_argument(
         '--load_path', help='where to load standards predictions'
+    )
+    parser.add_argument(
+        '--load_boycotts_path', help='where to load boycotts predictions'
     )
 
     parser.add_argument('--mode', default='compute')

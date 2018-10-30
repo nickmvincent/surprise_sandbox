@@ -19,7 +19,11 @@ def main():
 
     elif dataset == 'ml-1m':
         num_users = 6040
+<<<<<<< HEAD
         batchsize = 25
+=======
+        batchsize = 10
+>>>>>>> 23bf4e50df3960930c0ba21e83c9579320ce4b57
         batches = 1
 
     configs = []
@@ -31,8 +35,8 @@ def main():
         )
 
     percents = [
-        0.01, 0.05,
-        0.1, 0.5,
+        #0.01, 0.05,
+        #0.1, 0.5,
         1, 5,
         10, 20, 30, 40, 50, 60, 70, 80, 90,
         99,
