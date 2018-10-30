@@ -1,0 +1,64 @@
+Path to ratings file is: /home/nvl0834/.surprise_data/ml-1m/ml-1m/ratings.dat
+Got dataframes, took 5.145700931549072 seconds
+Total examples: 1000209
+raw_ratings.nbytes (GB): 0.015835792757570744
+5000 user sample
+      user_id gender  age  occupation zip_code
+206       207      M   25          12    94115
+4945     4946      F   35           1    91106
+4481     4482      F   35           1    94044
+5658     5659      M   25           0    20874
+842       843      M   25           7    49321
+isin time: 0.05291914939880371
+going through each uid time: 0.2178511619567871
+Iteration: 0
+Boycott ratings: 823684, Lingering Ratings from Boycott Users: 0
+Created dataframes 5.431896209716797
+raw_ratings.nbytes (GB): 0.002794829197227955
+raw_ratings.nbytes (GB): 0.013040963560342789
+nonboycott.raw_ratings size 3001021
+Created dataset objects 5.478015899658203
+parallelized prep_boycott_task took 3.874439001083374 seconds
+About to run Parallel() with 1 tasks
+Full runtime was: 195.2493007183075 for 1 experimental iterations
+bu
+ -0.10052989384597401 0.27911505613769916
+bi
+ -0.0522805693462137 0.32348293907241255
+bu
+ -0.10124448314234119 0.2772519126648896
+bi
+ -0.05239496224158623 0.32558479755563147
+bu
+ -0.09953242138987584 0.2765975206502355
+bi
+ -0.05197797021117844 0.32591640966014235
+bu
+ -0.10055242388753595 0.27582034898172514
+bi
+ -0.05237498889153555 0.32389862176424067
+bu
+ -0.10306533398164187 0.2778584216722286
+bi
+ -0.052865885513387306 0.32239120264817545
+raw_ratings.nbytes (GB): 0.0
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-1m_SVD__seed0_fold0_all_predictions.txt
+About to run standards fit and score for crossfold index 0
+psutil.virtual_memory().used 5.655647277832031 (GB)
+standards fit_and_score for crossfold 0 took 7.650086402893066 seconds
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-1m_SVD__seed0_fold1_all_predictions.txt
+About to run standards fit and score for crossfold index 1
+psutil.virtual_memory().used 5.803775787353516 (GB)
+standards fit_and_score for crossfold 1 took 7.688644886016846 seconds
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-1m_SVD__seed0_fold2_all_predictions.txt
+About to run standards fit and score for crossfold index 2
+psutil.virtual_memory().used 5.836555480957031 (GB)
+standards fit_and_score for crossfold 2 took 7.682898759841919 seconds
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-1m_SVD__seed0_fold3_all_predictions.txt
+About to run standards fit and score for crossfold index 3
+psutil.virtual_memory().used 5.878013610839844 (GB)
+standards fit_and_score for crossfold 3 took 7.682327032089233 seconds
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-1m_SVD__seed0_fold4_all_predictions.txt
+About to run standards fit and score for crossfold index 4
+psutil.virtual_memory().used 5.883277893066406 (GB)
+standards fit_and_score for crossfold 4 took 7.869040250778198 seconds

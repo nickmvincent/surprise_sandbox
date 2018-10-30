@@ -1,0 +1,116 @@
+Path to ratings file is: /home/nvl0834/.surprise_data/ml-20m/ml-20m/ratings.csv
+   user_id  movie_id  rating  unix_timestamp
+0        1         2     3.5      1112486027
+1        1        29     3.5      1112484676
+2        1        32     3.5      1112484819
+3        1        47     3.5      1112484727
+4        1        50     3.5      1112484580
+Got dataframes, took 94.82367706298828 seconds
+Total examples: 20000263
+14 user sample
+        user_id
+44182     44183
+133422   133423
+83327     83328
+56873     56874
+62505     62506
+Iteration: 0
+Boycott ratings: 959, Lingering Ratings from Boycott Users: 0
+Created dataframes 15.293392181396484
+nonboycott.raw_ratings size 639977840
+Created dataset objects 51.42049026489258
+14 user sample
+        user_id
+121472   121473
+60148     60149
+50714     50715
+81737     81738
+76123     76124
+Iteration: 2
+Boycott ratings: 1940, Lingering Ratings from Boycott Users: 0
+Created dataframes 21.066699981689453
+nonboycott.raw_ratings size 639946448
+Created dataset objects 51.77109909057617
+14 user sample
+        user_id
+62879     62880
+11618     11619
+104533   104534
+10187     10188
+82982     82983
+Iteration: 4
+Boycott ratings: 1644, Lingering Ratings from Boycott Users: 0
+Created dataframes 28.731857299804688
+nonboycott.raw_ratings size 639955920
+Created dataset objects 50.26018524169922
+14 user sample
+        user_id
+21019     21020
+94568     94569
+125932   125933
+117461   117462
+56609     56610
+Iteration: 3
+Boycott ratings: 1858, Lingering Ratings from Boycott Users: 0
+Created dataframes 25.386669158935547
+nonboycott.raw_ratings size 639949072
+Created dataset objects 49.882686614990234
+14 user sample
+        user_id
+68765     68766
+26085     26086
+138200   138201
+80931     80932
+129926   129927
+Iteration: 1
+Boycott ratings: 3138, Lingering Ratings from Boycott Users: 0
+Created dataframes 18.478065490722656
+nonboycott.raw_ratings size 639908112
+Created dataset objects 51.78748321533203
+About to run Parallel() with 5 tasks
+Do everything in series. On Iteration 0
+About to run fit and score
+66.52297973632812
+Do everything in series. On Iteration 1
+About to run fit and score
+75.2927017211914
+Do everything in series. On Iteration 2
+About to run fit and score
+78.84134292602539
+Do everything in series. On Iteration 3
+About to run fit and score
+79.39727020263672
+Do everything in series. On Iteration 4
+About to run fit and score
+78.67846298217773
+Do everything in series. On Iteration 0
+About to run fit and score
+64.61045455932617
+Do everything in series. On Iteration 1
+About to run fit and score
+76.16020202636719
+Do everything in series. On Iteration 2
+About to run fit and score
+78.42510986328125
+Do everything in series. On Iteration 3
+About to run fit and score
+79.53783798217773
+Do everything in series. On Iteration 4
+About to run fit and score
+77.86495590209961
+Do everything in series. On Iteration 0
+About to run fit and score
+63.53761672973633
+Do everything in series. On Iteration 1
+About to run fit and score
+75.03713989257812
+Do everything in series. On Iteration 2
+About to run fit and score
+74.78627395629883
+Do everything in series. On Iteration 3
+About to run fit and score
+76.56761932373047
+Do everything in series. On Iteration 4
+About to run fit and score
+77.61108016967773
+Full runtime was: 9427.519151449203 for 5 experimental iterations

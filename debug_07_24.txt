@@ -1,0 +1,223 @@
+Path to ratings file is: /home/nvl0834/.surprise_data/ml-20m/ml-20m/ratings.csv
+   user_id  movie_id  rating  unix_timestamp
+0        1         2     3.5      1112486027
+1        1        29     3.5      1112484676
+2        1        32     3.5      1112484819
+3        1        47     3.5      1112484727
+4        1        50     3.5      1112484580
+Got dataframes, took 94.17883062362671 seconds
+Total examples: 20000263
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 0.3166538393124938
+14 user sample
+        user_id
+44182     44183
+133422   133423
+83327     83328
+56873     56874
+62505     62506
+Iteration: 0
+Boycott ratings: 959, Lingering Ratings from Boycott Users: 0
+Created dataframes 10.228778839111328
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 0.31663865596055984
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 1.5183351933956146e-05
+nonboycott.raw_ratings sizeof 0.316638745367527
+nonboycott.raw_ratings nbytes 0.31663865596055984
+{'reader': <surprise.reader.Reader object at 0x7f6c83ee4128>, 'has_been_split': False, 'raw_ratings': array([(     1,     2,  3.5, False), (     1,    29,  3.5, False),
+       (     1,    32,  3.5, False), ..., (138493, 69644,  3. , False),
+       (138493, 70286,  5. , False), (138493, 71619,  2.5, False)],
+      dtype=[('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')])}
+Created dataset objects 35.57242202758789
+Since you passed --save_path False, predictions will NOT BE SAVED
+14 user sample
+        user_id
+121472   121473
+60148     60149
+50714     50715
+81737     81738
+76123     76124
+Iteration: 2
+Boycott ratings: 1940, Lingering Ratings from Boycott Users: 0
+Created dataframes 19.21572494506836
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 0.316623124293983
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 3.071501851081848e-05
+nonboycott.raw_ratings sizeof 0.31662321370095015
+nonboycott.raw_ratings nbytes 0.316623124293983
+{'reader': <surprise.reader.Reader object at 0x7f23bd1540f0>, 'has_been_split': False, 'raw_ratings': array([(     1,     2,  3.5, False), (     1,    29,  3.5, False),
+       (     1,    32,  3.5, False), ..., (138493, 69644,  3. , False),
+       (138493, 70286,  5. , False), (138493, 71619,  2.5, False)],
+      dtype=[('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')])}
+Created dataset objects 28.825889587402344
+Since you passed --save_path False, predictions will NOT BE SAVED
+14 user sample
+        user_id
+68765     68766
+26085     26086
+138200   138201
+80931     80932
+129926   129927
+Iteration: 1
+Boycott ratings: 3138, Lingering Ratings from Boycott Users: 0
+Created dataframes 14.964580535888672
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 0.31660415697842836
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 4.968233406543732e-05
+nonboycott.raw_ratings sizeof 0.3166042463853955
+nonboycott.raw_ratings nbytes 0.31660415697842836
+{'reader': <surprise.reader.Reader object at 0x7fec13eab080>, 'has_been_split': False, 'raw_ratings': array([(     1,     2,  3.5, False), (     1,    29,  3.5, False),
+       (     1,    32,  3.5, False), ..., (138493, 69644,  3. , False),
+       (138493, 70286,  5. , False), (138493, 71619,  2.5, False)],
+      dtype=[('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')])}
+Created dataset objects 28.690658569335938
+Since you passed --save_path False, predictions will NOT BE SAVED
+14 user sample
+        user_id
+21019     21020
+94568     94569
+125932   125933
+117461   117462
+56609     56610
+Iteration: 3
+Boycott ratings: 1858, Lingering Ratings from Boycott Users: 0
+Created dataframes 24.931316375732422
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 0.316624422557652
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 2.9416754841804504e-05
+nonboycott.raw_ratings sizeof 0.31662451196461916
+nonboycott.raw_ratings nbytes 0.316624422557652
+{'reader': <surprise.reader.Reader object at 0x7f57a26914e0>, 'has_been_split': False, 'raw_ratings': array([(     1,     2,  3.5, False), (     1,    29,  3.5, False),
+       (     1,    32,  3.5, False), ..., (138493, 69644,  3. , False),
+       (138493, 70286,  5. , False), (138493, 71619,  2.5, False)],
+      dtype=[('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')])}
+Created dataset objects 21.884159088134766
+Since you passed --save_path False, predictions will NOT BE SAVED
+14 user sample
+        user_id
+62879     62880
+11618     11619
+104533   104534
+10187     10188
+82982     82983
+Iteration: 4
+Boycott ratings: 1644, Lingering Ratings from Boycott Users: 0
+Created dataframes 28.63253402709961
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 0.31662781070917845
+dtype [('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')]
+bytes / 1024 ** 3 2.6028603315353394e-05
+nonboycott.raw_ratings sizeof 0.3166279001161456
+nonboycott.raw_ratings nbytes 0.31662781070917845
+{'reader': <surprise.reader.Reader object at 0x7f2c42e9c160>, 'has_been_split': False, 'raw_ratings': array([(     1,     2,  3.5, False), (     1,    29,  3.5, False),
+       (     1,    32,  3.5, False), ..., (138493, 69644,  3. , False),
+       (138493, 70286,  5. , False), (138493, 71619,  2.5, False)],
+      dtype=[('uid', '<i4'), ('iid', '<i4'), ('rating', '<f8'), ('timestamp', '?')])}
+Created dataset objects 17.656383514404297
+Since you passed --save_path False, predictions will NOT BE SAVED
+About to run Parallel() with 5 tasks
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold0_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold1_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold2_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold3_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold4_all_predictions.txt
+Loading predictions from all folds took 629.6223170757294
+raw_trainset took 15.864635229110718
+nonboycott_ratings_for_test took 4.010991096496582
+Stuff before boycott_uid_set took 98.01525282859802 sec
+identifier only took 27.596709966659546 sec
+n_jobs = 1, so just do everything in series. On Iteration 0
+About to run fit and score, crossfold index is 0
+psutil.virtual_memory().used / (1024**3) 85.49149703979492
+raw_trainset took 16.10312008857727
+nonboycott_ratings_for_test took 3.6449501514434814
+Stuff before boycott_uid_set took 96.31135892868042 sec
+identifier only took 34.937540769577026 sec
+n_jobs = 1, so just do everything in series. On Iteration 1
+About to run fit and score, crossfold index is 1
+psutil.virtual_memory().used / (1024**3) 101.18461608886719
+raw_trainset took 15.352250099182129
+nonboycott_ratings_for_test took 5.852268218994141
+Stuff before boycott_uid_set took 148.46581625938416 sec
+identifier only took 47.209221839904785 sec
+n_jobs = 1, so just do everything in series. On Iteration 2
+About to run fit and score, crossfold index is 2
+psutil.virtual_memory().used / (1024**3) 105.08796691894531
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold0_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold1_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold2_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold3_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold4_all_predictions.txt
+Loading predictions from all folds took 924.4006023406982
+raw_trainset took 23.787622213363647
+nonboycott_ratings_for_test took 5.145583391189575
+Stuff before boycott_uid_set took 147.11147928237915 sec
+identifier only took 44.0655620098114 sec
+n_jobs = 1, so just do everything in series. On Iteration 0
+About to run fit and score, crossfold index is 0
+psutil.virtual_memory().used / (1024**3) 93.5657958984375
+raw_trainset took 15.869464635848999
+nonboycott_ratings_for_test took 4.555915117263794
+Stuff before boycott_uid_set took 101.86667799949646 sec
+identifier only took 35.12719678878784 sec
+n_jobs = 1, so just do everything in series. On Iteration 1
+About to run fit and score, crossfold index is 1
+psutil.virtual_memory().used / (1024**3) 103.24168014526367
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold0_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold1_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold2_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold3_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold4_all_predictions.txt
+Loading predictions from all folds took 651.9228572845459
+raw_trainset took 14.186084985733032
+nonboycott_ratings_for_test took 3.45157527923584
+Stuff before boycott_uid_set took 87.64687204360962 sec
+identifier only took 26.78336453437805 sec
+n_jobs = 1, so just do everything in series. On Iteration 0
+About to run fit and score, crossfold index is 0
+psutil.virtual_memory().used / (1024**3) 86.43725204467773
+raw_trainset took 14.974712371826172
+nonboycott_ratings_for_test took 3.6589889526367188
+Stuff before boycott_uid_set took 95.40853691101074 sec
+identifier only took 31.498027324676514 sec
+n_jobs = 1, so just do everything in series. On Iteration 1
+About to run fit and score, crossfold index is 1
+psutil.virtual_memory().used / (1024**3) 102.03504943847656
+raw_trainset took 14.982767105102539
+nonboycott_ratings_for_test took 3.6543169021606445
+Stuff before boycott_uid_set took 94.88270449638367 sec
+identifier only took 31.751915216445923 sec
+n_jobs = 1, so just do everything in series. On Iteration 2
+About to run fit and score, crossfold index is 2
+psutil.virtual_memory().used / (1024**3) 105.55966567993164
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold0_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold1_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold2_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold3_all_predictions.txt
+load_from /data/nickvincent/surprise_sandbox/predictions/standards/ml-20m_SVD__seed0_fold4_all_predictions.txt
+Loading predictions from all folds took 632.7585232257843
+raw_trainset took 14.020484685897827
+nonboycott_ratings_for_test took 3.426875591278076
+Stuff before boycott_uid_set took 87.70394110679626 sec
+identifier only took 27.122406244277954 sec
+n_jobs = 1, so just do everything in series. On Iteration 0
+About to run fit and score, crossfold index is 0
+psutil.virtual_memory().used / (1024**3) 84.15416717529297
+raw_trainset took 14.988697052001953
+nonboycott_ratings_for_test took 3.742349147796631
+Stuff before boycott_uid_set took 100.14063811302185 sec
+identifier only took 34.51291513442993 sec
+n_jobs = 1, so just do everything in series. On Iteration 1
+About to run fit and score, crossfold index is 1
+psutil.virtual_memory().used / (1024**3) 105.6568374633789
+raw_trainset took 14.190948963165283
+nonboycott_ratings_for_test took 3.7366411685943604
+Stuff before boycott_uid_set took 93.08206343650818 sec
+identifier only took 31.4882390499115 sec
+n_jobs = 1, so just do everything in series. On Iteration 2
+About to run fit and score, crossfold index is 2
+psutil.virtual_memory().used / (1024**3) 106.09520721435547

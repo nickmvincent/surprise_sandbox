@@ -29,9 +29,12 @@ def get_metric_names():
     metric_names = []
     for measure in MEASURES[:2]:
         metric_names.append(measure.lower())
-    for measure in LIST_METRICS:
-        name = measure.lower()
-        metric_names.append(name)
-        metric_names.append('tail' + name)
+    for name in LIST_METRICS:
+        #name = measure.lower()
+        #metric_names.append(name)
+        #metric_names.append('tail' + name)
+        metric_names += [
+            name, 'tail' + name, name + '_frac', 'tail' + name + '_frac',
+        ]
 
     return metric_names
