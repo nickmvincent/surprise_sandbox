@@ -20,9 +20,10 @@ LIST_METRICS = [
     'ndcgfull',
     'hits',
     'normhits',
-    'avg_rating',
-    'avg_est',
+    'avgrating',
+    'avgest',
     'falsepos',
+    'totalhits',
 ]
 
 def get_metric_names():

@@ -40,11 +40,11 @@ def main():
 
         # 's3/ml-1m_autogen_aws_1,250/',
         # 1,250 was re-run on butter, not aws.
-        's3/ml-1m_autogen_aws_1,10_grouped/',
-        's3/ml-1m_autogen_aws_11,20_grouped/',
-        's3/ml-1m_autogen_aws_21,30_grouped/',
-        's3/ml-1m_autogen_aws_31,40_grouped/',
-        's3/ml-1m_autogen_aws_41,50_grouped/',
+        # 's3/ml-1m_autogen_aws_1,10_grouped/',
+        # 's3/ml-1m_autogen_aws_11,20_grouped/',
+        # 's3/ml-1m_autogen_aws_21,30_grouped/',
+        # 's3/ml-1m_autogen_aws_31,40_grouped/',
+        # 's3/ml-1m_autogen_aws_41,50_grouped/',
     ]:
         files = glob.iglob(root_dir + '*/out/results/*.csv')
         for filepath in files:
