@@ -175,8 +175,8 @@ def prepare_boycott_task(i, experimental_iteration, args, config, ratings_df, se
         load_path = args.load_path + '/standards/{}_{}_'.format(args.dataset, algo_name)
 
     load_boycotts_path = save_path
-    if args.load_boycotts_path:
-        load_boycotts_path = os.getcwd() + '/' + save_path
+    if args.load_boycotts_path is None:
+        load_boycotts_path = None
     return (
         algo_name, algo, nonboycott, boycott, boycott_uid_set, like_boycotters_uid_set, MEASURES, NUM_FOLDS,
         False, identifier,

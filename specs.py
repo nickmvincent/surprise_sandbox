@@ -29,12 +29,12 @@ ALGOS_FOR_STANDARDS = {
     #'KNNBasic_user_cosine_10': KNNBasic(sim_options={'user_based': True, 'name': 'cosine'}, k=10),
     #'KNNBasic_item_msd': KNNBasic(sim_options={'user_based': False}),
     #'KNNBasic_item_cosine': KNNBasic(sim_options={'user_based': False, 'name': 'cosine'}),
-    #'SVD': SVD(random_state=0),
+    'SVD': SVD(random_state=0),
     #'KNNBaseline_item_msd': KNNBaseline(sim_options={'user_based': False}),
-    'GuessThree': GuessThree(),
-    'GlobalMean': GlobalMean(),
-    'MovieMean': MovieMean(),
-    'TwentyMean': TwentyMean(),
+    #'GuessThree': GuessThree(),
+    #'GlobalMean': GlobalMean(),
+    #'MovieMean': MovieMean(),
+    #'TwentyMean': TwentyMean(),
 }
 
 
