@@ -19,16 +19,8 @@ def main():
 
     elif dataset == 'ml-1m':
         num_users = 6040
-<<<<<<< HEAD
-<<<<<<< HEAD
-        batchsize = 25
-=======
         batchsize = 10
->>>>>>> 23bf4e50df3960930c0ba21e83c9579320ce4b57
-=======
-        batchsize = 25
->>>>>>> 32dda6240ba9e222f4fe57d43c26f8ccdf867772
-        batches = 1
+        batches = 5
 
     configs = []
     for i in range(batches):
@@ -39,14 +31,12 @@ def main():
         )
 
     percents = [
-        #0.01, 0.05,
-        #0.1, 0.5,
+        0.01, 0.05,
+        0.1, 0.5,
         1, 5,
         10, 20, 30, 40, 50, 60, 70, 80, 90,
         99,
     ]
-    # temp
-    percents = [99.5, 99.6, 99.7, 99.8, 99.9]
 
     user_counts = []
     for percent in percents:
@@ -77,7 +67,7 @@ def main():
                 'gender', 'state', 'power', 'age', 'occupation', 'genre'
             ]
             for grouping in groupings:
-                job = "python3 sandbox.py --grouping {} --num_samples {} --userfrac 0.5 --ratingfrac 1.0 --indices {} --dataset {} --send_to_out --save_path False".format(
+                job = "python sandbox.py --grouping {} --num_samples {} --userfrac 0.5 --ratingfrac 1.0 --indices {} --dataset {}".format(
                     grouping, int(num_samples), indices, dataset
                 )
                 grouped_jobs.append(job)
@@ -97,6 +87,10 @@ def main():
         #     os.makedirs(grouped_s3_dir) 
         # with open(grouped_s3_dir + '/jobs.txt', "w", newline='\n') as outfile:
         #     outfile.write('\n'.join(grouped_jobs))
+
+        with open('bash_scripts/{}_autogen_jobs_{}_grouped.sh'.format(dataset, indices), 'w', newline='\n') as outfile:
+            outfile.write('\n'.join(grouped_jobs))
+
 
 
 main()
