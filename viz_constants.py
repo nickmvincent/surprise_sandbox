@@ -1,5 +1,6 @@
 metric2title = {
     'ndcg10': 'NDCG@10',
+    'ndcgfull': 'NDCG with All Items',
     '2hits-prec5t4': 'Loss in Precision@5-estimated hits, pb=2',
     '4hits-prec5t4': 'Loss in Precision@5-estimated hits, pb=4',
     '2hits-ndcg10': 'Loss in ndcg@10-estimated hits, pb=2',
@@ -9,8 +10,8 @@ metric2title = {
     'prec10t4': 'Precision',
     'totalhits': 'Total Hits',
     'loghits': 'Log-Transformed Hits',
-    'normhits': 'Fraction of Ideal Hits across Remaining Users',
-    'biznormhits': 'Fraction of Ideal Hits across System'
+    'normhits': 'Norm Hits per User',
+    'surfaced-hits': 'Surfaced Hits'
 }
 
 group2scenario = {

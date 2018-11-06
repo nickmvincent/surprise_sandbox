@@ -143,6 +143,7 @@ def main(args):
                             uid_to_metric[uid]['type'] = experiment_type
                             if 'indices' in outname:
                                 uid_to_metric[uid]['indices'] = indices
+                        
         as_df = pd.DataFrame.from_dict(uid_to_metric, orient='index')
         
         cols = list(as_df.columns.values)

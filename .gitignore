@@ -11,6 +11,7 @@ s3/
 
 MERGED_*
 *.svg
+*.png
 
 processed_results/
 archived/
@@ -22,3 +23,4 @@ misc_saved_scripts.txt
 logs/
 aws_helper.py
 .ipynb_checkpoints/visualize-v03-checkpoint.ipynb
+*-checkpoint.ipynb

@@ -131,8 +131,6 @@ def p_b_curve(
     )
     longform = fill_in_longform(longform)
 
-    print('metrics', metrics)
-    print(row)
     grid = sns.lmplot(
         x="num_users_boycotting", y="value", hue=hue, data=longform,
         sharey='row', sharex='col',
@@ -179,7 +177,7 @@ def p_b_curve(
 
                 # for printing out values at various intervals
                 if print_vals:
-                    if group == 'non-boycott':
+                    if group == 'all':
                         for num in print_vals:
                             val_nb = roundnum2mean.get(num)
                             if val_nb is None:
@@ -251,41 +249,41 @@ def p_b_curve(
                     'value': comparisons['MovieMean'],
                     'color': 'r',
                     'name': 'MovieMean',
-                    'linestyle': '-'
+                    'linestyle': ':'
                 }
             if 'all' in line_names or 'Zero' in line_names:
                 lines['Zero'] = {
                     'value': 0,
                     'color': '0.3',
                     'name': 'Zero',
-                    'linestyle': '-'
+                    'linestyle': ':'
                 }
             if 'all' in line_names or 'MaxDamage' in line_names:
                 lines['MaxDamage'] = {
                     'value': -114000,
                     'color': '0.3',
                     'name': 'MaxDamage',
-                    'linestyle': '-'
+                    'linestyle': ':'
                 }
                 
             if 'GlobalMean' in line_names:
                 lines['GlobalMean'] = {
                     'value': comparisons['GlobalMean'],
-                    'color': '0.3',
+                    'color': 'y',
                     'name': 'GlobalMean',
-                    'linestyle': '-'
+                    'linestyle': ':'
                 }
             if 'SVD' in line_names:
                 lines['SVD'] = {
                     'value': comparisons['SVD'],
                     'color': '0.3',
                     'name': 'SVD',
-                    'linestyle': '-'
+                    'linestyle': ':'
                 }
             if 'KNNBasic_item_msd' in line_names:
                 lines['KNNBasic_item_msd'] = {
                     'value': comparisons['KNNBasic_item_msd'],
-                    'color': 'r',
+                    'color': 'c',
                     'name': 'Item KNN (1999)',
                     'linestyle': ':'
                 }
@@ -310,7 +308,6 @@ def p_b_curve(
                     'name': 'ml-1m SVD',
                     'linestyle': ':'
                 }
-            #print('lines', lines)
 
             if normalize:
                 norm_val = abs(comparisons['MovieMean'])
@@ -323,7 +320,8 @@ def p_b_curve(
                 ax.set(ylim=ylim)
 
 
-            linestyle = '-' if group != 'all' else '--'
+            #linestyle = '-' if group != 'all' else '--'
+            linestyle= '-'
             ax.plot(
                 algo2metric2group2[algo_name][metric][group]['x'],
                 algo2metric2group2[algo_name][metric][group]['y'],
@@ -351,7 +349,6 @@ def p_b_curve(
                 )
                 pass
             for line in lines.values():
-                print(line)
                 ax.axhline(line['value'], color=line['color'], linestyle=line['linestyle'])
                 #ax.text(0.7, line['value'] + 0.05, line['name'])
                 lines_caption += "{} colored line (value of {}) shows comparison with {}\n".format(
