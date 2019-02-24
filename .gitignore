@@ -24,3 +24,4 @@ logs/
 aws_helper.py
 .ipynb_checkpoints/visualize-v03-checkpoint.ipynb
 *-checkpoint.ipynb
+ml-1m_totalhits.png
