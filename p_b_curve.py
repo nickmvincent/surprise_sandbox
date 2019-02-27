@@ -76,7 +76,7 @@ def p_b_curve(
         aspect=1, palette={'all': 'b', 'non-boycott': 'g', 'standards_non-boycott': 'y'},
         label_map = {
             'all': 'Data Strike',
-            'non-boycott': 'Boycott',
+            'non-boycott': 'Data Strike + Boycott',
             'bizall': 'Data Strike, system',
             'biznon-boycott': 'Boycott, system',
             'standards_non-boycott': 'Trad. Boycott',
