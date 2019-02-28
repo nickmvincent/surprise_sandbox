@@ -75,8 +75,8 @@ def p_b_curve(
         title_template='Recommender {} vs. Size of Boycott for {}',
         aspect=1, palette={'all': 'b', 'non-boycott': 'g', 'standards_non-boycott': 'y'},
         label_map = {
-            'all': 'Data Strike',
-            'non-boycott': 'Data Strike + Boycott',
+            'all': 'Data \nStrike',
+            'non-boycott': 'Data \nStrike +\nBoycott',
             'bizall': 'Data Strike, system',
             'biznon-boycott': 'Boycott, system',
             'standards_non-boycott': 'Trad. Boycott',
