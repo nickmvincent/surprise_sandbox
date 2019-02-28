@@ -1,0 +1,7 @@
+,participants,non-participants,all
+1) baseline,23.227,54.167,77.393
+2) hits after strike,22.77,53.917,76.687
+3) change in hits,-0.456,-0.25,-0.706
+"4) change in hits, normalized w.r.t un-personalized",32.471,17.771,50.241
+5) percent change in hits,-1.964,-0.461,-0.912
+"6) percent change in hits, normalized w.r.t un-personalized",108.199,25.399,50.241
