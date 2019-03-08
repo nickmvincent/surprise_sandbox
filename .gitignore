@@ -3,11 +3,11 @@ results/
 predictions/
 misc_standards/
 rand/
-misc_results/
-standard_results/
 uid_sets/
 tmp.json
 s3/
+
+.DS_Store
 
 MERGED_*
 *.svg

@@ -1,2 +1,0 @@
-make sure to save jobs.txt with LF file endings EVERY TIME.
-If you have CRLF line endings (the default...) your job will fail!
